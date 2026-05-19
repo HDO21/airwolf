@@ -148,7 +148,7 @@ Vähemalt järgmised kontrollid tehakse automaatselt:
 ## Tööjaotus
 
 | Roll | Vastutus |
-|---|---|---|
+|---|---|
 | Ilmaandmete omanik | Kontrollib `f_kliima_tund` päringuid, sissevõttu ja ilmavaatluste standardiseerimist |
 | Õhukvaliteedi andmete omanik | Kontrollib `f_keskkonnaseire` päringuid, välisõhu seire filtreid ja saasteainete andmete kvaliteeti | 
 | Liiklusandmete omanik | Vastutab `traffic_detectors` ja DATEX teenuste päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | 
