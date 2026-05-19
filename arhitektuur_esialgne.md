@@ -94,7 +94,7 @@ flowchart LR
     scheduler --> ingest_aq
     scheduler --> ingest_traffic
     scheduler --> ingest_datex
-
+```
 ### Andmevoo selgitus
 
 1. Pythoni skriptid loevad andmed teenustest staging kihti võimalikult allikalähedasel kujul.  
