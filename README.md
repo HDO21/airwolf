@@ -2,7 +2,7 @@
 
 ## Äriküsimus
 
-Projekti eesmärk on uurida, kas, kuidas ja millisel määral sõltub Eesti asulates mõõdetud õhukvaliteet ilmastikunähtustest, nagu tuul, sademed ja temperatuur, ning liiklussagedusest.
+Projekti eesmärk on uurida, kas, kuidas ja millisel määral sõltub Eesti asulates mõõdetud õhukvaliteet ilmastikunähtustest, nagu tuul, sademed ja temperatuur, ning liiklussagedusest. Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama õhukvaliteedi, et planeerida tervislikke välitegevusi?
 
 ## Andmeallikad ja nende muutuvus ajas (sh lingid)
 
