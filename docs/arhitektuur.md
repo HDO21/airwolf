@@ -2,7 +2,7 @@
 
 ## Äriküsimus
 
-Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest?
+Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
 
 ## Mõõdikud
 
@@ -20,9 +20,9 @@ Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5
 
 ### Võimalikud KPI-d dashboardil
 
-- PM10, PM2.5, NO2 ja O3 keskmine tase valitud asulas/perioodil
+- PM10, PM2.5, NO2 ja O3 keskmine kontsentratsioon valitud asulas/perioodil (näidata punasega kui on üle lubatud piirnormi)
 - Korrelatsioon tuule, temperatuuri, sademete ja liiklussagedusega
-- Kõrge saastetasemega päevade või tundide arv
+- Vähese/kõrge saastetasemega päevade või tundide arv
 - Ilma vs liikluse suhteline mõju valitud saasteainele
 
 
