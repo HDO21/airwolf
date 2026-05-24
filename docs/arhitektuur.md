@@ -2,7 +2,7 @@
 
 ## Äriküsimus
 
-Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest?
+Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
 
 ## Mõõdikud
 
@@ -20,9 +20,9 @@ Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5
 
 ### Võimalikud KPI-d dashboardil
 
-- PM10, PM2.5, NO2 ja O3 keskmine tase valitud asulas/perioodil
+- PM10, PM2.5, NO2 ja O3 keskmine kontsentratsioon valitud asulas/perioodil (näidata punasega kui on üle lubatud piirnormi)
 - Korrelatsioon tuule, temperatuuri, sademete ja liiklussagedusega
-- Kõrge saastetasemega päevade või tundide arv
+- Vähese/kõrge saastetasemega päevade või tundide arv
 - Ilma vs liikluse suhteline mõju valitud saasteainele
 
 
@@ -30,7 +30,7 @@ Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5
 
 | Allikas | Link | Tüüp | Ajas muutuv? | Roll |
 |---|---|---|---|---|
-| `f_kliima_tund` | `https://keskkonnaandmed.envir.ee/f_kliima_tund` | Avalik HTTP API | Jah, ajas muutuv vaatluste andmestik | Tunnipõhised ilmavaatlused: temperatuur, sademed, tuul ja muud meteoroloogilised näitajad; kasutatakse õhukvaliteedi ja liiklusandmete sidumiseks ühisel tunnitasemel |
+| `f_kliima_tund` (`Ilmavaatlused`) | `https://keskkonnaandmed.envir.ee/f_kliima_tund` | Avalik HTTP API | Jah, ajas muutuv vaatluste andmestik | Tunnipõhised ilmavaatlused: temperatuur, sademed, tuul ja muud meteoroloogilised näitajad; kasutatakse õhukvaliteedi ja liiklusandmete sidumiseks ühisel tunnitasemel |
 | `f_keskkonnaseire` (`Välisõhu seire`) | `https://keskkonnaandmed.envir.ee/f_keskkonnaseire` | Avalik HTTP API | Jah, üldjuhul uuendatakse regulaarselt | Õhukvaliteedi seireandmed: PM10, PM2.5, NO2, O3 ja seotud mõõtepunktid |
 | Keskkonna ja ilma valdkonna andmeteenuste kirjeldus | `https://keskkonnaportaal.ee/avaandmed/keskkonna-ja-ilma-valdkonna-andmeteenused` | Dokumentatsioon | Jah | Tehniline kirjeldus `f_kliima_paev` ja `f_keskkonnaseire` päringute, filtrite ja kasutusreeglite jaoks |
 | `traffic_detectors` MapServer | `https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer` | Avalik ArcGIS REST teenus | Jah, teenus kuvab jooksvaid mõõtmisi | Liiklusdetektorite mõõtmised ja asukohad; kasutatakse liiklusvoo, raskeveokite osakaalu ja kiiruse näitajate jaoks |
@@ -103,7 +103,7 @@ flowchart LR
    - aja ühtlustamine ühisele analüüsitasemele;
    - ühikute ühtlustamine;
    - koordinaatsüsteemide ühtlustamine EPSG:3301 peale;
-   - dublettide eemaldamine ja põhiline skeemivalideerimine.
+   - dublikaatide eemaldamine ja põhiline skeemivalideerimine (andmetüübid, kohustuslikud väljad jms).
 3. `core` kihis on juba ühtlustatud vaatlused allikate kaupa.  
 4. `mart` kihis seotakse õhukvaliteedi vaatlused ilmastiku ja liiklusandmetega ning arvutatakse KPI-d, episoodid ja seoseanalüüsi väljundid.  
 5. Streamlit dashboard kuvab nii kaardivaate kui ka valitud mõõdikute ajagraafikud, võrdlused ja koondid.  
@@ -122,7 +122,7 @@ flowchart LR
 ### Kihtide kasutamise põhimõtted
 
 - Iga töövoo käivitus saab unikaalse `run_id`.
-- `staging` kihti ei kirjutata üle, vaid sinna jäävad alles ajaloo jooksil laetud andmed auditiks ja backfilliks.
+- `staging` kihti ei kirjutata üle, vaid sinna jäävad alles ajaloo jooksul laetud andmed auditiks ja backfilliks.
 - `mart` kihi tabelid võib ehitada igal käivitusel uuesti või inkrementaalselt, sõltuvalt andmemahust.
 - Dashboard loeb ainult viimase eduka töövoo tulemusi.
 
@@ -140,7 +140,7 @@ Vähemalt järgmised kontrollid tehakse automaatselt:
    Sama allika puhul ei tohi sama mõõtekoha, näitaja ja ajamomendi kombinatsioon korduda ootamatult mitu korda.
 
 4. **Ruumilise sobituse kontroll**  
-   Iga analüüsi minev õhukvaliteedi vaatlus peab olema seotud vähemalt ühe ilmavaatluspunkti ja ühe liiklusallikaga või olema selgelt märgitud sidumata vaatluseks.
+   Õhukvaliteedi vaatlus peab olema seotud vähemalt ühe ilmavaatluspunkti ja ühe liiklusallikaga või olema selgelt märgitud sidumata vaatluseks.
 
 5. **Ajalise katvuse kontroll**  
    Kontrollitakse, et analüüsi minevad perioodid oleksid piisava andmekattega ning et ühe allika puudumine ei moonutaks koondtulemusi.
@@ -171,8 +171,8 @@ Väikeses grupis võib üks inimene täita mitut rolli.
 | Eri lähteandmestikud uuenevad eri sagedusega | Koondtulemused võivad põhineda eri värskusega andmetel | Iga allika jaoks hoitakse eraldi laadimisajatemplit ja analüüsi tehakse ainult ajaperioodil, kus andmete olemasolu on piisav. |
 | Streamlit dashboard lülitub välja või muutub kättesaamatuks | Kasutaja ei näe analüüsi tulemusi | Kuvatakse viimase eduka laadimise aeg, hoitakse rakendus võimalikult kergena ning lisatakse lihtne tervisekontrolli mehhanism. |
 | Sisendallikate vahel ei ilmne tugevat seost | Tulemused ei anna oodatud lisateadmist | Projekti fookus on esmalt piiratud saasteainete ja piirkondade valimil. Dashboard peab näitama ka “nõrga seose” tulemust, mitte ainult positiivseid leide. |
-| Andmeallikates on palju puuduvaid, vigaseid või ebaloogilisi väärtusi | KPI-d ja analüüsi tulemused võivad olla valed või kallutatud | Rakendatakse kvaliteeditestid: not null, vahemikukontrollid, ajatemplite kontroll, dublettide kontroll ja koordinaatide kehtivuse kontroll. Vigased read märgitakse või jäetakse analüüsist välja. |
-| Teenuste päringumahud või piirangud takistavad suure mahu laadimist | Kõiki vajalikke andmeid ei saa ühe korraga kätte | Päringud tehakse ajavahemike, piirkondade ja filtrite kaupa. Sissevõtt on inkrementaalne ning suurte perioodide puhul kasutatakse jupitatud laadimist. |
+| Andmeallikates on palju puuduvaid, vigaseid või ebaloogilisi väärtusi | KPI-d ja analüüsi tulemused võivad olla valed või kallutatud | Rakendatakse kvaliteeditestid: not null, vahemikukontrollid, ajatemplite kontroll, dublikaatide kontroll ja koordinaatide kehtivuse kontroll. Vigased read märgitakse või jäetakse analüüsist välja. |
+| Teenuste päringumahud või piirangud takistavad suure mahu laadimist | Kõiki vajalikke andmeid ei saa ühe korraga kätte | Päringud tehakse ajavahemike, piirkondade ja filtrite kaupa. Sissevõtt on inkrementaalne ning suurte perioodide puhul kasutatakse osade kaupa laadimist. |
 
 ## Privaatsus ja turve
 
