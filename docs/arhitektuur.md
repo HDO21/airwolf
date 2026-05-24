@@ -147,16 +147,15 @@ Vähemalt järgmised kontrollid tehakse automaatselt:
 
 ## Tööjaotus
 
-| Roll | Vastutus |
-|---|---|
-| Ilmaandmete omanik | Kontrollib `f_kliima_tund` päringuid, sissevõttu ja ilmavaatluste standardiseerimist |
-| Õhukvaliteedi andmete omanik | Kontrollib `f_keskkonnaseire` päringuid, välisõhu seire filtreid ja saasteainete andmete kvaliteeti | 
-| Liiklusandmete omanik | Vastutab `traffic_detectors` ja DATEX teenuste päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | 
-| Transformatsioonide omanik | Ehitab `core` ja `mart` kihi mudelid, ruumilise sidumise loogika ja KPI arvutused | 
-| Kvaliteedi omanik | Loob andmekvaliteedi testid, jälgib ebaõnnestumisi ja kontrollib logisid |
-| Dashboardi omanik | Arendab Streamlit rakendust, kaardivaadet ja kasutajaliidest | 
+| Roll | Vastutus | Omanik |
+|---|---|---|
+| Ilmaandmete omanik | Kontrollib `f_kliima_tund` päringuid, sissevõttu ja ilmavaatluste standardiseerimist | Katrin |
+| Õhukvaliteedi andmete omanik | Kontrollib `f_keskkonnaseire` päringuid, välisõhu seire filtreid ja saasteainete andmete kvaliteeti | Katrin |
+| Liiklusandmete omanik | Vastutab `traffic_detectors` ja DATEX teenuste päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | Hanna |
+| Transformatsioonide omanik | Ehitab `core` ja `mart` kihi mudelid, ruumilise sidumise loogika ja KPI arvutused | Hele |
+| Kvaliteedi omanik | Loob andmekvaliteedi testid, jälgib ebaõnnestumisi ja kontrollib logisid | Hando | 
+| Dashboardi omanik | Arendab Streamlit rakendust, kaardivaadet ja kasutajaliidest | Hando |
 
-Väikeses grupis võib üks inimene täita mitut rolli.
 
 ## Riskid
 
