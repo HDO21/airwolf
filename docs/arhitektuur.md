@@ -2,7 +2,9 @@
 
 ## Äriküsimus
 
-Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
+Kas, kuidas ja millisel määral sõltuvad Eesti asulates (Tallinn, Tartu ja Narva) mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
+
+Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, tehakse esialgne PoC 2025. aasta kohta.
 
 ## Mõõdikud
 
@@ -30,84 +32,76 @@ Kas, kuidas ja millisel määral sõltuvad Eesti asulates mõõdetud PM10, PM2.5
 
 | Allikas | Link | Tüüp | Ajas muutuv? | Roll |
 |---|---|---|---|---|
-| `f_kliima_tund` (`Ilmavaatlused`) | `https://keskkonnaandmed.envir.ee/f_kliima_tund` | Avalik HTTP API | Jah, ajas muutuv vaatluste andmestik | Tunnipõhised ilmavaatlused: temperatuur, sademed, tuul ja muud meteoroloogilised näitajad; kasutatakse õhukvaliteedi ja liiklusandmete sidumiseks ühisel tunnitasemel |
-| `f_keskkonnaseire` (`Välisõhu seire`) | `https://keskkonnaandmed.envir.ee/f_keskkonnaseire` | Avalik HTTP API | Jah, üldjuhul uuendatakse regulaarselt | Õhukvaliteedi seireandmed: PM10, PM2.5, NO2, O3 ja seotud mõõtepunktid |
-| Keskkonna ja ilma valdkonna andmeteenuste kirjeldus | `https://keskkonnaportaal.ee/avaandmed/keskkonna-ja-ilma-valdkonna-andmeteenused` | Dokumentatsioon | Jah | Tehniline kirjeldus `f_kliima_paev` ja `f_keskkonnaseire` päringute, filtrite ja kasutusreeglite jaoks |
+| `f_kliima_tund` (`Ilmavaatlused`) | `https://keskkonnaandmed.envir.ee/f_kliima_tund` | Avalik HTTP API | Jah, ajas muutuv vaatluste andmestik | Tunnipõhised ilmavaatlused: temperatuur, sademed ja tuul; kasutatakse õhukvaliteedi ja liiklusandmete sidumiseks ühisel tunnitasemel |
+| `f_kliima_jaam_vaatlus` | `https://keskkonnaandmed.envir.ee/f_kliima_jaam_vaatlus` | Avalik HTTP API | Pigem aeglaselt muutuv | Ilmajaamade asukohtade allikas |
+| `f_keskkonnaseire` (`Välisõhu seire`) | `https://keskkonnaandmed.envir.ee/f_keskkonnaseire` | Avalik HTTP API | Jah, üldjuhul uuendatakse regulaarselt, kuid 2026. aasta andmed veel avalikud ei ole | Õhukvaliteedi seireandmed: PM10, PM2.5, NO2, O3 ja seotud mõõtepunktid |
 | `traffic_detectors` MapServer | `https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer` | Avalik ArcGIS REST teenus | Jah, teenus kuvab jooksvaid mõõtmisi | Liiklusdetektorite mõõtmised ja asukohad; kasutatakse liiklusvoo, raskeveokite osakaalu ja kiiruse näitajate jaoks |
-| Tark Tee DATEX II juurdepääs | `https://tarktee.mnt.ee/#/et/datex` | API-võtmega teenus | Jah, jooksvad feedid | Lisakiht liiklus- ja teepiirangute sündmuste, mõõtekohtade ning võimalusel liiklusmõõtmiste rikastamiseks |
-| Tark Tee DATEX II profiil | `https://tarktee.mnt.ee/assets/datex/DATEX_II_Estonian_profile_Tark_Tee.pdf` | Tehniline dokumentatsioon | Jah | DATEX II feedide kirjeldus, juurdepääsuloogika, feedide sisu ja piirangud |
+| Ajalooliste liiklussagedusandmete CSV backfill | KAlgallikas: `https://andmed.eesti.ee/datasets/liiklusloenduse-andmed` | Kohalik sisendfail | Ei | Ajalooline info, mis seotakse liiklussagedusdetektorite ruumiandmetega |
 | OpenStreetMap | `https://www.openstreetmap.org` | Avalik kaardiandmestik / aluskaart | Jah | Aluskaart ja kaardiaken Streamlitis |
 
 ### Andmeallikate kasutamise põhimõtted
 
+- Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, tehakse esialgne PoC 2025. aasta kohta.
 - Projekti peamine analüüsitase on **MVP-s tunnipõhine**, sest ilmavaatluste lähteallikas on `f_kliima_tund`.
+- Esialgne töövoog kasutab ilmavaatlusandmeid kolmest ilmajaamast: **Tallinn-Harku**, **Tartu-Tõravere** ja **Narva**.
 - Õhukvaliteedi, ilmastiku ja liikluse andmed ühtlustatakse võimalusel ühisele tunnitasemele, et nende omavahelisi seoseid saaks võrrelda samas ajavaates.
 - Kui mõni andmeallikas on tunnitasemest detailsem või ebaühtlase ajasammuga, agregeeritakse või joondatakse see lähimale sobivale tunnisele vaatlusaknale.
-- DATEX II andmeid kasutatakse täiendava rikastuskihina liiklussündmuste, piirangute ja teeolude konteksti lisamiseks, kui need on valitud piirkondade ja ajavahemike jaoks asjakohased.
 - Projekti sisemine ruumiandmete referentssüsteem on **EPSG:3301**. Streamliti kaardivaates teisendatakse geomeetriad vajadusel **EPSG:4326** formaati, et need kuvataks korrektselt OpenStreetMapi kaardil.
+- Projektis teostatakse analüüs kolmel näidisalal, mille BBOX koordinaadid on:
+| Ala | WGS84 NW nurk | WGS84 SE nurk | EPSG:3301 x_min | EPSG:3301 x_max | EPSG:3301 y_min | EPSG:3301 y_max |
+|---|---|---|---|---:|---:|---:|---:|
+|  Tallinn  | lat_n: `59.554594`, lon_w: `24.474231` | lat_s: `59.361424`, lon_e: `25.012994` | 526818 | 557609 | 6580812 | 6601992 |
+|  Narva | lat_n: `59.398837`, lon_w: `28.099803` | lat_s: `59.342551`, lon_e: `28.211009` | 732765 | 739464 | 6585793 | 6591660 |
+| Tartu | lat_n: `58.426894`, lon_w: `26.455566` | lat_s: `58.248549`, lon_e: `26.780029` | 643432 | 663197 | 6459800 | 6478907 |
 
 ## Andmevoog
 
 ```mermaid
 flowchart LR
-    weather_api[f_kliima_tund] --> ingest_weather[Python sissevõtt: ilm]
-    aq_api[f_keskkonnaseire / Välisõhu seire] --> ingest_aq[Python sissevõtt: õhukvaliteet]
-    traffic_api[traffic_detectors MapServer] --> ingest_traffic[Python sissevõtt: liiklusdetektorid]
-    datex_api[Tark Tee DATEX II] --> ingest_datex[Python sissevõtt: DATEX]
-    seed[seed.study_area / seed.station_mapping] --> core_join
+   weather_hourly[f_kliima_tund] --> ingest_weather[ingest_weather.py]
+    weather_meta[f_kliima_jaam_vaatlus] --> ingest_weather
 
-    ingest_weather --> stg_weather[(staging.weather_raw)]
-    ingest_aq --> stg_aq[(staging.air_quality_raw)]
-    ingest_traffic --> stg_traffic[(staging.traffic_raw)]
-    ingest_datex --> stg_datex[(staging.datex_raw)]
+    aq_api[f_keskkonnaseire / Välisõhu seire] --> ingest_aq[ingest_air_quality.py]
+    traffic_api[traffic_detectors MapServer/0] --> ingest_traffic_live[ingest_traffic.py --mode live]
+    traffic_csv[ajalooline CSV] --> ingest_traffic_backfill[ingest_traffic.py --mode backfill]
 
-    stg_weather --> std[Standardiseerimine ja valideerimine]
-    stg_aq --> std
-    stg_traffic --> std
-    stg_datex --> std
+    ingest_weather --> stg_weather[(staging/weather_raw_YYYY_MM.parquet)]
+    ingest_aq --> stg_aq[(staging/air_quality_raw_YYYY_MM.parquet)]
+    ingest_traffic_live --> stg_traffic_live[(staging/traffic_live_TIMESTAMP.parquet)]
+    ingest_traffic_live --> stg_registry[(staging/traffic_detector_registry.parquet)]
+    ingest_traffic_backfill --> stg_traffic_backfill[(staging/traffic_backfill_*.parquet)]
 
-    std --> core_weather[(core.weather_hourly)]
-    std --> core_aq[(core.air_quality_observations)]
-    std --> core_traffic[(core.traffic_observations)]
-    std --> core_events[(core.traffic_events)]
+    stg_weather --> validate[validate.py]
+    stg_aq --> validate
+    stg_traffic_live --> validate
+    stg_traffic_backfill --> validate
 
-    core_weather --> core_join[Ajajoondus, ruumiline sidumine, ühikud, filtrid]
-    core_aq --> core_join
-    core_traffic --> core_join
-    core_events --> core_join
+    weather_day[f_kliima_paev] --> app_weather[src/airwolf/ingestion/weather.py]
+    weather_meta2[f_kliima_jaam_vaatlus] --> app_weather
+    aq_api2[f_keskkonnaseire] --> app_aq[src/airwolf/ingestion/air_quality.py]
+    traffic_api2[traffic_detectors MapServer/0] --> app_traffic[src/airwolf/ingestion/traffic.py]
 
-    core_join --> mart_fact[(mart.fact_air_quality_context)]
-    core_join --> mart_kpi[(mart.kpi_hourly_summary)]
-    core_join --> mart_episode[(mart.pollution_episode_summary)]
-    core_join --> mart_model[(mart.effect_analysis)]
-
-    mart_fact --> dashboard[Streamlit dashboard + kaart]
-    mart_kpi --> dashboard
-    mart_episode --> dashboard
-    mart_model --> dashboard
-
-    std --> quality[quality.test_results]
-    core_join --> quality
-    mart_fact --> quality
-
-    scheduler[Cron / scheduler] --> ingest_weather
-    scheduler --> ingest_aq
-    scheduler --> ingest_traffic
-    scheduler --> ingest_datex
+    app_weather --> dashboard[streamlit_app.py]
+    app_aq --> dashboard
+    app_traffic --> dashboard
+    osm[OpenStreetMap] --> dashboard
 ```
 ### Andmevoo selgitus
 
-1. Pythoni skriptid loevad andmed teenustest staging kihti võimalikult allikalähedasel kujul.  
+1. Pythoni skriptid loevad andmed teenustest või lokaalsest CSV failist ning kirjutavad need `staging` kausta Parquet-failidena.  
 2. Standardiseerimise käigus tehakse järgmised sammud:
    - huvipakkuvate asulate või seirealade filtreerimine;
    - aja ühtlustamine ühisele analüüsitasemele;
    - ühikute ühtlustamine;
    - koordinaatsüsteemide ühtlustamine EPSG:3301 peale;
    - dublikaatide eemaldamine ja põhiline skeemivalideerimine (andmetüübid, kohustuslikud väljad jms).
-3. `core` kihis on juba ühtlustatud vaatlused allikate kaupa.  
-4. `mart` kihis seotakse õhukvaliteedi vaatlused ilmastiku ja liiklusandmetega ning arvutatakse KPI-d, episoodid ja seoseanalüüsi väljundid.  
-5. Streamlit dashboard kuvab nii kaardivaate kui ka valitud mõõdikute ajagraafikud, võrdlused ja koondid.  
-6. Scheduler käivitab automaatse sissevõtu ja võimaliku backfill-protsessi.
+3. Ilmavaatlusandmetele lisatakse asukohainfo `f_kliima_jaam_vaatlus` teenusest
+4. Liiklusesagedus andmeid päritakse `traffic_detectors` ArcGIS teenusest uurimisalade kaupa ning need salvestatakse.
+5. Liikluse backfill loeb ajalooliste andmete CSV, arvutab tuletatud tunnused ning lisab andmed liilussageduse mõõtmiste tabelisse.
+6. `core` kihis on juba ühtlustatud vaatlused allikate kaupa.  
+7. `mart` kihis seotakse õhukvaliteedi vaatlused ilmastiku ja liiklusandmetega ning arvutatakse KPI-d, episoodid ja seoseanalüüsi väljundid.  
+8. Streamlit dashboard kuvab nii kaardivaate kui ka valitud mõõdikute ajagraafikud, võrdlused ja koondid.  
+9. Scheduler käivitab automaatse sissevõtu ja võimaliku backfill-protsessi.
 
 ## Andmebaasi kihid
 
@@ -130,30 +124,36 @@ flowchart LR
 
 Vähemalt järgmised kontrollid tehakse automaatselt:
 
-1. **Not null kontrollid**  
-   Kohustuslikud väljad nagu mõõtmise aeg, jaama/seirekoha identifikaator, näitaja nimetus ja väärtus ei tohi olla tühjad.
+### Ilmaandmed (`weather`)
+- nõutud väljad: `jaam_kood`, `obs_time`, `lat`, `lon`
+- vähemalt üks mõõteväli peab olema olemas: `temperature_c`, `wind_speed_ms`, `precip_mm`
+- koordinaatide vahemikukontroll (`lat`, `lon`)
+- temperatuur, tuulekiirus ja sademed peavad jääma mõistlikku vahemikku
 
-2. **Loogiliste vahemike kontrollid**  
-   Näiteks saasteainete kontsentratsioonid, temperatuur, sademed, tuulekiirus ja liiklusmaht peavad jääma mõistlikesse vahemikesse.
+### Õhukvaliteedi andmed (`air_quality`)
+- nõutud väljad: `seirekoha_kood`, `obs_time`, `lat`, `lon`, `area`
+- vähemalt üks saasteaine veerg peab olema olemas: `O3`, `NO2`, `PM10`, `PM25`
+- saasteainete väärtused peavad olema mitte-negatiivsed
+- koordinaatide vahemikukontroll (`lat`, `lon`)
 
-3. **Unikaalsuse kontrollid**  
-   Sama allika puhul ei tohi sama mõõtekoha, näitaja ja ajamomendi kombinatsioon korduda ootamatult mitu korda.
+### Liikluse live-andmed (`traffic_live`)
+- nõutud väljad: `traffic_detector_id`, `measurement_time`, `x_3301`, `y_3301`
+- liiklusvood peavad olema mitte-negatiivsed
+- EPSG:3301 koordinaadid peavad jääma Eesti jaoks mõistlikku vahemikku
 
-4. **Ruumilise sobituse kontroll**  
-   Õhukvaliteedi vaatlus peab olema seotud vähemalt ühe ilmavaatluspunkti ja ühe liiklusallikaga või olema selgelt märgitud sidumata vaatluseks.
-
-5. **Ajalise katvuse kontroll**  
-   Kontrollitakse, et analüüsi minevad perioodid oleksid piisava andmekattega ning et ühe allika puudumine ei moonutaks koondtulemusi.
+### Liikluse backfill (`traffic_backfill`)
+- nõutud väljad: `id`, `aeg`
+- `total_flow` peab olema mitte-negatiivne
+- `heavy_vehicle_share` peab jääma vahemikku 0…1
 
 ## Tööjaotus
 
 | Roll | Vastutus | Omanik |
 |---|---|---|
-| Ilmaandmete omanik | Kontrollib `f_kliima_tund` päringuid, sissevõttu ja ilmavaatluste standardiseerimist | Katrin |
-| Õhukvaliteedi andmete omanik | Kontrollib `f_keskkonnaseire` päringuid, välisõhu seire filtreid ja saasteainete andmete kvaliteeti | Katrin |
-| Liiklusandmete omanik | Vastutab `traffic_detectors` ja DATEX teenuste päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | Hanna |
+| Keskkonnaregistri andmete omanik | Kontrollib `f_kliima_tund`, `f_keskkonnaseire` ja `f_kliima_jaam_vaatlus` päringuid, sissevõttu ja ilmavaatluste standardiseerimist | Katrin |
+| Liiklusandmete omanik | Vastutab `traffic_detectors` päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | Hanna |
 | Transformatsioonide omanik | Ehitab `core` ja `mart` kihi mudelid, ruumilise sidumise loogika ja KPI arvutused | Hele |
-| Kvaliteedi omanik | Loob andmekvaliteedi testid, jälgib ebaõnnestumisi ja kontrollib logisid | Hando | 
+| Kvaliteedi omanik | Loob andmekvaliteedi testid (`validate.py`), jälgib ebaõnnestumisi ja kontrollib logisid | Hando | 
 | Dashboardi omanik | Arendab Streamlit rakendust, kaardivaadet ja kasutajaliidest | Hando |
 
 
