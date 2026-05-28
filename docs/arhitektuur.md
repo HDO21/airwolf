@@ -48,11 +48,12 @@ Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, t
 - Kui mõni andmeallikas on tunnitasemest detailsem või ebaühtlase ajasammuga, agregeeritakse või joondatakse see lähimale sobivale tunnisele vaatlusaknale.
 - Projekti sisemine ruumiandmete referentssüsteem on **EPSG:3301**. Streamliti kaardivaates teisendatakse geomeetriad vajadusel **EPSG:4326** formaati, et need kuvataks korrektselt OpenStreetMapi kaardil.
 - Projektis teostatakse analüüs kolmel näidisalal, mille BBOX koordinaadid on:
+
 | Ala | WGS84 NW nurk | WGS84 SE nurk | EPSG:3301 x_min | EPSG:3301 x_max | EPSG:3301 y_min | EPSG:3301 y_max |
-|---|---|---|---|---:|---:|---:|---:|
-|  Tallinn  | lat_n: `59.554594`, lon_w: `24.474231` | lat_s: `59.361424`, lon_e: `25.012994` | 526818 | 557609 | 6580812 | 6601992 |
-|  Narva | lat_n: `59.398837`, lon_w: `28.099803` | lat_s: `59.342551`, lon_e: `28.211009` | 732765 | 739464 | 6585793 | 6591660 |
-| Tartu | lat_n: `58.426894`, lon_w: `26.455566` | lat_s: `58.248549`, lon_e: `26.780029` | 643432 | 663197 | 6459800 | 6478907 |
+|---|---|---|---:|---:|---:|---:|
+| Tallinn | lat_n: 59.554594, lon_w: 24.474231 | lat_s: 59.361424, lon_e: 25.012994 | 526818 | 557609 | 6580812 | 6601992 |
+| Narva | lat_n: 59.398837, lon_w: 28.099803 | lat_s: 59.342551, lon_e: 28.211009 | 732765 | 739464 | 6585793 | 6591660 |
+| Tartu | lat_n: 58.426894, lon_w: 26.455566 | lat_s: 58.248549, lon_e: 26.780029 | 643432 | 663197 | 6459800 | 6478907 |
 
 ## Andmevoog
 
