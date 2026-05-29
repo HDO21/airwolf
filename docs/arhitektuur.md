@@ -102,7 +102,7 @@ flowchart LR
     subgraph Orchestration[Orkestreerimine]
         pipeline[run_pipeline.py]
         stamp[_last_updated.txt]
-        airflow[Airflow / scheduler<br/>(planeeritud / osaliselt seadistatud)]
+        airflow["Airflow / scheduler<br>planeeritud / osaliselt seadistatud"]
     end
 
     subgraph Presentation[4. Visualiseerimine]
@@ -161,6 +161,7 @@ flowchart LR
     pipeline --> stamp
     airflow -. tulevikus .-> pipeline
 ```
+
 ### Andmevoo selgitus
 
 1. `run_pipeline.py` orkestreerib töövoo: ingest → transform → mart → viimase uuenduse ajatempel.  
