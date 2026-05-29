@@ -2,7 +2,9 @@ __pycache__/
 *.pyc
 *.pyo
 .env
-data/
+data/staging/
+data/intermediate/
+data/quality/
 .DS_Store
 *.egg-info/
 dist/
