@@ -1,7 +1,6 @@
 """Airwolf — vahekaartidega õhukvaliteedi, ilma ja liikluse armatuurlaud."""
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import altair as alt
@@ -11,13 +10,10 @@ import requests
 import streamlit as st
 from streamlit_folium import st_folium
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
 _DATA_DIR     = Path(__file__).parent / "data"
 _STAGING      = _DATA_DIR / "staging"
 _INTERMEDIATE = _DATA_DIR / "intermediate"
 _MART         = _DATA_DIR / "mart"
-
-from airwolf.clients.envir_client import EnvirClient
 
 st.set_page_config(page_title="Airwolf", layout="wide")
 
