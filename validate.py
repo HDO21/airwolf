@@ -14,11 +14,16 @@ import pandas as pd
 log = logging.getLogger(__name__)
 
 _REQUIRED_COLS: dict[str, list[str]] = {
-    "weather": ["jaam_kood", "obs_time", "lat", "lon"],
-    "air_quality": ["seirekoha_kood", "obs_time", "lat", "lon", "area"],
+    "weather": ["station_id", "obs_time", "lat", "lon"],
+    "air_quality": ["station_id", "obs_time", "lat", "lon", "area"],
     "traffic_live": ["traffic_detector_id", "measurement_time", "x_3301", "y_3301"],
     "traffic_backfill": ["id", "aeg"],
 }
+
+# For air quality sourced from ohuseire.ee, all four pollutants are expected
+# because stations with missing indicators are excluded at ingest time.
+_AQ_POLLUTANTS = ["O3", "NO2", "SO2", "PM10", "PM25"]
+_AQ_MAX_NULL_PCT = 5.0   # hard-fail threshold per pollutant column
 
 
 def validate(df: pd.DataFrame, schema_name: str) -> dict[str, Any]:
@@ -54,8 +59,21 @@ def validate(df: pd.DataFrame, schema_name: str) -> dict[str, Any]:
         _check_gte(df, "precip_mm", 0.0, issues)
 
     elif schema_name == "air_quality":
-        _at_least_one(df, ["O3", "NO2", "PM10", "PM25"], issues)
-        for col in ["O3", "NO2", "PM10", "PM25"]:
+        # Every row must have at least one reading (belt-and-suspenders guard)
+        _at_least_one(df, _AQ_POLLUTANTS, issues)
+        # Each pollutant column is individually required: stations are pre-filtered
+        # to include only those that measure all four indicators.
+        for col in _AQ_POLLUTANTS:
+            if col not in df.columns:
+                issues.append(f"Missing pollutant column: {col}")
+                hard_fail = True
+                continue
+            null_count = int(df[col].isna().sum())
+            if null_count:
+                pct = null_count / total * 100 if total else 0.0
+                issues.append(f"{col}: {null_count} nulls ({pct:.1f}%)")
+                if pct > _AQ_MAX_NULL_PCT:
+                    hard_fail = True
             _check_gte(df, col, 0.0, issues)
         _check_range(df, "lat", 57.0, 60.5, issues)
         _check_range(df, "lon", 21.0, 29.0, issues)
