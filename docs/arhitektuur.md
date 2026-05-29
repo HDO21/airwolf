@@ -22,7 +22,7 @@ Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, t
 
 ### Võimalikud KPI-d dashboardil
 
-- PM10, PM2.5, NO2 ja O3 keskmine kontsentratsioon valitud asulas/perioodil (näidata punasega kui on üle lubatud piirnormi)
+- SO2, PM10, PM2.5, NO2 ja O3 keskmine kontsentratsioon valitud asulas/perioodil (näidata punasega kui on üle lubatud piirnormi)
 - Korrelatsioon tuule, temperatuuri, sademete ja liiklussagedusega
 - Vähese/kõrge saastetasemega päevade või tundide arv
 - Ilma vs liikluse suhteline mõju valitud saasteainele
@@ -60,50 +60,127 @@ Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, t
 
 ```mermaid
 flowchart LR
-   weather_hourly[f_kliima_tund] --> ingest_weather[ingest_weather.py]
-    weather_meta[f_kliima_jaam_vaatlus] --> ingest_weather
+    subgraph Sources[Andmeallikad]
+        weather_hourly[f_kliima_tund]
+        weather_meta[f_kliima_jaam_vaatlus]
+        aq_api[ohuseire.ee API]
+        traffic_api[traffic_detectors MapServer/0]
+        traffic_csv[Ajalooline liikluse CSV]
+        traffic_sites[Ajalooliste mõõdistuspunktide fail]
+        osm[OpenStreetMap]
+    end
 
-    aq_api[f_keskkonnaseire / Välisõhu seire] --> ingest_aq[ingest_air_quality.py]
-    traffic_api[traffic_detectors MapServer/0] --> ingest_traffic_live[ingest_traffic.py --mode live]
-    traffic_csv[ajalooline CSV] --> ingest_traffic_backfill[ingest_traffic.py --mode backfill]
+    subgraph Ingest[1. Ingest / staging]
+        ingest_weather[ingest_weather.py]
+        ingest_aq[ingest_air_quality.py]
+        ingest_traffic_live[ingest_traffic.py --mode live]
+        ingest_traffic_backfill[ingest_traffic.py --mode backfill]
+        stg_weather[(data/staging/weather_raw_YYYY_MM.parquet)]
+        stg_weather_meta[(data/staging/weather_stations.parquet)]
+        stg_aq[(data/staging/air_quality_raw_YYYY_MM.parquet)]
+        stg_traffic_live[(data/staging/traffic_live_TIMESTAMP.parquet)]
+        stg_registry[(data/staging/traffic_detector_registry.parquet)]
+        stg_traffic_backfill[(data/staging/traffic_backfill.parquet)]
+    end
 
-    ingest_weather --> stg_weather[(staging/weather_raw_YYYY_MM.parquet)]
-    ingest_aq --> stg_aq[(staging/air_quality_raw_YYYY_MM.parquet)]
-    ingest_traffic_live --> stg_traffic_live[(staging/traffic_live_TIMESTAMP.parquet)]
-    ingest_traffic_live --> stg_registry[(staging/traffic_detector_registry.parquet)]
-    ingest_traffic_backfill --> stg_traffic_backfill[(staging/traffic_backfill_*.parquet)]
+    subgraph Transform[2. Transform / intermediate]
+        transform[run_transform.py]
+        validate[validate.py]
+        int_weather[(data/intermediate/weather_YYYY_MM.parquet)]
+        int_aq[(data/intermediate/air_quality_YYYY_MM.parquet)]
+        int_traffic[(data/intermediate/traffic.parquet)]
+    end
 
-    stg_weather --> validate[validate.py]
-    stg_aq --> validate
-    stg_traffic_live --> validate
-    stg_traffic_backfill --> validate
+    subgraph Mart[3. Mart]
+        build_mart[run_mart.py]
+        mart_weather[(data/mart/mart_weather.parquet)]
+        mart_aq[(data/mart/mart_aq.parquet)]
+        mart_traffic[(data/mart/mart_traffic.parquet)]
+        dim_stations[(data/mart/dim_stations.parquet)]
+    end
 
-    weather_day[f_kliima_paev] --> app_weather[src/airwolf/ingestion/weather.py]
-    weather_meta2[f_kliima_jaam_vaatlus] --> app_weather
-    aq_api2[f_keskkonnaseire] --> app_aq[src/airwolf/ingestion/air_quality.py]
-    traffic_api2[traffic_detectors MapServer/0] --> app_traffic[src/airwolf/ingestion/traffic.py]
+    subgraph Orchestration[Orkestreerimine]
+        pipeline[run_pipeline.py]
+        stamp[_last_updated.txt]
+        airflow[Airflow / scheduler<br/>(planeeritud / osaliselt seadistatud)]
+    end
 
-    app_weather --> dashboard[streamlit_app.py]
-    app_aq --> dashboard
-    app_traffic --> dashboard
-    osm[OpenStreetMap] --> dashboard
+    subgraph Presentation[4. Visualiseerimine]
+        dashboard[streamlit_app.py]
+    end
+
+    weather_hourly --> ingest_weather
+    weather_meta --> ingest_weather
+    aq_api --> ingest_aq
+    traffic_api --> ingest_traffic_live
+    traffic_csv --> ingest_traffic_backfill
+    traffic_sites --> ingest_traffic_backfill
+
+    ingest_weather --> stg_weather
+    ingest_weather --> stg_weather_meta
+    ingest_aq --> stg_aq
+    ingest_traffic_live --> stg_traffic_live
+    ingest_traffic_live --> stg_registry
+    ingest_traffic_backfill --> stg_traffic_backfill
+
+    stg_weather --> transform
+    stg_weather_meta --> transform
+    stg_aq --> transform
+    stg_traffic_backfill --> transform
+    stg_registry --> transform
+
+    transform --> validate
+    transform --> int_weather
+    transform --> int_aq
+    transform --> int_traffic
+
+    int_weather --> build_mart
+    int_aq --> build_mart
+    int_traffic --> build_mart
+    stg_weather_meta --> build_mart
+    stg_registry --> build_mart
+
+    build_mart --> mart_weather
+    build_mart --> mart_aq
+    build_mart --> mart_traffic
+    build_mart --> dim_stations
+
+    mart_weather --> dashboard
+    mart_aq --> dashboard
+    mart_traffic --> dashboard
+    dim_stations --> dashboard
+    stamp --> dashboard
+    osm --> dashboard
+
+    pipeline --> ingest_weather
+    pipeline --> ingest_aq
+    pipeline --> ingest_traffic_live
+    pipeline --> ingest_traffic_backfill
+    pipeline --> transform
+    pipeline --> build_mart
+    pipeline --> stamp
+    airflow -. tulevikus .-> pipeline
 ```
 ### Andmevoo selgitus
 
-1. Pythoni skriptid loevad andmed teenustest või lokaalsest CSV failist ning kirjutavad need `staging` kausta Parquet-failidena.  
-2. Standardiseerimise käigus tehakse järgmised sammud:
-   - huvipakkuvate asulate või seirealade filtreerimine;
-   - aja ühtlustamine ühisele analüüsitasemele;
-   - ühikute ühtlustamine;
-   - koordinaatsüsteemide ühtlustamine EPSG:3301 peale;
-   - dublikaatide eemaldamine ja põhiline skeemivalideerimine (andmetüübid, kohustuslikud väljad jms).
-3. Ilmavaatlusandmetele lisatakse asukohainfo `f_kliima_jaam_vaatlus` teenusest
-4. Liiklusesagedus andmeid päritakse `traffic_detectors` ArcGIS teenusest uurimisalade kaupa ning need salvestatakse.
-5. Liikluse backfill loeb ajalooliste andmete CSV, arvutab tuletatud tunnused ning lisab andmed liilussageduse mõõtmiste tabelisse.
-6. `core` kihis on juba ühtlustatud vaatlused allikate kaupa.  
-7. `mart` kihis seotakse õhukvaliteedi vaatlused ilmastiku ja liiklusandmetega ning arvutatakse KPI-d, episoodid ja seoseanalüüsi väljundid.  
-8. Streamlit dashboard kuvab nii kaardivaate kui ka valitud mõõdikute ajagraafikud, võrdlused ja koondid.  
-9. Scheduler käivitab automaatse sissevõtu ja võimaliku backfill-protsessi.
+1. `run_pipeline.py` orkestreerib töövoo: ingest → transform → mart → viimase uuenduse ajatempel.  
+2. Ingest-skriptid kirjutavad allikalähedased toorandmed `data/staging` kihti:
+   - `ingest_weather.py` salvestab ilmavaatlused kuupõhiselt ja ilmajaamade metaandmed eraldi;
+   - `ingest_air_quality.py` salvestab õhukvaliteedi toorandmed kuupõhiselt;
+   - `ingest_traffic.py --mode live` salvestab live-snapshot'i ja uuendab detektorite registrit;
+   - `ingest_traffic.py --mode backfill` salvestab ajaloolise liiklus-CSV backfilli.
+3. `run_transform.py` loeb `staging` kihist andmed, normaliseerib need ja kirjutab `data/intermediate` kihti:
+   - ilm ja õhukvaliteet kuupõhistesse failidesse;
+   - liikluse üksikute sõiduridade backfill ühendatakse detektoriregistriga ja agregeeritakse tunnitasemele faili `traffic.parquet`.
+4. `validate.py` käivitatakse transformatsiooni käigus iga allika standardiseeritud väljundi peal. Kvaliteedikontrollide tulemusi praegu eraldi tabelisse ei kirjutata, vaid need logitakse jooksu väljundisse.
+5. `run_mart.py` koondab `intermediate` kihi failid dashboardi jaoks sobivatesse `mart` kihtidesse:
+   - `mart_weather.parquet`
+   - `mart_aq.parquet`
+   - `mart_traffic.parquet`
+   - `dim_stations.parquet`
+6. Streamlit dashboard loeb praegu `mart` kihti, mitte live-API-sid otse. Kaardivaade kasutab `dim_stations.parquet` faili ning ajagraafikud loevad `mart_*` faile.
+7. `data/staging/_last_updated.txt` salvestab viimase eduka pipeline-jooksu ajatembli ja kuvatakse dashboardil.
+8. Airflow ja andmebaasi konteinerid on projektis ette valmistatud, kuid praegune PoC töötab failipõhise pipeline'ina ning automaatne scheduler ei ole veel töövoo keskne osa.
 
 ## Andmebaasi kihid
 
@@ -134,7 +211,7 @@ Vähemalt järgmised kontrollid tehakse automaatselt:
 
 ### Õhukvaliteedi andmed (`air_quality`)
 - nõutud väljad: `seirekoha_kood`, `obs_time`, `lat`, `lon`, `area`
-- vähemalt üks saasteaine veerg peab olema olemas: `O3`, `NO2`, `PM10`, `PM25`
+- vähemalt üks saasteaine veerg peab olema olemas: `SO2`, `O3`, `NO2`, `PM10`, `PM25`
 - saasteainete väärtused peavad olema mitte-negatiivsed
 - koordinaatide vahemikukontroll (`lat`, `lon`)
 
@@ -152,7 +229,7 @@ Vähemalt järgmised kontrollid tehakse automaatselt:
 
 | Roll | Vastutus | Omanik |
 |---|---|---|
-| Keskkonnaregistri andmete omanik | Kontrollib `f_kliima_tund`, `f_keskkonnaseire` ja `f_kliima_jaam_vaatlus` päringuid, sissevõttu ja ilmavaatluste standardiseerimist | Katrin |
+| Keskkonnaandmete omanik | Kontrollib `f_kliima_tund`, `õhukvaliteet` ja `f_kliima_jaam_vaatlus` päringuid, sissevõttu ja ilmavaatluste standardiseerimist | Katrin |
 | Liiklusandmete omanik | Vastutab `traffic_detectors` päringute, API-võtme kasutuse ja liiklusandmete normaliseerimise eest | Hanna |
 | Transformatsioonide omanik | Ehitab `core` ja `mart` kihi mudelid, ruumilise sidumise loogika ja KPI arvutused | Hele |
 | Kvaliteedi omanik | Loob andmekvaliteedi testid (`validate.py`), jälgib ebaõnnestumisi ja kontrollib logisid | Hando | 
