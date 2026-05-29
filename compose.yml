@@ -6,9 +6,7 @@
 #   airflow-apiserver   — Airflow UI ja REST API (port 8080)
 #   airflow-scheduler   — DAG-ide käivitamine
 #   airflow-dag-processor — DAG-ide parsimine
-#   superset-db         — Superset metaandmebaas
-#   superset-init       — Superset ühekordne initsialiseerimine
-#   superset            — Superset näidikulaud (port 8088)
+#   streamlit           mlit näidikulaud (port 8088)
 #
 # Käivitamine pärast kohandamist:
 #   cp .env.example .env
@@ -153,7 +151,7 @@ services:
          condition: service_healthy
      ports:
        - "${DASHBOARD_PORT_HOST:-8501}:8501"
-     command: ["streamlit", "run", "dashboard/app.py", "--server.address=0.0.0.0"]
+     command: ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
 
 volumes:
   pgdata:
