@@ -486,13 +486,14 @@ def _show(chart: alt.Chart | None, fallback: str = "Andmed puuduvad.") -> None:
 
 
 def _last_updated_str() -> str:
+    import datetime
+    # Prefer the explicit marker written by run_pipeline.py
     marker = _STAGING / "_last_updated.txt"
     if marker.exists():
         return marker.read_text().strip()[:16].replace("T", " ")
-    # Fall back to newest parquet modification time
-    parquets = list(_STAGING.glob("*.parquet"))
+    # Fall back to newest mart parquet modification time (mart files are in git)
+    parquets = list(_MART.glob("*.parquet"))
     if parquets:
-        import datetime
         ts = max(p.stat().st_mtime for p in parquets)
         return datetime.datetime.fromtimestamp(ts).strftime("%d.%m.%Y %H:%M")
     return "—"
