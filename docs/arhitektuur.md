@@ -2,17 +2,17 @@
 
 ## Äriküsimus
 
-Kas, kuidas ja millisel määral sõltuvad Eesti asulates (Tallinn, Tartu ja Narva) mõõdetud PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
+Kas, kuidas ja millisel määral sõltuvad Eesti asulates (Tallinn, Tartu ja Narva) mõõdetud SO2, PM10, PM2.5, NO2 ja O3 kontsentratsioonid ilmastikunähtustest (nt tuul, sademed, temperatuur) ning liiklussagedusest? Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
 
 Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, tehakse esialgne PoC 2025. aasta kohta.
 
 ## Mõõdikud
 
 1. **Saasteaine kontsentratsiooni seose tugevus ilmastikuteguritega**  
-   PM10, PM2.5, NO2 ja O3 tunnikeskmiste või päevakeskmiste kontsentratsioonide seos tuulekiiruse, tuulesuuna, temperatuuri ja sademetega. Näidatakse korrelatsiooni, regressioonikordaja või muu mõju suuruse näitajana asula ja perioodi lõikes.
+   SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste või päevakeskmiste kontsentratsioonide seos tuulekiiruse, tuulesuuna, temperatuuri ja sademetega. Näidatakse korrelatsiooni, regressioonikordaja või muu mõju suuruse näitajana asula ja perioodi lõikes.
 
 2. **Saasteaine kontsentratsiooni seose tugevus liiklussagedusega**  
-   PM10, PM2.5, NO2 ja O3 kontsentratsiooni muutus liiklusvoo, raskeveokite osakaalu ja võimalusel keskmise kiiruse muutumisel.
+   SO2, PM10, PM2.5, NO2 ja O3 kontsentratsiooni muutus liiklusvoo, raskeveokite osakaalu ja võimalusel keskmise kiiruse muutumisel.
 
 3. **Kõrge saastetaseme episoodid ja neid saatvad tingimused**  
    Tundide või päevade arv, mil valitud saasteaine tase ületab kokkulepitud lävendi, ning millised ilma- ja liiklustingimused nende episoodidega kaasnesid.
@@ -34,9 +34,10 @@ Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, t
 |---|---|---|---|---|
 | `f_kliima_tund` (`Ilmavaatlused`) | `https://keskkonnaandmed.envir.ee/f_kliima_tund` | Avalik HTTP API | Jah, ajas muutuv vaatluste andmestik | Tunnipõhised ilmavaatlused: temperatuur, sademed ja tuul; kasutatakse õhukvaliteedi ja liiklusandmete sidumiseks ühisel tunnitasemel |
 | `f_kliima_jaam_vaatlus` | `https://keskkonnaandmed.envir.ee/f_kliima_jaam_vaatlus` | Avalik HTTP API | Pigem aeglaselt muutuv | Ilmajaamade asukohtade allikas |
-| `f_keskkonnaseire` (`Välisõhu seire`) | `https://keskkonnaandmed.envir.ee/f_keskkonnaseire` | Avalik HTTP API | Jah, üldjuhul uuendatakse regulaarselt, kuid 2026. aasta andmed veel avalikud ei ole | Õhukvaliteedi seireandmed: PM10, PM2.5, NO2, O3 ja seotud mõõtepunktid |
+| `ohuseire.ee` | `https://ohuseire.ee/api/monitoring/et` | Pool-avalik API (kasutusel EKUKi kaardirakenduses) | Jah, uueneb pidevalt | Õhukvaliteedi seireandmed: SO2, PM10, PM2.5, NO2, O3 ja seotud mõõtepunktid |
 | `traffic_detectors` MapServer | `https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer` | Avalik ArcGIS REST teenus | Jah, teenus kuvab jooksvaid mõõtmisi | Liiklusdetektorite mõõtmised ja asukohad; kasutatakse liiklusvoo, raskeveokite osakaalu ja kiiruse näitajate jaoks |
-| Ajalooliste liiklussagedusandmete CSV backfill | KAlgallikas: `https://andmed.eesti.ee/datasets/liiklusloenduse-andmed` | Kohalik sisendfail | Ei | Ajalooline info, mis seotakse liiklussagedusdetektorite ruumiandmetega |
+| Ajalooliste liiklussagedusandmete CSV backfill | Algallikas: `https://andmed.eesti.ee/datasets/liiklusloenduse-andmed` | Kohalik sisendfail | Ei | Ajalooline info, mis seotakse liiklussagedusdetektorite ruumiandmetega |
+| Ajalooliste liiklussagedusandmete mõõdistuspunktide asukohtade backfill | Algallikas: `https://andmed.eesti.ee/datasets/liiklusloendusseadmed` | Kohalik sisendfail | Ei | Ajalooline info, mis seotakse mõõdistusandmetega |
 | OpenStreetMap | `https://www.openstreetmap.org` | Avalik kaardiandmestik / aluskaart | Jah | Aluskaart ja kaardiaken Streamlitis |
 
 ### Andmeallikate kasutamise põhimõtted
