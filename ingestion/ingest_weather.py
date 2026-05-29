@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import time
 from typing import Any
+import uuid
 
 import pandas as pd
 import requests
@@ -22,7 +23,6 @@ BACKOFF = 5
 STATION_CODES = ["AJHARK01", "AJTART01", "AJNARV01"]
 ELEMENT_CODES = ["TA", "WS10M", "WD10M", "PR1H"]
 
-# f_kliima_tund element_kood -> staging.weather_raw column
 ELEMENT_TO_COLUMN = {
     "TA": "temperature_c",
     "WS10M": "wind_speed_ms",
@@ -32,7 +32,6 @@ ELEMENT_TO_COLUMN = {
 
 
 def _get(endpoint: str, params: list[tuple[str, Any]]) -> list[dict[str, Any]]:
-    """Fetch rows from Keskkonnaandmed API."""
     url = f"{BASE_URL}/{endpoint.lstrip('/')}"
     all_params = params + [("limit", "50000")]
 
@@ -73,7 +72,6 @@ def _get(endpoint: str, params: list[tuple[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _find_value_column(df: pd.DataFrame) -> str:
-    """Find the API column containing the measured value."""
     candidates = [
         "vaartus",
         "väärtus",
@@ -93,8 +91,12 @@ def _find_value_column(df: pd.DataFrame) -> str:
     )
 
 
-def _fetch_station_coordinates() -> pd.DataFrame:
-    """Fetch station metadata and return columns: jaam_kood, lat, lon."""
+def _fetch_station_metadata() -> pd.DataFrame:
+    """
+    Pärib jaamade lat/lon info.
+    NB! Seda EI salvestata enam eraldi weather_stations_raw tabelisse.
+    Seda kasutatakse ainult weather_raw ridade rikastamiseks.
+    """
     codes = ",".join(STATION_CODES)
 
     rows = _get(
@@ -162,7 +164,6 @@ def _fetch_station_coordinates() -> pd.DataFrame:
 
 
 def _fetch_observations(year: int, month: int) -> pd.DataFrame:
-    """Fetch hourly observations for one month."""
     rows = _get(
         "f_kliima_tund",
         [
@@ -183,18 +184,8 @@ def _fetch_observations(year: int, month: int) -> pd.DataFrame:
 def _prepare_weather_rows(
     observations_df: pd.DataFrame,
     stations_df: pd.DataFrame,
-    run_id: str,
+    run_id: uuid.UUID,
 ) -> list[tuple]:
-    """
-    Convert API rows from long format into staging.weather_raw format.
-
-    API format:
-        jaam_kood | aasta | kuu | paev | tund | element_kood | vaartus
-
-    DB format:
-        run_id | jaam_kood | obs_time | lat | lon |
-        temperature_c | wind_speed_ms | wind_direction_deg | precip_mm
-    """
     if observations_df.empty:
         return []
 
@@ -202,6 +193,7 @@ def _prepare_weather_rows(
 
     required = ["jaam_kood", "aasta", "kuu", "paev", "tund", "element_kood"]
     missing = [col for col in required if col not in df.columns]
+
     if missing:
         raise ValueError(
             f"Weather API response missing required columns: {missing}. "
@@ -261,6 +253,7 @@ def _prepare_weather_rows(
     wide = wide.dropna(subset=["jaam_kood", "obs_time"])
 
     rows: list[tuple] = []
+
     for _, row in wide.iterrows():
         rows.append(
             (
@@ -289,28 +282,19 @@ def load_weather(
     schema: str = "staging",
 ) -> int:
     """
-    Load weather data directly into PostgreSQL.
+    Laeb ilmaandmed staging.weather_raw tabelisse.
 
-    Intended Airflow usage:
-        from ingestion.ingest_weather import load_weather
-
-        load_weather(
-            hook=PostgresHook(postgres_conn_id="analytics_db"),
-            run_id=<uuid string>,
-            year_start=2025,
-            month_start=1,
-            year_end=2025,
-            month_end=12,
-            schema="staging",
-        )
+    Eraldi weather_stations_raw tabelit enam ei kasutata.
+    Jaamade lat/lon lisatakse otse weather_raw ridadele.
     """
-    stations_df = _fetch_station_coordinates()
+    stations_df = _fetch_station_metadata()
 
     y, m = year_start, month_start
     total_inserted = 0
 
     while (y, m) <= (year_end, month_end):
         observations_df = _fetch_observations(y, m)
+
         rows = _prepare_weather_rows(
             observations_df=observations_df,
             stations_df=stations_df,
@@ -337,6 +321,8 @@ def load_weather(
 
             total_inserted += len(rows)
             log.info("Inserted %d weather rows for %d-%02d", len(rows), y, m)
+        else:
+            log.info("No weather rows to insert for %d-%02d", y, m)
 
         m += 1
         if m > 12:
