@@ -102,7 +102,7 @@ flowchart LR
     subgraph Orchestration[Orkestreerimine]
         pipeline[run_pipeline.py]
         stamp[_last_updated.txt]
-        airflow[Airflow / scheduler<br/>(planeeritud / osaliselt seadistatud)]
+        airflow["Airflow / scheduler<br>planeeritud / osaliselt seadistatud"]
     end
 
     subgraph Presentation[4. Visualiseerimine]
