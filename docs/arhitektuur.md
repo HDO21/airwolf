@@ -161,6 +161,7 @@ flowchart LR
     pipeline --> stamp
     airflow -. tulevikus .-> pipeline
 ```
+
 ### Andmevoo selgitus
 
 1. `run_pipeline.py` orkestreerib töövoo: ingest → transform → mart → viimase uuenduse ajatempel.  
