@@ -1,24 +1,22 @@
 from __future__ import annotations
+
 import logging
 import sys
 import uuid
-
+from datetime import datetime, timezone
 from pathlib import Path
-from datetime import datetime
-
-import pendulum
 
 sys.path.append("/opt/airflow")
 
-from datetime import datetime, timezone
-from airflow import DAG
-from airflow.sdk import Param
+from airflow.sdk import DAG, Param
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+# from airflow.providers.standard.operators.bash import BashOperator
 
-from ingestion.ingest_weather import load_weather
-#from ingestion.ingest_air_quality import load_air_quality
-#from ingestion.ingest_traffic import load_traffic_live
+from ingestion.ingest_weather import load_weather_backfill, load_weather_recent
+# from ingestion.ingest_air_quality import load_air_quality
+# from ingestion.ingest_traffic import load_traffic_live, load_traffic_backfill
+
 log = logging.getLogger(__name__)
 
 POSTGRES_CONN_ID = "analytics_db"
@@ -28,11 +26,7 @@ DBT_PROJECT_DIR = "/opt/airflow/dbt_project"
 
 
 def _hook() -> PostgresHook:
-    """Tagastab ühenduse sinu analytics-db andmebaasi vastu.
-
-    See kasutab docker-compose.yml failis defineeritud ühendust:
-    AIRFLOW_CONN_ANALYTICS_DB=postgresql://...@analytics-db:5432/...
-    """
+    """Tagastab ühenduse analytics-db andmebaasi vastu."""
     return PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
 
 
@@ -48,8 +42,7 @@ def create_tables() -> None:
 def _start_run(
     hook: PostgresHook,
     source_name: str,
-    started_at: datetime | None = None,
-    finished_at: datetime | None = None,
+    message: str | None = None,
 ) -> str:
     """Lisab staging.pipeline_runs tabelisse uue jooksu staatusega running."""
     run_id = str(uuid.uuid4())
@@ -57,11 +50,11 @@ def _start_run(
     hook.run(
         """
         INSERT INTO staging.pipeline_runs
-            (run_id, source_name, started_at, finished_at, status)
+            (run_id, source_name, loaded_at, status, message)
         VALUES
-            (%s, %s,  %s, %s, 'running')
+            (%s, %s, NOW(), %s, %s)
         """,
-        parameters=(run_id, source_name, started_at, finished_at),
+        parameters=(run_id, source_name, "running", message),
     )
 
     return run_id
@@ -69,7 +62,7 @@ def _start_run(
 
 def _finish_run(
     hook: PostgresHook,
-    run_id: uuid.UUID,
+    run_id: str,
     status: str,
     message: str | None = None,
 ) -> None:
@@ -103,13 +96,34 @@ def _period_from_params(context) -> tuple[int, int, int, int, datetime, datetime
     return year_start, month_start, year_end, month_end, period_start, period_end
 
 
-def ingest_weather(**context) -> None:
+def ingest_weather_backfill(**context) -> int:
+    """
+    Ilmaandmete backfill.
+
+    Käivitub ainult siis, kui DAG trigger config'is on:
+        {"run_weather_backfill": true}
+
+    Vaikimisi periood on 2026 märts kuni 2026 mai, aga seda saab
+    Airflow UI-s parameetritega muuta.
+    """
+    params = context["params"]
+    run_backfill = bool(params.get("run_weather_backfill"))
+
+    if not run_backfill:
+        log.info("run_weather_backfill=false; skipping weather backfill")
+        return 0
+
     hook = _hook()
     year_start, month_start, year_end, month_end, period_start, period_end = _period_from_params(context)
-    run_id = _start_run(hook, "weather", period_start, period_end)
+
+    run_id = _start_run(
+        hook=hook,
+        source_name="weather_backfill",
+        message=f"Weather backfill {period_start.date()} to {period_end.date()}",
+    )
 
     try:
-        load_weather(
+        rows = load_weather_backfill(
             hook=hook,
             run_id=run_id,
             year_start=year_start,
@@ -118,16 +132,54 @@ def ingest_weather(**context) -> None:
             month_end=month_end,
             schema=SCHEMA_NAME,
         )
-        _finish_run(hook, run_id, "success")
+        _finish_run(hook, run_id, "success", f"Backfill upserted {rows} weather rows")
+        return rows
     except Exception as exc:
         _finish_run(hook, run_id, "failed", str(exc))
         raise
 
 
+def ingest_weather_hourly(**context) -> int:
+    """
+    Regulaarne ilmaandmete laadimine.
+
+    Käib iga DAG run'iga ja laeb viimased N tundi uuesti.
+    ON CONFLICT loogika ingest_weather.py failis väldib duplikaate.
+    """
+    params = context["params"]
+    lookback_hours = int(params.get("weather_lookback_hours", 48))
+
+    hook = _hook()
+    run_id = _start_run(
+        hook=hook,
+        source_name="weather_hourly",
+        message=f"Weather hourly load, lookback_hours={lookback_hours}",
+    )
+
+    try:
+        rows = load_weather_recent(
+            hook=hook,
+            run_id=run_id,
+            lookback_hours=lookback_hours,
+            schema=SCHEMA_NAME,
+        )
+        _finish_run(hook, run_id, "success", f"Hourly load upserted {rows} weather rows")
+        return rows
+    except Exception as exc:
+        _finish_run(hook, run_id, "failed", str(exc))
+        raise
+
+
+# Alles jäetud tulevaste andmeallikate jaoks. Kui moodulid valmis saavad,
+# võta import ülevalt kommentaarist välja ja aktiveeri allpool taskid.
 def ingest_air_quality(**context) -> None:
     hook = _hook()
     year_start, month_start, year_end, month_end, period_start, period_end = _period_from_params(context)
-    run_id = _start_run(hook, "air_quality", period_start, period_end)
+    run_id = _start_run(
+        hook=hook,
+        source_name="air_quality",
+        message=f"Air quality load {period_start.date()} to {period_end.date()}",
+    )
 
     try:
         load_air_quality(
@@ -147,7 +199,7 @@ def ingest_air_quality(**context) -> None:
 
 def ingest_traffic_live(**context) -> None:
     hook = _hook()
-    run_id = _start_run(hook, "traffic_live")
+    run_id = _start_run(hook=hook, source_name="traffic_live")
 
     try:
         load_traffic_live(
@@ -162,7 +214,7 @@ def ingest_traffic_live(**context) -> None:
 
 
 def ingest_traffic_backfill(**context) -> None:
-    """Laeb liikluse ajaloolise CSV ainult siis, kui DAG param traffic_backfill_file on antud."""
+    """Laeb liikluse ajaloolise CSV ainult siis, kui traffic_backfill_file on antud."""
     params = context["params"]
     traffic_backfill_file = str(params.get("traffic_backfill_file") or "").strip()
     traffic_stations_file = str(params.get("traffic_stations_file") or "").strip()
@@ -181,7 +233,7 @@ def ingest_traffic_backfill(**context) -> None:
         raise FileNotFoundError(f"traffic_stations_file not found: {stations_path}")
 
     hook = _hook()
-    run_id = _start_run(hook, "traffic_backfill")
+    run_id = _start_run(hook=hook, source_name="traffic_backfill")
 
     try:
         load_traffic_backfill(
@@ -200,14 +252,19 @@ def ingest_traffic_backfill(**context) -> None:
 with DAG(
     dag_id="airwolf_pipeline",
     description="Laeb Airwolf projekti andmed staging skeemi ja käivitab dbt transformatsioonid",
-    start_date=datetime(2026, 1, 1),
-    schedule="@daily",
+    start_date=datetime(2026, 3, 1),
+    schedule="@hourly",
     catchup=False,
     params={
-        "year_start": Param(2025, type="integer", minimum=2000, maximum=2100),
-        "month_start": Param(1, type="integer", minimum=1, maximum=12),
-        "year_end": Param(2025, type="integer", minimum=2000, maximum=2100),
-        "month_end": Param(12, type="integer", minimum=1, maximum=12),
+        # Backfill käivitub ainult käsitsi, kui run_weather_backfill=true.
+        "run_weather_backfill": Param(False, type="boolean"),
+        "year_start": Param(2026, type="integer", minimum=2000, maximum=2100),
+        "month_start": Param(3, type="integer", minimum=1, maximum=12),
+        "year_end": Param(2026, type="integer", minimum=2000, maximum=2100),
+        "month_end": Param(5, type="integer", minimum=1, maximum=12),
+        # Hourly laadimine.
+        "weather_lookback_hours": Param(48, type="integer", minimum=1, maximum=168),
+        # Tulevaste liiklusandmete jaoks.
         "traffic_backfill_file": Param("", type="string"),
         "traffic_stations_file": Param("", type="string"),
     },
@@ -219,11 +276,17 @@ with DAG(
         python_callable=create_tables,
     )
 
-    ingest_weather_task = PythonOperator(
-        task_id="ingest_weather",
-        python_callable=ingest_weather,
+    ingest_weather_backfill_task = PythonOperator(
+        task_id="ingest_weather_backfill",
+        python_callable=ingest_weather_backfill,
     )
 
+    ingest_weather_hourly_task = PythonOperator(
+        task_id="ingest_weather_hourly",
+        python_callable=ingest_weather_hourly,
+    )
+
+    # Kui vastavad ingestion failid on valmis, aktiveeri need taskid.
     # ingest_air_quality_task = PythonOperator(
     #     task_id="ingest_air_quality",
     #     python_callable=ingest_air_quality,
@@ -239,6 +302,8 @@ with DAG(
     #     python_callable=ingest_traffic_backfill,
     # )
 
+    # Kui dbt on seadistatud, võta BashOperator import ülevalt kommentaarist välja
+    # ja aktiveeri need taskid.
     # dbt_run = BashOperator(
     #     task_id="dbt_run",
     #     bash_command=(
@@ -257,8 +322,18 @@ with DAG(
     # )
 
     create_tables_task >> [
-        ingest_weather_task]
-        #ingest_air_quality_task,
-        #ingest_traffic_live_task,
-        #ingest_traffic_backfill_task,
-     #>> dbt_run >> dbt_test
+        ingest_weather_backfill_task,
+        ingest_weather_hourly_task,
+        # ingest_air_quality_task,
+        # ingest_traffic_live_task,
+        # ingest_traffic_backfill_task,
+    ]
+
+    # Kui dbt taskid aktiveerid, kasuta näiteks:
+    # [
+    #     ingest_weather_backfill_task,
+    #     ingest_weather_hourly_task,
+    #     ingest_air_quality_task,
+    #     ingest_traffic_live_task,
+    #     ingest_traffic_backfill_task,
+    # ] >> dbt_run >> dbt_test

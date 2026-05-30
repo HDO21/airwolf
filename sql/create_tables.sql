@@ -4,8 +4,7 @@ CREATE SCHEMA IF NOT EXISTS marts;
 
 CREATE TABLE IF NOT EXISTS staging.pipeline_runs (
     run_id      uuid PRIMARY KEY,
-    started_at  timestamptz NOT NULL DEFAULT now(),
-    finished_at timestamptz,
+    loaded_at  timestamptz NOT NULL DEFAULT now(),
     source_name text NOT NULL,
     status      text NOT NULL CHECK (status IN ('running', 'success', 'failed')),
     message     text,
@@ -17,11 +16,10 @@ CREATE TABLE IF NOT EXISTS staging.pipeline_runs (
 -- Õhukvaliteet: ohuseire.ee /api/monitoring/et.
 -- Algfail deduplikeeris võtmega station × indicator × measured.
 CREATE TABLE IF NOT EXISTS staging.air_quality_raw (
+    run_id     uuid REFERENCES staging.pipeline_runs(run_id),
     station    text NOT NULL,
     indicator  text NOT NULL,
     measured   timestamptz NOT NULL,
-    payload    jsonb NOT NULL,
-    run_id     uuid REFERENCES staging.pipeline_runs(run_id),
     loaded_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT pk_air_quality_raw PRIMARY KEY (station, indicator, measured)
 );
@@ -49,7 +47,7 @@ CREATE TABLE IF NOT EXISTS staging.weather_raw (
     loaded_at           timestamptz      NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_weather_raw
-        PRIMARY KEY (run_id, jaam_kood, obs_time)
+        PRIMARY KEY (jaam_kood, obs_time)
 );
 
 
