@@ -16,12 +16,15 @@ CREATE TABLE IF NOT EXISTS staging.pipeline_runs (
 -- Õhukvaliteet: ohuseire.ee /api/monitoring/et.
 -- Algfail deduplikeeris võtmega station × indicator × measured.
 CREATE TABLE IF NOT EXISTS staging.air_quality_raw (
-    run_id     uuid REFERENCES staging.pipeline_runs(run_id),
-    station    text NOT NULL,
-    indicator  text NOT NULL,
-    measured   timestamptz NOT NULL,
-    loaded_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT pk_air_quality_raw PRIMARY KEY (station, indicator, measured)
+    run_id      uuid REFERENCES staging.pipeline_runs(run_id),
+    station     text NOT NULL,
+    indicator   text NOT NULL,
+    measured    timestamptz NOT NULL,
+    value       numeric,
+    loaded_at   timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_air_quality_raw 
+        PRIMARY KEY (station, indicator, measured)
 );
 
 -- Ilm: keskkonnaandmed.envir.ee / f_kliima_tund.

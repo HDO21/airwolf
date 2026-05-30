@@ -14,7 +14,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 # from airflow.providers.standard.operators.bash import BashOperator
 
 from ingestion.ingest_weather import load_weather_backfill, load_weather_recent
-# from ingestion.ingest_air_quality import load_air_quality
+from ingestion.ingest_air_quality import load_air_quality_backfill, load_air_quality_recent
 # from ingestion.ingest_traffic import load_traffic_live, load_traffic_backfill
 
 log = logging.getLogger(__name__)
@@ -170,19 +170,34 @@ def ingest_weather_hourly(**context) -> int:
         raise
 
 
-# Alles jäetud tulevaste andmeallikate jaoks. Kui moodulid valmis saavad,
-# võta import ülevalt kommentaarist välja ja aktiveeri allpool taskid.
-def ingest_air_quality(**context) -> None:
+def ingest_air_quality_backfill(**context) -> int:
+    """
+    Õhukvaliteedi backfill.
+
+    Käivitub ainult siis, kui DAG trigger config'is on:
+        {"run_air_quality_backfill": true}
+
+    Vaikimisi periood on 2026 märts kuni 2026 mai, aga seda saab
+    Airflow UI-s parameetritega muuta.
+    """
+    params = context["params"]
+    run_backfill = bool(params.get("run_air_quality_backfill"))
+
+    if not run_backfill:
+        log.info("run_air_quality_backfill=false; skipping air quality backfill")
+        return 0
+
     hook = _hook()
     year_start, month_start, year_end, month_end, period_start, period_end = _period_from_params(context)
+
     run_id = _start_run(
         hook=hook,
-        source_name="air_quality",
-        message=f"Air quality load {period_start.date()} to {period_end.date()}",
+        source_name="air_quality_backfill",
+        message=f"Air quality backfill {period_start.date()} to {period_end.date()}",
     )
 
     try:
-        load_air_quality(
+        rows = load_air_quality_backfill(
             hook=hook,
             run_id=run_id,
             year_start=year_start,
@@ -191,7 +206,39 @@ def ingest_air_quality(**context) -> None:
             month_end=month_end,
             schema=SCHEMA_NAME,
         )
-        _finish_run(hook, run_id, "success")
+        _finish_run(hook, run_id, "success", f"Backfill upserted {rows} air quality rows")
+        return rows
+    except Exception as exc:
+        _finish_run(hook, run_id, "failed", str(exc))
+        raise
+
+
+def ingest_air_quality_hourly(**context) -> int:
+    """
+    Regulaarne õhukvaliteedi laadimine.
+
+    Käib iga DAG run'iga ja laeb viimased N tundi uuesti.
+    ON CONFLICT loogika ingest_air_quality.py failis väldib duplikaate.
+    """
+    params = context["params"]
+    lookback_hours = int(params.get("air_quality_lookback_hours", 48))
+
+    hook = _hook()
+    run_id = _start_run(
+        hook=hook,
+        source_name="air_quality_hourly",
+        message=f"Air quality hourly load, lookback_hours={lookback_hours}",
+    )
+
+    try:
+        rows = load_air_quality_recent(
+            hook=hook,
+            run_id=run_id,
+            lookback_hours=lookback_hours,
+            schema=SCHEMA_NAME,
+        )
+        _finish_run(hook, run_id, "success", f"Hourly load upserted {rows} air quality rows")
+        return rows
     except Exception as exc:
         _finish_run(hook, run_id, "failed", str(exc))
         raise
@@ -258,12 +305,17 @@ with DAG(
     params={
         # Backfill käivitub ainult käsitsi, kui run_weather_backfill=true.
         "run_weather_backfill": Param(False, type="boolean"),
+
+         # Õhukvaliteedi backfill käivitub ainult käsitsi, kui run_air_quality_backfill=true.
+        "run_air_quality_backfill": Param(False, type="boolean"),
+
         "year_start": Param(2026, type="integer", minimum=2000, maximum=2100),
         "month_start": Param(3, type="integer", minimum=1, maximum=12),
         "year_end": Param(2026, type="integer", minimum=2000, maximum=2100),
         "month_end": Param(5, type="integer", minimum=1, maximum=12),
         # Hourly laadimine.
         "weather_lookback_hours": Param(48, type="integer", minimum=1, maximum=168),
+        "air_quality_lookback_hours": Param(48, type="integer", minimum=1, maximum=168),
         # Tulevaste liiklusandmete jaoks.
         "traffic_backfill_file": Param("", type="string"),
         "traffic_stations_file": Param("", type="string"),
@@ -286,11 +338,16 @@ with DAG(
         python_callable=ingest_weather_hourly,
     )
 
-    # Kui vastavad ingestion failid on valmis, aktiveeri need taskid.
-    # ingest_air_quality_task = PythonOperator(
-    #     task_id="ingest_air_quality",
-    #     python_callable=ingest_air_quality,
-    # )
+
+    ingest_air_quality_backfill_task = PythonOperator(
+        task_id="ingest_air_quality_backfill",
+        python_callable=ingest_air_quality_backfill,
+    )
+
+    ingest_air_quality_hourly_task = PythonOperator(
+        task_id="ingest_air_quality_hourly",
+        python_callable=ingest_air_quality_hourly,
+    )
 
     # ingest_traffic_live_task = PythonOperator(
     #     task_id="ingest_traffic_live",
@@ -324,7 +381,8 @@ with DAG(
     create_tables_task >> [
         ingest_weather_backfill_task,
         ingest_weather_hourly_task,
-        # ingest_air_quality_task,
+        ingest_air_quality_backfill_task,
+        ingest_air_quality_hourly_task,
         # ingest_traffic_live_task,
         # ingest_traffic_backfill_task,
     ]
