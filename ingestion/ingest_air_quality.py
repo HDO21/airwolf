@@ -300,8 +300,17 @@ def load_air_quality_backfill(
         observations_df = _fetch_observations(y, m)
 
         rows = _prepare_air_quality_rows(
-            observations_df=observations_df,
-            run_id=run_id,
+        observations_df=observations_df,
+        run_id=run_id,
+        )
+
+        # Ära salvesta tuleviku mõõtmisi.
+        # Eriti oluline jooksva kuu backfilli puhul, sest kuu päring küsib kuu lõpuni.
+        now_time = datetime.today().replace(microsecond=0)
+
+        rows = _filter_rows_by_time(
+            rows,
+            end_time=now_time,
         )
 
         upserted = _upsert_air_quality_rows(
