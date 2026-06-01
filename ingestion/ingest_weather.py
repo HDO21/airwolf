@@ -3,7 +3,10 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any
+import uuid
+from contextlib import closing
+from datetime import datetime, timedelta
+from typing import Any, Iterable
 
 import pandas as pd
 import requests
@@ -19,10 +22,15 @@ TIMEOUT = 30
 MAX_RETRIES = 3
 BACKOFF = 5
 
+# Vajadusel lisa siia ilmajaamu juurde.
 STATION_CODES = ["AJHARK01", "AJTART01", "AJNARV01"]
+
+# TA    = õhutemperatuur
+# WS10M = tuule kiirus 10 m kõrgusel
+# WD10M = tuule suund 10 m kõrgusel
+# PR1H  = 1 tunni sademed
 ELEMENT_CODES = ["TA", "WS10M", "WD10M", "PR1H"]
 
-# f_kliima_tund element_kood -> staging.weather_raw column
 ELEMENT_TO_COLUMN = {
     "TA": "temperature_c",
     "WS10M": "wind_speed_ms",
@@ -32,7 +40,7 @@ ELEMENT_TO_COLUMN = {
 
 
 def _get(endpoint: str, params: list[tuple[str, Any]]) -> list[dict[str, Any]]:
-    """Fetch rows from Keskkonnaandmed API."""
+    """GET päring Keskkonnaandmete API vastu retry loogikaga."""
     url = f"{BASE_URL}/{endpoint.lstrip('/')}"
     all_params = params + [("limit", "50000")]
 
@@ -73,7 +81,6 @@ def _get(endpoint: str, params: list[tuple[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _find_value_column(df: pd.DataFrame) -> str:
-    """Find the API column containing the measured value."""
     candidates = [
         "vaartus",
         "väärtus",
@@ -93,8 +100,13 @@ def _find_value_column(df: pd.DataFrame) -> str:
     )
 
 
-def _fetch_station_coordinates() -> pd.DataFrame:
-    """Fetch station metadata and return columns: jaam_kood, lat, lon."""
+def _fetch_station_metadata() -> pd.DataFrame:
+    """
+    Pärib jaamade lat/lon info.
+
+    Eraldi weather_stations_raw tabelit ei kasutata.
+    Koordinaadid lisatakse otse weather_raw ridadele.
+    """
     codes = ",".join(STATION_CODES)
 
     rows = _get(
@@ -162,7 +174,10 @@ def _fetch_station_coordinates() -> pd.DataFrame:
 
 
 def _fetch_observations(year: int, month: int) -> pd.DataFrame:
-    """Fetch hourly observations for one month."""
+    """
+    Pärib ühe kuu tunnised ilmavaatlused valitud jaamadele ja elementidele.
+    API päring käib kuu kaupa, hiljem filtreerime vajadusel obs_time järgi.
+    """
     rows = _get(
         "f_kliima_tund",
         [
@@ -183,18 +198,9 @@ def _fetch_observations(year: int, month: int) -> pd.DataFrame:
 def _prepare_weather_rows(
     observations_df: pd.DataFrame,
     stations_df: pd.DataFrame,
-    run_id: str,
+    run_id: str | uuid.UUID,
 ) -> list[tuple]:
-    """
-    Convert API rows from long format into staging.weather_raw format.
-
-    API format:
-        jaam_kood | aasta | kuu | paev | tund | element_kood | vaartus
-
-    DB format:
-        run_id | jaam_kood | obs_time | lat | lon |
-        temperature_c | wind_speed_ms | wind_direction_deg | precip_mm
-    """
+    """Teeb API ridadest staging.weather_raw tabelisse sobivad tuple'id."""
     if observations_df.empty:
         return []
 
@@ -202,6 +208,7 @@ def _prepare_weather_rows(
 
     required = ["jaam_kood", "aasta", "kuu", "paev", "tund", "element_kood"]
     missing = [col for col in required if col not in df.columns]
+
     if missing:
         raise ValueError(
             f"Weather API response missing required columns: {missing}. "
@@ -264,7 +271,7 @@ def _prepare_weather_rows(
     for _, row in wide.iterrows():
         rows.append(
             (
-                run_id,
+                str(run_id),
                 row["jaam_kood"],
                 row["obs_time"].to_pydatetime(),
                 None if pd.isna(row["lat"]) else float(row["lat"]),
@@ -279,37 +286,103 @@ def _prepare_weather_rows(
     return rows
 
 
-def load_weather(
+def _month_iter(year_start: int, month_start: int, year_end: int, month_end: int) -> Iterable[tuple[int, int]]:
+    y, m = year_start, month_start
+    while (y, m) <= (year_end, month_end):
+        yield y, m
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+
+
+def _upsert_weather_rows(hook, rows: list[tuple], schema: str = "staging") -> int:
+    """
+    Lisab või uuendab staging.weather_raw read.
+
+    Eeldus andmebaasis:
+        PRIMARY KEY (jaam_kood, obs_time)
+    või:
+        UNIQUE (jaam_kood, obs_time)
+    """
+    if not rows:
+        return 0
+
+    sql = f"""
+        INSERT INTO {schema}.weather_raw
+            (run_id, jaam_kood, obs_time, lat, lon,
+             temperature_c, wind_speed_ms, wind_direction_deg, precip_mm, loaded_at)
+        VALUES
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+        ON CONFLICT (jaam_kood, obs_time) DO UPDATE SET
+            run_id = EXCLUDED.run_id,
+            lat = EXCLUDED.lat,
+            lon = EXCLUDED.lon,
+            temperature_c = EXCLUDED.temperature_c,
+            wind_speed_ms = EXCLUDED.wind_speed_ms,
+            wind_direction_deg = EXCLUDED.wind_direction_deg,
+            precip_mm = EXCLUDED.precip_mm,
+            loaded_at = NOW()
+    """
+
+    with closing(hook.get_conn()) as conn:
+        with conn:
+            with conn.cursor() as cur:
+                cur.executemany(sql, rows)
+
+    return len(rows)
+
+
+def _filter_rows_by_time(
+    rows: list[tuple],
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> list[tuple]:
+    """Filtreerib prepared rows listi obs_time järgi. Tuple'is on obs_time indeksil 2."""
+    filtered: list[tuple] = []
+
+    for row in rows:
+        obs_time = row[2]
+
+        if start_time is not None and obs_time < start_time:
+            continue
+        if end_time is not None and obs_time > end_time:
+            continue
+
+        filtered.append(row)
+
+    return filtered
+
+
+def load_weather_backfill(
     hook,
     run_id: str,
-    year_start: int = 2025,
-    month_start: int = 1,
-    year_end: int = 2025,
-    month_end: int = 12,
+    year_start: int = 2026,
+    month_start: int = 3,
+    year_end: int | None = None,
+    month_end: int | None = None,
     schema: str = "staging",
 ) -> int:
     """
-    Load weather data directly into PostgreSQL.
+    Backfill: laeb kuu-vahemiku staging.weather_raw tabelisse.
 
-    Intended Airflow usage:
-        from ingestion.ingest_weather import load_weather
-
-        load_weather(
-            hook=PostgresHook(postgres_conn_id="analytics_db"),
-            run_id=<uuid string>,
-            year_start=2025,
-            month_start=1,
-            year_end=2025,
-            month_end=12,
-            schema="staging",
-        )
+    Vaikimisi: 2026 märtsist käesoleva kuuni.
+    UPSERT tõttu sama perioodi korduv käivitamine ei tekita duplikaate.
     """
-    stations_df = _fetch_station_coordinates()
+    today = datetime.today()
+    year_end = year_end if year_end is not None else today.year
+    month_end = month_end if month_end is not None else today.month
 
-    y, m = year_start, month_start
-    total_inserted = 0
+    if (year_start, month_start) > (year_end, month_end):
+        raise ValueError(
+            f"Invalid period: start {year_start}-{month_start:02d} is after "
+            f"end {year_end}-{month_end:02d}"
+        )
 
-    while (y, m) <= (year_end, month_end):
+    stations_df = _fetch_station_metadata()
+    total_upserted = 0
+
+    for y, m in _month_iter(year_start, month_start, year_end, month_end):
         observations_df = _fetch_observations(y, m)
         rows = _prepare_weather_rows(
             observations_df=observations_df,
@@ -317,38 +390,66 @@ def load_weather(
             run_id=run_id,
         )
 
-        if rows:
-            hook.insert_rows(
-                table=f"{schema}.weather_raw",
-                rows=rows,
-                target_fields=[
-                    "run_id",
-                    "jaam_kood",
-                    "obs_time",
-                    "lat",
-                    "lon",
-                    "temperature_c",
-                    "wind_speed_ms",
-                    "wind_direction_deg",
-                    "precip_mm",
-                ],
-                replace=False,
-            )
+        upserted = _upsert_weather_rows(hook=hook, rows=rows, schema=schema)
+        total_upserted += upserted
+        log.info("Backfill upserted %d weather rows for %d-%02d", upserted, y, m)
 
-            total_inserted += len(rows)
-            log.info("Inserted %d weather rows for %d-%02d", len(rows), y, m)
+    log.info("Backfill upserted %d weather rows in total", total_upserted)
+    return total_upserted
 
-        m += 1
-        if m > 12:
-            m = 1
-            y += 1
 
-    log.info("Inserted %d weather rows in total", total_inserted)
-    return total_inserted
+def load_weather_recent(
+    hook,
+    run_id: str,
+    lookback_hours: int = 48,
+    schema: str = "staging",
+) -> int:
+    """
+    Regulaarne juurde laadimine: sobib tunnipõhisele Airflow schedule'ile.
+
+    Iga käivitusega küsib viimase N tunni andmed ja teeb UPSERT-i.
+    Soovitus: 48h aken, sest API andmed võivad viibega tekkida või täieneda.
+    """
+    if lookback_hours < 1:
+        raise ValueError("lookback_hours must be at least 1")
+
+    end_time = datetime.today().replace(minute=0, second=0, microsecond=0)
+    start_time = end_time - timedelta(hours=lookback_hours)
+
+    stations_df = _fetch_station_metadata()
+    total_upserted = 0
+
+    for y, m in _month_iter(start_time.year, start_time.month, end_time.year, end_time.month):
+        observations_df = _fetch_observations(y, m)
+        rows = _prepare_weather_rows(
+            observations_df=observations_df,
+            stations_df=stations_df,
+            run_id=run_id,
+        )
+        rows = _filter_rows_by_time(rows, start_time=start_time, end_time=end_time)
+
+        upserted = _upsert_weather_rows(hook=hook, rows=rows, schema=schema)
+        total_upserted += upserted
+        log.info(
+            "Recent load upserted %d weather rows for %d-%02d between %s and %s",
+            upserted,
+            y,
+            m,
+            start_time,
+            end_time,
+        )
+
+    log.info("Recent load upserted %d weather rows in total", total_upserted)
+    return total_upserted
+
+
+# Tagasiühilduv alias, kui mõnes olemasolevas DAG-is on veel load_weather import.
+def load_weather(*args, **kwargs) -> int:
+    return load_weather_backfill(*args, **kwargs)
 
 
 if __name__ == "__main__":
     raise SystemExit(
         "This module is intended to be called by Airflow. "
-        "Use load_weather(hook=..., run_id=..., ...) from dags/airwolf_pipeline.py."
+        "Use load_weather_backfill(...) for backfill and load_weather_recent(...) for hourly updates."
     )

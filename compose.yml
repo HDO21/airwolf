@@ -12,13 +12,58 @@
 #   cp .env.example .env
 #   docker compose up -d --build
 
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:3.1.8
+  env_file:
+    - .env
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager 
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-db:5432/${AIRFLOW_DB}  
+    
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
+    
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET}
+    AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER}
+    
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    # Andmebaasi ühendus Airflow ühenduste jaoks (PostgresHook kasutab seda)
+    AIRFLOW_CONN_ANALYTICS_DB: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@analytics-db:5432/${POSTGRES_DB}
+    # dbt profiilidele vajalikud muutujad
+    POSTGRES_HOST: analytics-db
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+
+    # dbt installimine koos Airflow'ga (kasutab BashOperator'it)
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./ingestion:/opt/airflow/ingestion
+    - ./sql:/opt/airflow/sql
+    - ./dbt_project:/opt/airflow/dbt_project
+    - airflow-logs:/opt/airflow/logs
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    &airflow-common-depends-on
+    airflow-db:
+      condition: service_healthy
+    analytics-db:
+      condition: service_healthy
+
 services:
 
-  # --- Andmebaas ---
-  # Kõigil projektidel on vaja andmebaasi. pgDuckDB toetab nii PostgreSQL-i kui DuckDB päringuid.
-  db:
+  # --- Peamine analüütika andmebaas ---
+  analytics-db:
     image: pgduckdb/pgduckdb:18-v1.1.1
-    container_name: airwolf-db
+    container_name: airwolf-analytics-db
     env_file:
       - .env
     environment:
@@ -26,29 +71,29 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${DB_PORT_HOST:-55432}:5432"
+      - "${DB_PORT_HOST}:5432"
     volumes:
-      - ./init:/docker-entrypoint-initdb.d   # SQL-skriptid, mis käivituvad esimesel korral
-      - pgdata:/var/lib/postgresql
+      - ./init:/docker-entrypoint-initdb.d
+      - analytics-db-volume:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-praktikum}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       retries: 5
       start_period: 5s
+    restart: always
 
-  # --- Töövoo konteiner (nt Python ETL skript) ---
-# --- Airflow metaandmebaas ---
+  # --- Airflow metaandmebaas ---
   airflow-db:
     image: postgres:16
     container_name: airwolf-airflow-db
     environment:
-      POSTGRES_USER: ${AIRFLOW_USER:-airflow}
-      POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD:-airflow}
-      POSTGRES_DB: ${AIRFLOW_DB:-airflow}
+      POSTGRES_USER: ${AIRFLOW_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_DB}
     volumes:
       - airflow-db-volume:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_USER:-airflow}"]
+      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_USER}"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -70,8 +115,8 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
     restart: "no"
@@ -129,10 +174,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-
-  # --- Näidikulaud ---
-  # Streamliti dashboard
-  #
   dashboard:
      build:
        context: .
@@ -140,18 +181,22 @@ services:
      container_name: airwolf-dashboard
      env_file:
        - .env
-     environment:
-       DB_HOST: db
-       DB_PORT: "5432"
-       DB_USER: ${POSTGRES_USER}
-       DB_PASSWORD: ${POSTGRES_PASSWORD}
-       DB_NAME: ${POSTGRES_DB}
-     depends_on:
-       db:
-         condition: service_healthy
+    #  environment:
+    #    DB_HOST: analytics-db
+    #    DB_PORT: "5432"
+    #    DB_USER: ${POSTGRES_USER}
+    #    DB_PASSWORD: ${POSTGRES_PASSWORD}
+    #    DB_NAME: ${POSTGRES_DB}
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
      ports:
        - "${DASHBOARD_PORT_HOST:-8501}:8501"
      command: ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
 
+
+
 volumes:
-  pgdata:
+  analytics-db-volume:
+  airflow-db-volume:
+  airflow-logs:
