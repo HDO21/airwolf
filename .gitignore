@@ -5,7 +5,9 @@ __pycache__/
 data/staging/
 data/intermediate/
 data/quality/
-data/raw
+data/raw/traffic/counts/*.csv
+data/raw/traffic/stations/*.xlsx
+data/raw/traffic/stations/*.csv
 .DS_Store
 *.egg-info/
 dist/
