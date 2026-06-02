@@ -1,0 +1,244 @@
+{
+    "metadata": [
+        {
+            "column": "id",
+            "apiFieldName": null,
+            "description": "Loendusseadme id",
+            "private": false,
+            "required": false,
+            "type": "text",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "kanal",
+            "apiFieldName": null,
+            "description": "Sõidurada",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "aeg",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "timestamp",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "1",
+            "apiFieldName": null,
+            "description": "Motorcycle",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "2",
+            "apiFieldName": null,
+            "description": "Car / Light Van",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "3",
+            "apiFieldName": null,
+            "description": "Car/Lt. Van+Trailer",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "4",
+            "apiFieldName": null,
+            "description": "Heavy Van",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "5",
+            "apiFieldName": null,
+            "description": "Light Goods",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "6",
+            "apiFieldName": null,
+            "description": "Rigid",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "7",
+            "apiFieldName": null,
+            "description": "Rigid + Trailer",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "8",
+            "apiFieldName": null,
+            "description": "Articulated HGV",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "9",
+            "apiFieldName": null,
+            "description": "Minibus",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "10",
+            "apiFieldName": null,
+            "description": "Bus / Coach",
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "<40Kph",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "40-<50",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "50-<60",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "60-<70",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "70-<80",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "80-<90",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "90-<100",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "100-<110",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "110-<120",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "120-<130",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        },
+        {
+            "column": "=>130",
+            "apiFieldName": null,
+            "description": null,
+            "private": false,
+            "required": false,
+            "type": "integer",
+            "unique": false,
+            "unit": null
+        }
+    ]
+}

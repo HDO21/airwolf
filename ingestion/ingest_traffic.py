@@ -2,27 +2,32 @@
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import logging
-import sys
+import json
 import time
+from contextlib import closing
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import pandas as pd
 import requests
 from pyproj import Transformer
 
-from ingestion.db import get_conn, insert_pipeline_run, upsert_rows
+try:
+    from psycopg2.extras import execute_values
+except ModuleNotFoundError:  # Allows local linting/testing outside the Airflow image.
+    execute_values = None
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 ARCGIS_BASE = "https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer/0"
+HEADERS = {"Accept": "application/json"}
 TIMEOUT = 30
 MAX_RETRIES = 3
 BACKOFF = 5
 MAX_RECORDS = 1000
+CSV_CHUNK_SIZE = 50_000
 
 STUDY_AREAS: dict[str, dict[str, int]] = {
     "tallinn": {"x_min": 526818, "x_max": 557609, "y_min": 6580812, "y_max": 6601992},
@@ -30,241 +35,594 @@ STUDY_AREAS: dict[str, dict[str, int]] = {
     "tartu": {"x_min": 643432, "x_max": 663197, "y_min": 6459800, "y_max": 6478907},
 }
 
-LIVE_FIELDS = ",".join([
-    "traffic_detector_id", "site_name", "road_name", "measurement_time",
-    "total_flow_forwards", "total_flow_backwards",
-    "heavy_traffic_forwards", "heavy_traffic_backwards",
-    "average_speed_forwards", "average_speed_backwards",
-    "relative_speed_forwards", "relative_speed_backwards",
-])
+LIVE_FIELDS = ",".join(
+    [
+        "traffic_detector_id",
+        "site_name",
+        "road_name",
+        "measurement_time",
+        "total_flow_forwards",
+        "total_flow_backwards",
+        "heavy_traffic_forwards",
+        "heavy_traffic_backwards",
+        "average_speed_forwards",
+        "average_speed_backwards",
+        "relative_speed_forwards",
+        "relative_speed_backwards",
+    ]
+)
 
 wgs84_to_3301 = Transformer.from_crs("EPSG:4326", "EPSG:3301", always_xy=True)
 _3301_to_wgs84 = Transformer.from_crs("EPSG:3301", "EPSG:4326", always_xy=True)
+
+CSV_COLUMN_MAP = {
+    "1": "motorcycle_count",
+    "2": "car_light_van_count",
+    "3": "car_light_van_trailer_count",
+    "4": "heavy_van_count",
+    "5": "light_goods_count",
+    "6": "rigid_count",
+    "7": "rigid_trailer_count",
+    "8": "articulated_hgv_count",
+    "9": "minibus_count",
+    "10": "bus_coach_count",
+    "<40Kph": "speed_lt_40_count",
+    "40-<50": "speed_40_50_count",
+    "50-<60": "speed_50_60_count",
+    "60-<70": "speed_60_70_count",
+    "70-<80": "speed_70_80_count",
+    "80-<90": "speed_80_90_count",
+    "90-<100": "speed_90_100_count",
+    "100-<110": "speed_100_110_count",
+    "110-<120": "speed_110_120_count",
+    "120-<130": "speed_120_130_count",
+    "=>130": "speed_gte_130_count",
+}
+
+COUNT_COLUMNS = list(CSV_COLUMN_MAP.values())
+
+TRAFFIC_COUNTS_COLUMNS = [
+    "run_id",
+    "id",
+    "kanal",
+    "aeg",
+    "site_name",
+    "road_name",
+    "area",
+    "lat",
+    "lon",
+    "x_3301",
+    "y_3301",
+    *COUNT_COLUMNS,
+    "source_file",
+]
+
+TRAFFIC_LIVE_COLUMNS = [
+    "run_id",
+    "traffic_detector_id",
+    "measurement_time",
+    "site_name",
+    "road_name",
+    "area",
+    "lat",
+    "lon",
+    "x_3301",
+    "y_3301",
+    "total_flow_forwards",
+    "total_flow_backwards",
+    "heavy_traffic_forwards",
+    "heavy_traffic_backwards",
+    "average_speed_forwards",
+    "average_speed_backwards",
+    "relative_speed_forwards",
+    "relative_speed_backwards",
+]
+
+
+def _none_if_nan(value: Any) -> Any:
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except TypeError:
+        pass
+    if isinstance(value, pd.Timestamp):
+        if pd.isna(value):
+            return None
+        return value.to_pydatetime()
+    return value
+
+
+def _to_int(value: Any) -> int | None:
+    value = _none_if_nan(value)
+    if value is None or value == "":
+        return None
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_float(value: Any) -> float | None:
+    value = _none_if_nan(value)
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _arcgis_time_to_datetime(value: Any) -> datetime | None:
+    value = _none_if_nan(value)
+    if value is None or value == "":
+        return None
+
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+    try:
+        number = float(value)
+        # ArcGIS date fields are usually Unix epoch milliseconds.
+        if number > 10_000_000_000:
+            return datetime.fromtimestamp(number / 1000, tz=timezone.utc)
+        return datetime.fromtimestamp(number, tz=timezone.utc)
+    except (TypeError, ValueError, OSError):
+        parsed = pd.to_datetime(value, errors="coerce", utc=True)
+        if pd.isna(parsed):
+            return None
+        return parsed.to_pydatetime()
 
 
 def _query_arcgis(params: dict[str, Any]) -> dict[str, Any]:
     url = f"{ARCGIS_BASE}/query"
     base = {"f": "json", "outSR": "3301", "returnGeometry": "true"}
     base.update(params)
+
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.get(url, params=base, headers={"Accept": "application/json"}, timeout=TIMEOUT)
+            resp = requests.get(url, params=base, headers=HEADERS, timeout=TIMEOUT)
             if resp.status_code >= 500:
                 raise requests.HTTPError(response=resp)
             resp.raise_for_status()
-            return resp.json()
-        except (requests.HTTPError, requests.ConnectionError, requests.Timeout) as exc:
+            data = resp.json()
+            if "error" in data:
+                raise RuntimeError(f"ArcGIS API error: {data['error']}")
+            return data
+        except (requests.HTTPError, requests.ConnectionError, requests.Timeout, RuntimeError) as exc:
             if attempt == MAX_RETRIES:
                 raise
             log.warning("Attempt %d/%d failed: %s — retrying in %ds", attempt, MAX_RETRIES, exc, BACKOFF)
             time.sleep(BACKOFF)
+
     return {}
 
 
-def _run_id(prefix: str) -> str:
-    return f"{prefix}_{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%SZ')}"
+def _find_column(df: pd.DataFrame, candidates: list[str]) -> str | None:
+    normalized = {str(col).strip().lower(): col for col in df.columns}
+    for candidate in candidates:
+        found = normalized.get(candidate.strip().lower())
+        if found is not None:
+            return found
+    return None
+
+def _read_csv_flexible(path: Path, **kwargs) -> pd.DataFrame:
+    """
+    Loeb CSV faili erinevate kodeeringute ja eraldajatega.
+    Valib variandi, kus tekib kõige rohkem veerge.
+    """
+    encodings = ["utf-8-sig", "utf-8", "cp1252", "latin1", "cp1257"]
+    separators = [",", ";", "\t"]
+
+    best_df: pd.DataFrame | None = None
+    best_score = -1
+    last_error: Exception | None = None
+
+    for encoding in encodings:
+        for sep in separators:
+            try:
+                df = pd.read_csv(
+                    path,
+                    encoding=encoding,
+                    sep=sep,
+                    engine="python",
+                    quotechar='"',
+                    doublequote=True,
+                    on_bad_lines="warn",
+                    **kwargs,
+                )
+
+                # Vali variant, kus päis parsiti kõige paremini.
+                score = len(df.columns)
+
+                if score > best_score:
+                    best_df = df
+                    best_score = score
+
+                # Kui leidsime ID, Lat ja Lon veerud, on see kindlasti õige.
+                normalized_cols = {str(c).strip().lower() for c in df.columns}
+                if {"id", "lat", "lon"}.issubset(normalized_cols):
+                    return df
+
+            except Exception as exc:
+                last_error = exc
+
+    if best_df is not None and best_score > 1:
+        return best_df
+
+    if last_error is not None:
+        raise last_error
+
+    raise ValueError(f"Could not read CSV file: {path}")
+
+def _load_station_lookup(stations_file: Path | None) -> dict[str, dict[str, Any]]:
+    """Loads traffic detector metadata, if a station file is provided.
+
+    Expected common columns: ID/id, Lat/lat, Lon/lon, Nimetus/site_name, Tee nimi/road_name.
+    The function is intentionally permissive because the portal files may be CSV or Excel.
+    """
+    if stations_file is None:
+        return {}
+    if not stations_file.exists():
+        raise FileNotFoundError(f"Traffic station file not found: {stations_file}")
+
+    df = _read_csv_flexible(stations_file, dtype=str)
+
+    df.columns = [str(col).strip() for col in df.columns]
+
+    id_col = _find_column(df, ["ID", "id", "loendusseadme id", "loenduri id", "traffic_detector_id"])
+    lat_col = _find_column(df, ["Lat", "lat", "latitude", "laius", "laiuskraad", "y_wgs84"])
+    lon_col = _find_column(df, ["Lon", "lon", "longitude", "pikkus", "pikkuskraad", "x_wgs84"])
+    x_col = _find_column(df, ["x_3301", "X_3301", "x", "X", "l_est_x", "L-EST X"])
+    y_col = _find_column(df, ["y_3301", "Y_3301", "y", "Y", "l_est_y", "L-EST Y"])
+    name_col = _find_column(df, ["Nimetus", "nimetus", "site_name", "name", "nimi", "jaam", "jaama_nimi"])
+    road_col = _find_column(df, ["Tee nimi", "tee_nimi", "road_name", "tee", "road", "maantee", "tänav"])
+
+    if id_col is None:
+        raise ValueError(f"Could not find detector ID column in {stations_file}. Columns: {list(df.columns)}")
+
+    if lat_col is not None:
+        df[lat_col] = pd.to_numeric(df[lat_col].str.replace(",", ".", regex=False), errors="coerce")
+    if lon_col is not None:
+        df[lon_col] = pd.to_numeric(df[lon_col].str.replace(",", ".", regex=False), errors="coerce")
+    if x_col is not None:
+        df[x_col] = pd.to_numeric(df[x_col].str.replace(",", ".", regex=False), errors="coerce")
+    if y_col is not None:
+        df[y_col] = pd.to_numeric(df[y_col].str.replace(",", ".", regex=False), errors="coerce")
+
+    lookup: dict[str, dict[str, Any]] = {}
+
+    for _, row in df.iterrows():
+        detector_id = _none_if_nan(row.get(id_col))
+        if detector_id is None:
+            continue
+        detector_id = str(detector_id).strip()
+
+        lat = _to_float(row.get(lat_col)) if lat_col is not None else None
+        lon = _to_float(row.get(lon_col)) if lon_col is not None else None
+        x_3301 = _to_float(row.get(x_col)) if x_col is not None else None
+        y_3301 = _to_float(row.get(y_col)) if y_col is not None else None
+        area = None
+
+        # Prefer explicit lat/lon when present. If only EPSG:3301 coordinates are present, convert them.
+        if lat is not None and lon is not None and (x_3301 is None or y_3301 is None):
+            x_3301, y_3301 = wgs84_to_3301.transform(lon, lat)
+        elif (lat is None or lon is None) and x_3301 is not None and y_3301 is not None:
+            lon, lat = _3301_to_wgs84.transform(x_3301, y_3301)
+
+        if x_3301 is not None and y_3301 is not None:
+            for name, bb in STUDY_AREAS.items():
+                if bb["x_min"] <= x_3301 <= bb["x_max"] and bb["y_min"] <= y_3301 <= bb["y_max"]:
+                    area = name
+                    break
+
+        lookup[detector_id] = {
+            "site_name": _none_if_nan(row.get(name_col)) if name_col is not None else None,
+            "road_name": _none_if_nan(row.get(road_col)) if road_col is not None else None,
+            "area": area,
+            "lat": lat,
+            "lon": lon,
+            "x_3301": x_3301,
+            "y_3301": y_3301,
+        }
+
+    log.info("Loaded %d traffic detector metadata rows from %s", len(lookup), stations_file)
+    return lookup
 
 
-def _none_if_nan(value: Any) -> Any:
-    if pd.isna(value):
-        return None
-    if isinstance(value, pd.Timestamp):
-        return value.isoformat()
-    return value
+def _resolve_csv_paths(csv_paths: str | Path | Iterable[str | Path]) -> list[Path]:
+    if isinstance(csv_paths, (str, Path)):
+        raw = str(csv_paths).strip()
+        if not raw:
+            return []
+
+        # Accept comma/semicolon-separated paths from Airflow params.
+        parts = [part.strip() for part in raw.replace(";", ",").split(",") if part.strip()]
+    else:
+        parts = [str(path).strip() for path in csv_paths if str(path).strip()]
+
+    resolved: list[Path] = []
+    for part in parts:
+        path = Path(part)
+        if path.is_dir():
+            resolved.extend(sorted(path.glob("*.csv")))
+        else:
+            resolved.append(path)
+
+    return resolved
 
 
-def _load_stations_from_excel(xlsx_path: Path) -> list[dict[str, Any]]:
-    df = pd.read_excel(xlsx_path)
-    df = df.dropna(subset=["ID", "Lat", "Lon"]).copy()
-    df["ID"] = df["ID"].astype(str).str.strip()
-    df["Lat"] = pd.to_numeric(df["Lat"], errors="coerce")
-    df["Lon"] = pd.to_numeric(df["Lon"], errors="coerce")
-    df = df.dropna(subset=["Lat", "Lon"])
+def _prepare_counts_chunk(
+    df: pd.DataFrame,
+    run_id: str,
+    source_file: str,
+    station_lookup: dict[str, dict[str, Any]],
+) -> list[tuple]:
+    required = {"id", "kanal", "aeg"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"Traffic CSV is missing required columns: {sorted(missing)}. Available columns: {list(df.columns)}")
 
-    xs, ys = wgs84_to_3301.transform(df["Lon"].to_numpy(), df["Lat"].to_numpy())
-    df["x_3301"] = xs
-    df["y_3301"] = ys
+    df = df.copy()
+    df["id"] = df["id"].astype(str).str.strip()
+    df["kanal"] = pd.to_numeric(df["kanal"], errors="coerce").astype("Int64")
+    df["aeg"] = pd.to_datetime(df["aeg"], format="%Y-%m-%d %H:%M:%S", errors="coerce")
 
-    def area(row: pd.Series) -> str | None:
-        for name, bb in STUDY_AREAS.items():
-            if bb["x_min"] <= row["x_3301"] <= bb["x_max"] and bb["y_min"] <= row["y_3301"] <= bb["y_max"]:
-                return name
-        return None
+    for csv_col, out_col in CSV_COLUMN_MAP.items():
+        if csv_col in df.columns:
+            df[out_col] = pd.to_numeric(df[csv_col], errors="coerce").astype("Int64")
+        else:
+            df[out_col] = pd.NA
 
-    df["area"] = df.apply(area, axis=1)
-    df = df[df["area"].notna()].copy()
-    road_col = "Tee nimi" if "Tee nimi" in df.columns else None
-    rows = []
-    for _, r in df.iterrows():
-        rows.append({
-            "traffic_detector_id": str(r["ID"]),
-            "site_name": _none_if_nan(r.get("Nimetus")),
-            "road_name": _none_if_nan(r.get(road_col)) if road_col else None,
-            "area": r["area"],
-            "lat": float(r["Lat"]),
-            "lon": float(r["Lon"]),
-            "x_3301": float(r["x_3301"]),
-            "y_3301": float(r["y_3301"]),
-            "payload": {k: _none_if_nan(v) for k, v in r.to_dict().items()},
-        })
+    df = df.dropna(subset=["id", "kanal", "aeg"])
+
+    rows: list[tuple] = []
+    for record in df.to_dict(orient="records"):
+        detector_id = str(record.get("id")).strip()
+        station = station_lookup.get(detector_id, {})
+
+        if station.get("area") not in {"tallinn", "tartu", "narva"}:
+            continue
+
+        row = {
+            "run_id": run_id,
+            "id": detector_id,
+            "kanal": _to_int(record.get("kanal")),
+            "aeg": _none_if_nan(record.get("aeg")),
+            "site_name": station.get("site_name"),
+            "road_name": station.get("road_name"),
+            "area": station.get("area"),
+            "lat": station.get("lat"),
+            "lon": station.get("lon"),
+            "x_3301": station.get("x_3301"),
+            "y_3301": station.get("y_3301"),
+            **{col: _to_int(record.get(col)) for col in COUNT_COLUMNS},
+            "source_file": source_file,
+        }
+        rows.append(tuple(row[col] for col in TRAFFIC_COUNTS_COLUMNS))
+
     return rows
 
 
-def _upsert_registry(rows: list[dict[str, Any]], run_id: str) -> int:
+def _upsert_traffic_counts_rows(hook, rows: list[tuple], schema: str = "staging") -> int:
     if not rows:
         return 0
-    prepared = []
-    for r in rows:
-        prepared.append({
-            "traffic_detector_id": str(r.get("traffic_detector_id")),
-            "site_name": r.get("site_name"),
-            "road_name": r.get("road_name"),
-            "area": r.get("area"),
-            "lat": r.get("lat"),
-            "lon": r.get("lon"),
-            "x_3301": r.get("x_3301"),
-            "y_3301": r.get("y_3301"),
-            "payload": r.get("payload", r),
-            "run_id": run_id,
-        })
-    with get_conn() as conn:
-        return upsert_rows(
-            conn,
-            "staging.traffic_detector_registry_raw",
-            prepared,
-            ["traffic_detector_id", "site_name", "road_name", "area", "lat", "lon", "x_3301", "y_3301", "payload", "run_id"],
-            ["traffic_detector_id"],
-        )
+
+    columns_sql = ", ".join(TRAFFIC_COUNTS_COLUMNS) + ", loaded_at"
+    placeholders = ", ".join(["%s"] * len(TRAFFIC_COUNTS_COLUMNS))
+
+    update_columns = [col for col in TRAFFIC_COUNTS_COLUMNS if col not in {"id", "kanal", "aeg"}]
+    update_sql = ",\n            ".join([f"{col} = EXCLUDED.{col}" for col in update_columns])
+
+    sql = f"""
+        INSERT INTO {schema}.traffic_counts_raw
+            ({columns_sql})
+        VALUES ({placeholders}, NOW())
+        ON CONFLICT (id, kanal, aeg) DO UPDATE SET
+            {update_sql},
+            loaded_at = NOW()
+    """
+
+    with closing(hook.get_conn()) as conn:
+        with conn:
+            with conn.cursor() as cur:
+                if execute_values is not None:
+                    values_sql = sql.replace(f"VALUES ({placeholders}, NOW())", "VALUES %s")
+                    template = "(" + ", ".join(["%s"] * len(TRAFFIC_COUNTS_COLUMNS)) + ", NOW())"
+                    execute_values(cur, values_sql, rows, template=template, page_size=5000)
+                else:
+                    cur.executemany(sql, rows)
+
+    return len(rows)
 
 
-def ingest_live() -> int:
-    run_id = _run_id("traffic_live")
-    all_rows: list[dict[str, Any]] = []
-    registry_rows: list[dict[str, Any]] = []
+def load_traffic_counts_backfill(
+    hook,
+    run_id: str,
+    csv_paths: str | Path | Iterable[str | Path],
+    stations_file: str | Path | None = None,
+    schema: str = "staging",
+    chunksize: int = CSV_CHUNK_SIZE,
+) -> int:
+    """Loads historical traffic count CSV files into staging.traffic_counts_raw.
+
+    The CSV source has the original columns id, kanal, aeg, vehicle classes 1-10,
+    and speed buckets. This function keeps id/kanal/aeg close to the source and
+    maps numeric/symbolic count columns to SQL-safe names.
+    """
+    paths = _resolve_csv_paths(csv_paths)
+    if not paths:
+        log.info("No traffic CSV backfill paths provided; skipping traffic counts backfill")
+        return 0
+
+    for path in paths:
+        if not path.exists():
+            raise FileNotFoundError(f"Traffic CSV file not found: {path}")
+
+    station_lookup = _load_station_lookup(Path(stations_file) if stations_file else None)
+
+    total_upserted = 0
+    for path in paths:
+        log.info("Loading traffic counts CSV: %s", path)
+        for chunk in pd.read_csv(path, dtype=str, chunksize=chunksize):
+            rows = _prepare_counts_chunk(
+                df=chunk,
+                run_id=run_id,
+                source_file=path.name,
+                station_lookup=station_lookup,
+            )
+            upserted = _upsert_traffic_counts_rows(hook=hook, rows=rows, schema=schema)
+            total_upserted += upserted
+            log.info("Upserted %d traffic count rows from %s; total=%d", upserted, path.name, total_upserted)
+
+    log.info("Traffic counts backfill upserted %d rows in total", total_upserted)
+    return total_upserted
+
+
+def _prepare_live_row(raw: dict[str, Any], area_name: str) -> tuple | None:
+    detector_id = _none_if_nan(raw.get("traffic_detector_id"))
+    measurement_time = _arcgis_time_to_datetime(raw.get("measurement_time"))
+
+    if detector_id is None or measurement_time is None:
+        return None
+
+    x_3301 = _to_float(raw.get("x_3301"))
+    y_3301 = _to_float(raw.get("y_3301"))
+    lat = None
+    lon = None
+
+    if x_3301 is not None and y_3301 is not None:
+        lon, lat = _3301_to_wgs84.transform(x_3301, y_3301)
+
+    row = {
+        "traffic_detector_id": str(detector_id).strip(),
+        "measurement_time": measurement_time,
+        "site_name": _none_if_nan(raw.get("site_name")),
+        "road_name": _none_if_nan(raw.get("road_name")),
+        "area": area_name,
+        "lat": lat,
+        "lon": lon,
+        "x_3301": x_3301,
+        "y_3301": y_3301,
+        "total_flow_forwards": _to_int(raw.get("total_flow_forwards")),
+        "total_flow_backwards": _to_int(raw.get("total_flow_backwards")),
+        "heavy_traffic_forwards": _to_int(raw.get("heavy_traffic_forwards")),
+        "heavy_traffic_backwards": _to_int(raw.get("heavy_traffic_backwards")),
+        "average_speed_forwards": _to_float(raw.get("average_speed_forwards")),
+        "average_speed_backwards": _to_float(raw.get("average_speed_backwards")),
+        "relative_speed_forwards": _to_float(raw.get("relative_speed_forwards")),
+        "relative_speed_backwards": _to_float(raw.get("relative_speed_backwards")),
+    }
+
+    return tuple(row[col] for col in TRAFFIC_LIVE_COLUMNS if col != "run_id")
+
+
+def _upsert_traffic_live_rows(hook, run_id: str, rows_without_run_id: list[tuple], schema: str = "staging") -> int:
+    if not rows_without_run_id:
+        return 0
+
+    rows = [(run_id, *row) for row in rows_without_run_id]
+    columns_sql = ", ".join(TRAFFIC_LIVE_COLUMNS) + ", loaded_at"
+    placeholders = ", ".join(["%s"] * len(TRAFFIC_LIVE_COLUMNS))
+
+    update_columns = [col for col in TRAFFIC_LIVE_COLUMNS if col not in {"traffic_detector_id", "measurement_time"}]
+    update_sql = ",\n            ".join([f"{col} = EXCLUDED.{col}" for col in update_columns])
+
+    sql = f"""
+        INSERT INTO {schema}.traffic_live_raw
+            ({columns_sql})
+        VALUES ({placeholders}, NOW())
+        ON CONFLICT (traffic_detector_id, measurement_time) DO UPDATE SET
+            {update_sql},
+            loaded_at = NOW()
+    """
+
+    with closing(hook.get_conn()) as conn:
+        with conn:
+            with conn.cursor() as cur:
+                if execute_values is not None:
+                    values_sql = sql.replace(f"VALUES ({placeholders}, NOW())", "VALUES %s")
+                    template = "(" + ", ".join(["%s"] * len(TRAFFIC_LIVE_COLUMNS)) + ", NOW())"
+                    execute_values(cur, values_sql, rows, template=template, page_size=5000)
+                else:
+                    cur.executemany(sql, rows)
+
+    return len(rows)
+
+
+def load_traffic_live_recent(
+    hook,
+    run_id: str,
+    schema: str = "staging",
+) -> int:
+    """Loads the latest Tark Tee traffic detector snapshot into staging.traffic_live_raw.
+
+    The ArcGIS layer is treated as a current/live source. Running this task hourly
+    appends or updates by traffic_detector_id + measurement_time.
+    """
+    all_rows: list[tuple] = []
 
     for area_name, bbox in STUDY_AREAS.items():
         geometry = f"{bbox['x_min']},{bbox['y_min']},{bbox['x_max']},{bbox['y_max']}"
         offset = 0
-        while True:
-            result = _query_arcgis({
-                "where": "1=1",
-                "geometry": geometry,
-                "geometryType": "esriGeometryEnvelope",
-                "inSR": "3301",
-                "spatialRel": "esriSpatialRelIntersects",
-                "outFields": LIVE_FIELDS,
-                "resultOffset": offset,
-                "resultRecordCount": MAX_RECORDS,
-            })
-            features = result.get("features", [])
-            for feat in features:
-                attr = feat.get("attributes", {}) or {}
-                geom = feat.get("geometry") or {}
-                raw = dict(attr)
-                raw["x_3301"] = geom.get("x")
-                raw["y_3301"] = geom.get("y")
-                raw["area"] = area_name
-                row = {
-                    "traffic_detector_id": str(raw.get("traffic_detector_id")),
-                    "measurement_time": raw.get("measurement_time"),
-                    "area": area_name,
-                    "site_name": raw.get("site_name"),
-                    "road_name": raw.get("road_name"),
-                    "x_3301": raw.get("x_3301"),
-                    "y_3301": raw.get("y_3301"),
-                    "payload": raw,
-                    "run_id": run_id,
-                }
-                all_rows.append(row)
 
-                if raw.get("traffic_detector_id") is not None:
-                    reg = {
-                        "traffic_detector_id": str(raw.get("traffic_detector_id")),
-                        "site_name": raw.get("site_name"),
-                        "road_name": raw.get("road_name"),
-                        "area": area_name,
-                        "x_3301": raw.get("x_3301"),
-                        "y_3301": raw.get("y_3301"),
-                        "payload": raw,
-                    }
-                    if raw.get("x_3301") is not None and raw.get("y_3301") is not None:
-                        lon, lat = _3301_to_wgs84.transform(raw["x_3301"], raw["y_3301"])
-                        reg["lon"] = lon
-                        reg["lat"] = lat
-                    registry_rows.append(reg)
+        while True:
+            result = _query_arcgis(
+                {
+                    "where": "1=1",
+                    "geometry": geometry,
+                    "geometryType": "esriGeometryEnvelope",
+                    "inSR": "3301",
+                    "spatialRel": "esriSpatialRelIntersects",
+                    "outFields": LIVE_FIELDS,
+                    "resultOffset": offset,
+                    "resultRecordCount": MAX_RECORDS,
+                }
+            )
+
+            features = result.get("features", [])
+            for feature in features:
+                attributes = feature.get("attributes", {}) or {}
+                geometry_data = feature.get("geometry") or {}
+                raw = dict(attributes)
+                raw["x_3301"] = geometry_data.get("x")
+                raw["y_3301"] = geometry_data.get("y")
+                raw["area"] = area_name
+
+                row = _prepare_live_row(raw, area_name)
+                if row is not None:
+                    all_rows.append(row)
+
             if len(features) < MAX_RECORDS:
                 break
             offset += MAX_RECORDS
 
-    with get_conn() as conn:
-        insert_pipeline_run(conn, run_id, "traffic_live", "running")
-        count = upsert_rows(
-            conn,
-            "staging.traffic_live_raw",
-            all_rows,
-            ["traffic_detector_id", "measurement_time", "area", "site_name", "road_name", "x_3301", "y_3301", "payload", "run_id"],
-            ["traffic_detector_id", "measurement_time", "area"],
-        )
-        insert_pipeline_run(conn, run_id, "traffic_live", "success", f"Loaded {count} rows")
-    _upsert_registry(registry_rows, run_id)
-    return count
+    upserted = _upsert_traffic_live_rows(hook=hook, run_id=run_id, rows_without_run_id=all_rows, schema=schema)
+    log.info("Traffic live load upserted %d rows", upserted)
+    return upserted
 
 
-def ingest_backfill(csv_path: Path, stations_file: Path | None = None) -> int:
-    run_id = _run_id("traffic_backfill")
-    if stations_file is not None:
-        registry = _load_stations_from_excel(stations_file)
-        _upsert_registry(registry, run_id)
+# Backwards-compatible aliases, if an older DAG imports these names.
+def load_traffic_backfill(*args, **kwargs) -> int:
+    return load_traffic_counts_backfill(*args, **kwargs)
 
-    df = pd.read_csv(csv_path, dtype=str)
-    if "aeg" not in df.columns or "id" not in df.columns or "kanal" not in df.columns:
-        raise ValueError("Traffic backfill CSV must contain id, kanal and aeg columns")
-    parsed_aeg = pd.to_datetime(df["aeg"], format="%Y-%m-%d %H:%M:%S", errors="coerce")
-    df["aeg"] = parsed_aeg.where(parsed_aeg.notna(), pd.to_datetime(df["aeg"], errors="coerce"))
 
-    rows = []
-    for _, r in df.iterrows():
-        raw = {k: _none_if_nan(v) for k, v in r.to_dict().items()}
-        rows.append({
-            "id": raw.get("id"),
-            "kanal": raw.get("kanal"),
-            "aeg": raw.get("aeg"),
-            "payload": raw,
-            "run_id": run_id,
-        })
-
-    with get_conn() as conn:
-        insert_pipeline_run(conn, run_id, "traffic_backfill", "running")
-        count = upsert_rows(
-            conn,
-            "staging.traffic_backfill_raw",
-            rows,
-            ["id", "kanal", "aeg", "payload", "run_id"],
-            ["id", "kanal", "aeg"],
-        )
-        insert_pipeline_run(conn, run_id, "traffic_backfill", "success", f"Loaded {count} rows")
-    return count
+def load_traffic_live(*args, **kwargs) -> int:
+    return load_traffic_live_recent(*args, **kwargs)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Load traffic raw data into PostgreSQL staging tables")
-    parser.add_argument("--mode", choices=["live", "backfill"], required=True)
-    parser.add_argument("--file", type=Path, help="CSV path, required for --mode backfill")
-    parser.add_argument("--stations-file", type=Path, help="Excel file with detector IDs and coordinates")
+    parser = argparse.ArgumentParser(description="Load traffic data into PostgreSQL staging tables")
+    parser.add_argument("--mode", choices=["counts-backfill", "live"], required=True)
+    parser.add_argument("--csv-paths", help="CSV path, directory, or comma-separated paths for counts backfill")
+    parser.add_argument("--stations-file", type=Path, help="Optional detector metadata CSV/XLSX file")
     args = parser.parse_args()
 
-    if args.mode == "live":
-        ingest_live()
-        return
-    if not args.file:
-        parser.error("--file <path> is required for --mode backfill")
-    if not args.file.exists():
-        log.error("File not found: %s", args.file)
-        sys.exit(1)
-    if args.stations_file and not args.stations_file.exists():
-        log.error("Stations file not found: %s", args.stations_file)
-        sys.exit(1)
-    ingest_backfill(args.file, args.stations_file)
+    raise SystemExit(
+        "This module is intended to be called by Airflow with a PostgresHook. "
+        "Use load_traffic_counts_backfill(...) or load_traffic_live_recent(...)."
+    )
 
 
 if __name__ == "__main__":

@@ -53,46 +53,77 @@ CREATE TABLE IF NOT EXISTS staging.weather_raw (
         PRIMARY KEY (jaam_kood, obs_time)
 );
 
+--CSV backfill
+CREATE TABLE IF NOT EXISTS staging.traffic_counts_raw (
+    run_id                         uuid REFERENCES staging.pipeline_runs(run_id),
 
--- Liiklus live: Tark Tee ArcGIS snapshot.
+    id            text NOT NULL,
+    kanal                          integer NOT NULL,
+    aeg               timestamptz NOT NULL,
+
+    site_name                      text,
+    road_name                      text,
+    area                           text,
+    lat                            double precision,
+    lon                            double precision,
+    x_3301                         double precision,
+    y_3301                         double precision,
+
+    motorcycle_count               integer,
+    car_light_van_count            integer,
+    car_light_van_trailer_count    integer,
+    heavy_van_count                integer,
+    light_goods_count              integer,
+    rigid_count                    integer,
+    rigid_trailer_count            integer,
+    articulated_hgv_count          integer,
+    minibus_count                  integer,
+    bus_coach_count                integer,
+
+    speed_lt_40_count              integer,
+    speed_40_50_count              integer,
+    speed_50_60_count              integer,
+    speed_60_70_count              integer,
+    speed_70_80_count              integer,
+    speed_80_90_count              integer,
+    speed_90_100_count             integer,
+    speed_100_110_count            integer,
+    speed_110_120_count            integer,
+    speed_120_130_count            integer,
+    speed_gte_130_count            integer,
+
+    source_file                    text,
+    loaded_at                      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_traffic_counts_raw
+        PRIMARY KEY (id, kanal, aeg)
+);
+
+--Hourly APi
 CREATE TABLE IF NOT EXISTS staging.traffic_live_raw (
-    traffic_detector_id text NOT NULL,
-    measurement_time    bigint NOT NULL,
-    area                text NOT NULL,
-    site_name           text,
-    road_name           text,
-    x_3301              double precision,
-    y_3301              double precision,
-    payload             jsonb NOT NULL,
-    run_id              uuid REFERENCES staging.pipeline_runs(run_id),
-    _loaded_at          timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT pk_traffic_live_raw PRIMARY KEY (traffic_detector_id, measurement_time, area)
+    run_id                         uuid REFERENCES staging.pipeline_runs(run_id),
+
+    traffic_detector_id            text NOT NULL,
+    measurement_time               timestamptz NOT NULL,
+
+    site_name                      text,
+    road_name                      text,
+    area                           text,
+    lat                            double precision,
+    lon                            double precision,
+    x_3301                         double precision,
+    y_3301                         double precision,
+
+    total_flow_forwards            integer,
+    total_flow_backwards           integer,
+    heavy_traffic_forwards         integer,
+    heavy_traffic_backwards        integer,
+    average_speed_forwards         double precision,
+    average_speed_backwards        double precision,
+    relative_speed_forwards        double precision,
+    relative_speed_backwards       double precision,
+    loaded_at                      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT pk_traffic_live_raw
+        PRIMARY KEY (traffic_detector_id, measurement_time)
 );
-
--- Liiklus backfill CSV: algfail deduplikeeris võtmega id × kanal × aeg.
-CREATE TABLE IF NOT EXISTS staging.traffic_backfill_raw (
-    id         text NOT NULL,
-    kanal      text NOT NULL,
-    aeg        timestamptz NOT NULL,
-    payload    jsonb NOT NULL,
-    run_id     uuid REFERENCES staging.pipeline_runs(run_id),
-    _loaded_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT pk_traffic_backfill_raw PRIMARY KEY (id, kanal, aeg)
-);
-
--- Liiklusandurite register, mida live/backfill laadimine uuendab.
-CREATE TABLE IF NOT EXISTS staging.traffic_detector_registry_raw (
-    traffic_detector_id text PRIMARY KEY,
-    site_name           text,
-    road_name           text,
-    area                text,
-    lat                 double precision,
-    lon                 double precision,
-    x_3301              double precision,
-    y_3301              double precision,
-    payload             jsonb NOT NULL,
-    run_id              uuid,
-    _loaded_at          timestamptz NOT NULL DEFAULT now()
-);
-
-

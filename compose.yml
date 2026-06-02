@@ -46,6 +46,7 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS}
   volumes:
     - ./dags:/opt/airflow/dags
+    - ./data:/opt/airflow/data
     - ./ingestion:/opt/airflow/ingestion
     - ./sql:/opt/airflow/sql
     - ./dbt_project:/opt/airflow/dbt_project

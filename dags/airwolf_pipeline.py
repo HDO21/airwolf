@@ -15,7 +15,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 from ingestion.ingest_weather import load_weather_backfill, load_weather_recent
 from ingestion.ingest_air_quality import load_air_quality_backfill, load_air_quality_recent
-# from ingestion.ingest_traffic import load_traffic_live, load_traffic_backfill
+from ingestion.ingest_traffic import load_traffic_counts_backfill, load_traffic_live_recent
 
 log = logging.getLogger(__name__)
 
@@ -244,53 +244,88 @@ def ingest_air_quality_hourly(**context) -> int:
         raise
 
 
-def ingest_traffic_live(**context) -> None:
+def ingest_traffic_counts_backfill(**context) -> int:
+    """
+    Liiklusloenduse CSV backfill.
+
+    Käivitub ainult siis, kui DAG trigger config'is on:
+        {"run_traffic_counts_backfill": true}
+
+    traffic_counts_files võib olla:
+      - üks CSV fail
+      - kaust, kus on traffic_2025.csv / traffic_2026.csv failid
+      - komaga eraldatud failide nimekiri
+
+    traffic_stations_file on LL_jaamad.csv, kust võetakse jaama nimi/asukoht.
+    """
+    params = context["params"]
+    run_backfill = bool(params.get("run_traffic_counts_backfill"))
+
+    if not run_backfill:
+        log.info("run_traffic_counts_backfill=false; skipping traffic counts backfill")
+        return 0
+
+    traffic_counts_files = str(params.get("traffic_counts_files") or "").strip()
+    traffic_stations_file = str(params.get("traffic_stations_file") or "").strip()
+
+    if not traffic_counts_files:
+        raise ValueError(
+            "traffic_counts_files is required when run_traffic_counts_backfill=true. "
+            "Use for example /opt/airflow/data/raw/traffic"
+        )
+
+    if traffic_stations_file:
+        stations_path = Path(traffic_stations_file)
+        if not stations_path.exists():
+            raise FileNotFoundError(f"traffic_stations_file not found: {stations_path}")
+    else:
+        stations_path = None
+        log.warning("traffic_stations_file is empty; station/location columns will be NULL")
+
     hook = _hook()
-    run_id = _start_run(hook=hook, source_name="traffic_live")
+    run_id = _start_run(
+        hook=hook,
+        source_name="traffic_counts_backfill",
+        message=f"Traffic counts CSV backfill from {traffic_counts_files}",
+    )
 
     try:
-        load_traffic_live(
+        rows = load_traffic_counts_backfill(
             hook=hook,
             run_id=run_id,
+            csv_paths=traffic_counts_files,
+            stations_file=stations_path,
             schema=SCHEMA_NAME,
         )
-        _finish_run(hook, run_id, "success")
+        _finish_run(hook, run_id, "success", f"Backfill upserted {rows} traffic count rows")
+        return rows
     except Exception as exc:
         _finish_run(hook, run_id, "failed", str(exc))
         raise
 
 
-def ingest_traffic_backfill(**context) -> None:
-    """Laeb liikluse ajaloolise CSV ainult siis, kui traffic_backfill_file on antud."""
-    params = context["params"]
-    traffic_backfill_file = str(params.get("traffic_backfill_file") or "").strip()
-    traffic_stations_file = str(params.get("traffic_stations_file") or "").strip()
+def ingest_traffic_hourly(**context) -> int:
+    """
+    Regulaarne liiklusandmete live/API laadimine.
 
-    if not traffic_backfill_file:
-        log.info("traffic_backfill_file is empty; skipping traffic backfill")
-        return
-
-    csv_path = Path(traffic_backfill_file)
-    stations_path = Path(traffic_stations_file) if traffic_stations_file else None
-
-    if not csv_path.exists():
-        raise FileNotFoundError(f"traffic_backfill_file not found: {csv_path}")
-
-    if stations_path is not None and not stations_path.exists():
-        raise FileNotFoundError(f"traffic_stations_file not found: {stations_path}")
-
+    Käib iga DAG run'iga. Tark Tee ArcGIS kiht on live/snapshot tüüpi,
+    seega seda kasutatakse edaspidiseks tunnipõhiseks kogumiseks.
+    """
     hook = _hook()
-    run_id = _start_run(hook=hook, source_name="traffic_backfill")
+    run_id = _start_run(
+        hook=hook,
+        source_name="traffic_hourly",
+        message="Traffic hourly live/API load",
+    )
 
     try:
-        load_traffic_backfill(
+        rows = load_traffic_live_recent(
             hook=hook,
             run_id=run_id,
-            csv_path=csv_path,
-            stations_file=stations_path,
             schema=SCHEMA_NAME,
         )
-        _finish_run(hook, run_id, "success")
+        _finish_run(hook, run_id, "success", f"Hourly load upserted {rows} traffic live rows")
+        return rows
     except Exception as exc:
         _finish_run(hook, run_id, "failed", str(exc))
         raise
@@ -299,7 +334,7 @@ def ingest_traffic_backfill(**context) -> None:
 with DAG(
     dag_id="airwolf_pipeline",
     description="Laeb Airwolf projekti andmed staging skeemi ja käivitab dbt transformatsioonid",
-    start_date=datetime(2026, 3, 1),
+    start_date=datetime(2025, 1, 1),
     schedule="@hourly",
     catchup=False,
     params={
@@ -316,9 +351,10 @@ with DAG(
         # Hourly laadimine.
         "weather_lookback_hours": Param(48, type="integer", minimum=1, maximum=168),
         "air_quality_lookback_hours": Param(48, type="integer", minimum=1, maximum=168),
-        # Tulevaste liiklusandmete jaoks.
-        "traffic_backfill_file": Param("", type="string"),
-        "traffic_stations_file": Param("", type="string"),
+        # Liiklusandmete CSV backfill käivitub ainult käsitsi, kui run_traffic_counts_backfill=true.
+        "run_traffic_counts_backfill": Param(False, type="boolean"),
+        "traffic_counts_files": Param("/opt/airflow/data/raw/traffic/counts", type="string"),
+        "traffic_stations_file": Param("/opt/airflow/data/raw/traffic/stations/LL_jaamad.csv", type="string"),
     },
     tags=["airwolf", "ingestion", "dbt"],
 ) as dag:
@@ -349,15 +385,15 @@ with DAG(
         python_callable=ingest_air_quality_hourly,
     )
 
-    # ingest_traffic_live_task = PythonOperator(
-    #     task_id="ingest_traffic_live",
-    #     python_callable=ingest_traffic_live,
-    # )
+    ingest_traffic_counts_backfill_task = PythonOperator(
+        task_id="ingest_traffic_counts_backfill",
+        python_callable=ingest_traffic_counts_backfill,
+    )
 
-    # ingest_traffic_backfill_task = PythonOperator(
-    #     task_id="ingest_traffic_backfill",
-    #     python_callable=ingest_traffic_backfill,
-    # )
+    ingest_traffic_hourly_task = PythonOperator(
+        task_id="ingest_traffic_hourly",
+        python_callable=ingest_traffic_hourly,
+    )
 
     # Kui dbt on seadistatud, võta BashOperator import ülevalt kommentaarist välja
     # ja aktiveeri need taskid.
@@ -383,8 +419,8 @@ with DAG(
         ingest_weather_hourly_task,
         ingest_air_quality_backfill_task,
         ingest_air_quality_hourly_task,
-        # ingest_traffic_live_task,
-        # ingest_traffic_backfill_task,
+        ingest_traffic_counts_backfill_task,
+        ingest_traffic_hourly_task,
     ]
 
     # Kui dbt taskid aktiveerid, kasuta näiteks:

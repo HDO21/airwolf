@@ -357,8 +357,8 @@ def _filter_rows_by_time(
 def load_weather_backfill(
     hook,
     run_id: str,
-    year_start: int = 2026,
-    month_start: int = 3,
+    year_start: int = 2025,
+    month_start: int = 1,
     year_end: int | None = None,
     month_end: int | None = None,
     schema: str = "staging",
