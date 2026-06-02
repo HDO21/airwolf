@@ -5,6 +5,7 @@ __pycache__/
 data/staging/
 data/intermediate/
 data/quality/
+data/raw
 .DS_Store
 *.egg-info/
 dist/
