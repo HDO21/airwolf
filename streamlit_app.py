@@ -676,6 +676,48 @@ def render_area_tab(area_key: str) -> None:
         except Exception as exc:
             st.warning(f"Seose graafiku loomine ebaõnnestus: {exc}")
 
+    # ── PM10: Tartu vs Tallinn vs Narva ─────────────────────────────────────
+    if area_key.lower() == "tartu":
+        try:
+            df = pd.read_parquet(_MART / "mart_aq.parquet")
+            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+            df["month"] = df["obs_time"].dt.to_period("M").dt.to_timestamp()
+
+            stations = {
+                8: "Tartu",
+                5: "Tallinn",
+                4: "Narva"
+            }
+
+            df = df[df["station_id"].isin(stations.keys())].copy()
+            df["city"] = df["station_id"].map(stations)
+
+            monthly = (
+                df.groupby(["city", "month"])["PM10"]
+                .mean()
+                .reset_index()
+            )
+
+            st.subheader("PM10 kuude keskmised — Tartu vs Tallinn vs Narva")
+
+            chart = (
+                alt.Chart(monthly)
+                .mark_line(point=True)
+                .encode(
+                    x=alt.X("month:T", title="Kuu"),
+                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
+                    color=alt.Color("city:N", title="Linn"),
+                    tooltip=["city:N", "month:T", "PM10:Q"]
+                )
+                .properties(height=300)
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+
+        except Exception as exc:
+            st.warning(f"PM10 võrdlusgraafiku loomine ebaõnnestus: {exc}")
+        
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
