@@ -539,7 +539,184 @@ def render_area_tab(area_key: str) -> None:
         st.warning(f"Õhukvaliteedi andmete laadimine ebaõnnestus: {exc}")
 
     _show(make_aq_chart(aq_df))
+    # ── KPI kastid: Tartu vs Tallinn PM10 ─────────────────────────────────────
+    if area_key.lower() == "tartu":
+        try:
+            df = pd.read_parquet(_MART / "mart_aq.parquet")
+            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+            df["month"] = df["obs_time"].dt.to_period("M")
 
+            # Tartu ja Tallinn
+            tartu = df[df["station_id"] == 8].copy()
+            tallinn = df[df["station_id"].isin([5, 7])].copy()
+
+            # Kuude keskmised
+            tartu_pm10 = tartu.groupby("month")["PM10"].mean().sort_values(ascending=False)
+            tallinn_pm10 = tallinn.groupby("month")["PM10"].mean().sort_values(ascending=False)
+
+            # KPI väärtused
+            tartu_month = str(tartu_pm10.index[0])
+            tartu_value = tartu_pm10.iloc[0]
+
+            tallinn_month = str(tallinn_pm10.index[0])
+            tallinn_value = tallinn_pm10.iloc[0]
+
+            diff = tartu_value - tallinn_value
+
+            # Kuvame KPI kastid kõrvuti
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric(
+                    label="Tartu kõige saastatum kuu (PM10)",
+                    value=tartu_month,
+                    delta=f"{tartu_value:.2f} µg/m³"
+                )
+
+            with col2:
+                st.metric(
+                    label="Tallinna kõige saastatum kuu (PM10)",
+                    value=tallinn_month,
+                    delta=f"{tallinn_value:.2f} µg/m³"
+                )
+
+            with col3:
+                st.metric(
+                    label="Tartu – Tallinn erinevus",
+                    value=f"{diff:+.2f} µg/m³",
+                    delta="Tartu vs Tallinn"
+                )
+
+        except Exception as exc:
+            st.warning(f"KPI kastide loomine ebaõnnestus: {exc}")
+
+    # ── Võrdlus: Tartu vs Tallinn PM10 kuude keskmised ─────────────────────────
+    if area_key.lower() == "tartu":
+        try:
+            df = pd.read_parquet(_MART / "mart_aq.parquet")
+            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+            df["month"] = df["obs_time"].dt.to_period("M")
+
+            # Filtreerime Tartu ja Tallinna jaamad
+            tartu = df[df["station_id"] == 8].copy()
+            tallinn = df[df["station_id"].isin([5, 7])].copy()  # Liivalaia + Õismäe
+
+            # Arvutame kuude keskmised
+            tartu_pm10 = (
+                tartu.groupby("month")["PM10"]
+                .mean()
+                .reset_index()
+                .assign(area="Tartu")
+            )
+
+            tallinn_pm10 = (
+                tallinn.groupby("month")["PM10"]
+                .mean()
+                .reset_index()
+                .assign(area="Tallinn")
+            )
+
+            # Paneme kokku üheks tabeliks
+            compare_df = pd.concat([tartu_pm10, tallinn_pm10], ignore_index=True)
+
+            # Teeme Altairi graafiku
+            chart = (
+                alt.Chart(compare_df)
+                .mark_line(point=True)
+                .encode(
+                    x=alt.X("month:T", title="Kuu"),
+                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
+                    color=alt.Color("area:N", title="Piirkond"),
+                    tooltip=["month:T", "area:N", "PM10:Q"]
+                )
+                .properties(
+                    title="PM10 kuude keskmised: Tartu vs Tallinn",
+                    height=250
+                )
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+
+        except Exception as exc:
+            st.warning(f"Võrdlusgraafiku loomine ebaõnnestus: {exc}")
+    # ── Seos: liiklussagedus vs PM10 ─────────────────────────────────────────
+    if area_key.lower() == "tartu":
+        try:
+            traffic = pd.read_parquet(_MART / "mart_traffic.parquet")
+            traffic = traffic[traffic["area"] == "tartu"].copy()
+            traffic["obs_time"] = pd.to_datetime(traffic["obs_time"], errors="coerce")
+
+            aq = pd.read_parquet(_MART / "mart_aq.parquet")
+            aq = aq[aq["station_id"] == 8].copy()
+            aq["obs_time"] = pd.to_datetime(aq["obs_time"], errors="coerce")
+
+            merged = pd.merge(
+                traffic,
+                aq[["obs_time", "PM10"]],
+                on="obs_time",
+                how="inner"
+            )
+
+            chart = (
+                alt.Chart(merged)
+                .mark_circle(size=40, opacity=0.6)
+                .encode(
+                    x=alt.X("total_flow:Q", title="Liiklussagedus (sõidukit/h)"),
+                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
+                    tooltip=["obs_time:T", "total_flow:Q", "PM10:Q"]
+                )
+                .properties(
+                    title="Seos: liiklussagedus vs PM10 (Tartu)",
+                    height=300
+                )
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+
+        except Exception as exc:
+            st.warning(f"Seose graafiku loomine ebaõnnestus: {exc}")
+
+    # ── PM10: Tartu vs Tallinn vs Narva ─────────────────────────────────────
+    if area_key.lower() == "tartu":
+        try:
+            df = pd.read_parquet(_MART / "mart_aq.parquet")
+            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+            df["month"] = df["obs_time"].dt.to_period("M").dt.to_timestamp()
+
+            stations = {
+                8: "Tartu",
+                5: "Tallinn",
+                4: "Narva"
+            }
+
+            df = df[df["station_id"].isin(stations.keys())].copy()
+            df["city"] = df["station_id"].map(stations)
+
+            monthly = (
+                df.groupby(["city", "month"])["PM10"]
+                .mean()
+                .reset_index()
+            )
+
+            st.subheader("PM10 kuude keskmised — Tartu vs Tallinn vs Narva")
+
+            chart = (
+                alt.Chart(monthly)
+                .mark_line(point=True)
+                .encode(
+                    x=alt.X("month:T", title="Kuu"),
+                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
+                    color=alt.Color("city:N", title="Linn"),
+                    tooltip=["city:N", "month:T", "PM10:Q"]
+                )
+                .properties(height=300)
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+
+        except Exception as exc:
+            st.warning(f"PM10 võrdlusgraafiku loomine ebaõnnestus: {exc}")
+        
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
