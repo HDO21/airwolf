@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: staging
+    tables:
+      - name: weather_raw
+        description: Raw hourly weather observations loaded by Airflow.
+      - name: air_quality_raw
+        description: Raw air-quality measurements loaded by Airflow.
+      - name: traffic_counts_raw
+        description: Historical traffic count rows loaded from CSV/API backfill.
+      - name: traffic_live_raw
+        description: Recent/live traffic measurements loaded hourly.

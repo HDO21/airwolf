@@ -15,7 +15,9 @@
 
 x-airflow-common:
   &airflow-common
-  image: apache/airflow:3.1.8
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
   env_file:
     - .env
   environment:
