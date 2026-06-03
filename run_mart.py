@@ -87,19 +87,26 @@ def build_dim_stations() -> None:
     """Combined station/detector metadata for the map layer."""
     frames: list[pd.DataFrame] = []
 
-    # Weather stations
+    # Weather stations — normalise regardless of whether stored in old API format
+    # (laiuskraad/pikkuskraad) or new format (lat/lon)
     ws_path = _STAGING / "weather_stations.parquet"
     if ws_path.exists():
-        ws = pd.read_parquet(ws_path).drop_duplicates(subset=["jaam_kood"])
-        ws_out = ws.rename(columns={"jaam_kood": "station_id", "jaam_nimi": "station_name",
-                                    "laiuskraad": "lat", "pikkuskraad": "lon"})
-        ws_out["source"] = "weather"
-        ws_out["area"]   = ws_out["station_id"].map({
+        ws = pd.read_parquet(ws_path).drop_duplicates(subset=["jaam_kood"]).copy()
+        # Prefer new-format lat/lon; fall back to old API column names
+        if "lat" not in ws.columns and "laiuskraad" in ws.columns:
+            ws["lat"] = ws["laiuskraad"]
+        if "lon" not in ws.columns and "pikkuskraad" in ws.columns:
+            ws["lon"] = ws["pikkuskraad"]
+        if "station_name" not in ws.columns and "jaam_nimi" in ws.columns:
+            ws["station_name"] = ws["jaam_nimi"]
+        ws = ws.rename(columns={"jaam_kood": "station_id"})
+        ws["source"] = "weather"
+        ws["area"]   = ws["station_id"].map({
             "AJHARK01": "tallinn", "AJTART01": "tartu", "AJNARV01": "narva"
         })
         keep = [c for c in ["station_id","station_name","area","lat","lon","source"]
-                if c in ws_out.columns]
-        frames.append(ws_out[keep])
+                if c in ws.columns]
+        frames.append(ws[keep])
 
     # AQ stations (hardcoded from ohuseire metadata)
     aq_meta = {
@@ -137,12 +144,73 @@ def build_dim_stations() -> None:
     log.info("dim_stations: %d rows → %s", len(dim), path)
 
 
+def build_mart_joined() -> None:
+    """Hourly join of weather + AQ + traffic per area for scatter/analytics charts.
+
+    Aggregates traffic to area-level mean before joining so the result has
+    one row per (area, obs_time).  Traffic and weather are joined on the hour;
+    AQ is already area-averaged in mart_aq.
+    """
+    weather_path = _MART / "mart_weather.parquet"
+    aq_path      = _MART / "mart_aq.parquet"
+    traffic_path = _MART / "mart_traffic.parquet"
+
+    if not aq_path.exists():
+        log.warning("mart_aq.parquet not found — skipping mart_joined")
+        return
+
+    aq = pd.read_parquet(aq_path)
+    aq["obs_time"] = pd.to_datetime(aq["obs_time"])
+
+    # Area-level AQ average (multiple stations per area already averaged in mart_aq,
+    # but station_id column may vary; regroup to be safe)
+    aq_area = (
+        aq.groupby(["area", "obs_time"], as_index=False)[
+            ["SO2", "O3", "NO2", "PM10", "PM25"]
+        ].mean()
+    )
+
+    # Weather — one station per area, already 1:1
+    if weather_path.exists():
+        weather = pd.read_parquet(weather_path)
+        weather["obs_time"] = pd.to_datetime(weather["obs_time"])
+        weather_area = weather[
+            ["area", "obs_time", "temperature_c", "wind_speed_ms", "precip_mm"]
+        ].copy()
+    else:
+        weather_area = pd.DataFrame(
+            columns=["area", "obs_time", "temperature_c", "wind_speed_ms", "precip_mm"]
+        )
+
+    # Traffic — aggregate to area-level hourly mean
+    if traffic_path.exists():
+        traffic = pd.read_parquet(traffic_path)
+        traffic["obs_time"] = pd.to_datetime(traffic["obs_time"])
+        traffic["total_flow"] = pd.to_numeric(traffic["total_flow"], errors="coerce")
+        traffic_area = (
+            traffic.groupby(["area", "obs_time"], as_index=False)["total_flow"].mean()
+        )
+    else:
+        traffic_area = pd.DataFrame(columns=["area", "obs_time", "total_flow"])
+
+    joined = aq_area.merge(weather_area, on=["area", "obs_time"], how="left")
+    joined = joined.merge(traffic_area, on=["area", "obs_time"], how="left")
+    joined = joined.sort_values(["area", "obs_time"]).reset_index(drop=True)
+
+    path = _MART / "mart_joined.parquet"
+    joined.to_parquet(path, index=False)
+    log.info("mart_joined: %d rows → %s", len(joined), path)
+
+
 def main() -> None:
+    import datetime
     _MART.mkdir(parents=True, exist_ok=True)
     build_mart_weather()
     build_mart_aq()
     build_mart_traffic()
     build_dim_stations()
+    build_mart_joined()
+    (_MART / "_last_updated.txt").write_text(datetime.datetime.now().isoformat())
     log.info("Mart build complete.")
 
 

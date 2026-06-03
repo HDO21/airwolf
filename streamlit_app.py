@@ -1,21 +1,20 @@
 """Airwolf — vahekaartidega õhukvaliteedi, ilma ja liikluse armatuurlaud."""
 from __future__ import annotations
 
+import calendar
 from pathlib import Path
 
 import altair as alt
 import folium
 import pandas as pd
-import requests
 import streamlit as st
 from streamlit_folium import st_folium
 
-_DATA_DIR     = Path(__file__).parent / "data"
-_STAGING      = _DATA_DIR / "staging"
-_INTERMEDIATE = _DATA_DIR / "intermediate"
-_MART         = _DATA_DIR / "mart"
+_DATA_DIR = Path(__file__).parent / "data"
+_STAGING  = _DATA_DIR / "staging"
+_MART     = _DATA_DIR / "mart"
 
-st.set_page_config(page_title="Airwolf", layout="wide")
+st.set_page_config(page_title="Õhuhunt", layout="wide")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Study areas
@@ -25,29 +24,20 @@ STUDY_AREAS: dict[str, dict] = {
     "Tallinn": {
         "bbox_wgs84": {"lat_n": 59.554594, "lon_w": 24.474231,
                        "lat_s": 59.361424, "lon_e": 25.012994},
-        "bbox_3301":  {"x_min": 526818, "x_max": 557609,
-                       "y_min": 6580812, "y_max": 6601992},
-        "map_center": [59.437, 24.745],
-        "map_zoom":   11,
-        "weather_station_codes": ["AJHARK01"],
+        "map_center": [59.458, 24.744],
+        "map_zoom":   10,   # one step back from theoretical minimum to guarantee full bbox
     },
     "Narva": {
         "bbox_wgs84": {"lat_n": 59.398837, "lon_w": 28.099803,
                        "lat_s": 59.342551, "lon_e": 28.211009},
-        "bbox_3301":  {"x_min": 732765, "x_max": 739464,
-                       "y_min": 6585793, "y_max": 6591660},
-        "map_center": [59.377, 28.179],
-        "map_zoom":   13,
-        "weather_station_codes": ["AJNARV01"],
+        "map_center": [59.371, 28.155],
+        "map_zoom":   12,
     },
     "Tartu": {
         "bbox_wgs84": {"lat_n": 58.426894, "lon_w": 26.455566,
                        "lat_s": 58.248549, "lon_e": 26.780029},
-        "bbox_3301":  {"x_min": 643432, "x_max": 663197,
-                       "y_min": 6459800, "y_max": 6478907},
-        "map_center": [58.380, 26.720],
-        "map_zoom":   12,
-        "weather_station_codes": ["AJTART01"],
+        "map_center": [58.338, 26.618],
+        "map_zoom":   11,
     },
 }
 
@@ -55,40 +45,50 @@ STUDY_AREAS: dict[str, dict] = {
 # Constants
 # ─────────────────────────────────────────────────────────────────────────────
 
-_DATA_PERIOD = "Detsember 2025"
-
-# Weather stations used in analysis
-_WEATHER_STATION_CODES = {"AJHARK01", "AJTART01", "AJNARV01"}
-
-# ohuseire.ee indicator IDs — stations with all indicators (Rahu/6 excluded: no PM2.5)
-_AQ_INDICATOR_MAP: dict[int, str] = {1: "SO2", 3: "NO2", 6: "O3", 21: "PM10", 23: "PM25"}
-_AQ_AREA_STATIONS: dict[str, list[int]] = {
-    "tallinn": [5, 7],
-    "narva":   [4],
-    "tartu":   [8],
+_MONTH_NAMES = {
+    1: "Jaanuar", 2: "Veebruar", 3: "Märts",    4: "Aprill",
+    5: "Mai",     6: "Juuni",    7: "Juuli",     8: "August",
+    9: "September", 10: "Oktoober", 11: "November", 12: "Detsember",
 }
-# Hardcoded from ohuseire.ee /api/station/et?type=INDICATOR (WGS84)
+
 _AQ_STATION_META: dict[int, dict] = {
-    4: {"name": "Narva",     "lat": 59.3722, "lon": 28.2007},
-    5: {"name": "Liivalaia", "lat": 59.4310, "lon": 24.7605},
-    7: {"name": "Õismäe",   "lat": 59.4140, "lon": 24.6497},
-    8: {"name": "Tartu",     "lat": 58.3706, "lon": 26.7348},
+    4: {"name": "Narva",     "area": "narva",   "lat": 59.3722, "lon": 28.2007},
+    5: {"name": "Liivalaia", "area": "tallinn", "lat": 59.4310, "lon": 24.7605},
+    7: {"name": "Õismäe",   "area": "tallinn", "lat": 59.4140, "lon": 24.6497},
+    8: {"name": "Tartu",     "area": "tartu",   "lat": 58.3706, "lon": 26.7348},
+}
+_EXCLUDED_DETECTOR_IDS: set[str] = {"944ab"}
+_INDICATORS = ["SO2", "O3", "NO2", "PM10", "PM25"]
+
+_INDICATOR_FULL_NAMES: dict[str, str] = {
+    "SO2":  "Vääveldioksiid (SO₂)",
+    "O3":   "Osoon (O₃)",
+    "NO2":  "Lämmastikdioksiid (NO₂)",
+    "PM10": "Peened osakesed (PM10)",
+    "PM25": "Eriti peened osakesed (PM2.5)",
 }
 
-_EXCLUDED_DETECTOR_IDS: set[str] = {"944ab"}  # Ülenurme — enamasti puuduvad andmed
 
-# ── Colour palette — no colour reused across charts ────────────────────────
-_C_TEMP    = "#E63946"   # chart 1 — temperatuur
-_C_PREC    = "#457B9D"   # chart 1 — sademed
-_C_WIND    = "#2A9D8F"   # chart 2 — tuule kiirus
-_C_TRAFFIC_MEAN = "#F4A261"  # chart 3 — keskmine
-_C_TRAFFIC_GREY = "#BBBBBB"  # chart 3 — üksikud detektorid
-_C_SO2  = "#F4D35E"   # chart 4
-_C_NO2  = "#264653"   # chart 4
-_C_O3   = "#7B2D8B"   # chart 4
-_C_PM10 = "#A8DADC"   # chart 4
-_C_PM25 = "#BFD3C1"   # chart 4
+# Colour palette
+_C_TEMP         = "#E63946"   # chart 1
+_C_PREC         = "#457B9D"   # chart 1
+_C_WIND         = "#2A9D8F"   # chart 2
+_C_TRAFFIC_MEAN = "#F4A261"   # chart 3
+_C_TRAFFIC_GREY = "#BBBBBB"   # chart 3
+_C_SO2          = "#F4D35E"   # chart 4
+_C_NO2          = "#1E88E5"   # chart 4 — bright blue for legibility
+_C_O3           = "#7B2D8B"   # chart 4
+_C_PM10         = "#A8DADC"   # chart 4
+_C_PM25         = "#BFD3C1"   # chart 4
+_AQ_COLOURS     = {"SO2": _C_SO2, "O3": _C_O3, "NO2": _C_NO2,
+                   "PM10": _C_PM10, "PM25": _C_PM25}
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Page header
+# ─────────────────────────────────────────────────────────────────────────────
+
+st.markdown("## Õhuhunt")
+st.markdown("*Andmetoru, mis kõnetab su hingetoru*")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Data loading
@@ -96,98 +96,71 @@ _C_PM25 = "#BFD3C1"   # chart 4
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def load_station_locations() -> dict:
-    """Load station/detector positions from mart dim_stations (built by run_mart.py)."""
-    data: dict = {}
-    errors: dict = {}
-
     dim_path = _MART / "dim_stations.parquet"
     if dim_path.exists():
         dim = pd.read_parquet(dim_path)
-        data["weather"] = dim[dim["source"] == "weather"].rename(
-            columns={"station_name": "station_name"}
-        )
-        data["aq"]      = dim[dim["source"] == "air_quality"].rename(
-            columns={"station_name": "station_name"}
-        )
-        data["traffic"] = dim[dim["source"] == "traffic"].rename(
-            columns={"station_id": "detector_id"}
-        )
-        data["traffic"] = data["traffic"][
-            ~data["traffic"]["detector_id"].astype(str).isin(_EXCLUDED_DETECTOR_IDS)
-        ]
-    else:
-        errors["stations"] = (
-            "dim_stations.parquet not found — run python run_mart.py to build mart layer"
-        )
-        # Fallback: hardcoded AQ metadata so the map still shows something
-        data["weather"]  = None
-        data["aq"]       = pd.DataFrame([
+        traffic = dim[dim["source"] == "traffic"].rename(columns={"station_id": "detector_id"})
+        traffic = traffic[~traffic["detector_id"].astype(str).isin(_EXCLUDED_DETECTOR_IDS)]
+        return {
+            "weather": dim[dim["source"] == "weather"].copy(),
+            "aq":      dim[dim["source"] == "air_quality"].copy(),
+            "traffic": traffic,
+        }
+    return {
+        "weather": None,
+        "aq": pd.DataFrame([
             {"station_id": sid, "station_name": m["name"], "lat": m["lat"], "lon": m["lon"]}
             for sid, m in _AQ_STATION_META.items()
-        ])
-        data["traffic"] = None
-
-    return {"data": data, "errors": errors}
+        ]),
+        "traffic": None,
+    }
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def fetch_weather_timeseries(area_key: str) -> pd.DataFrame:
-    _empty = pd.DataFrame(
-        columns=["station_id", "station_name", "obs_time",
-                 "temperature_c", "wind_speed_ms", "wind_direction_deg", "precip_mm"]
-    )
+def fetch_weather_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
+    _e = pd.DataFrame(columns=["station_id", "station_name", "obs_time",
+                                "temperature_c", "wind_speed_ms", "precip_mm"])
     path = _MART / "mart_weather.parquet"
     if not path.exists():
-        return _empty
+        return _e
     df = pd.read_parquet(path)
     df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-    df = df[df["obs_time"].between("2025-12-01", "2025-12-31 23:59:59")].copy()
-    return df if not df.empty else _empty
+    df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
+    return df if not df.empty else _e
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def fetch_aq_timeseries(area_key: str) -> pd.DataFrame:
-    _empty = pd.DataFrame(
-        columns=["station_id", "obs_time", "SO2", "O3", "NO2", "PM10", "PM25"]
-    )
+def fetch_aq_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
+    _e = pd.DataFrame(columns=["station_id", "obs_time"] + _INDICATORS)
     path = _MART / "mart_aq.parquet"
     if not path.exists():
-        return _empty
+        return _e
     df = pd.read_parquet(path)
     df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-    df = df[df["obs_time"].between("2025-12-01", "2025-12-31 23:59:59")].copy()
+    df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
     if df.empty:
-        return _empty
-
-    # Average across stations so each pollutant draws one smooth line per area
-    averaged = df.groupby("obs_time", as_index=False)[
-        ["SO2", "O3", "NO2", "PM10", "PM25"]
-    ].mean()
-    averaged["station_id"] = area_key
-    return averaged[["station_id", "obs_time", "SO2", "O3", "NO2", "PM10", "PM25"]]
+        return _e
+    avg = df.groupby("obs_time", as_index=False)[_INDICATORS].mean()
+    avg["station_id"] = area_key
+    return avg[["station_id", "obs_time"] + _INDICATORS]
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def fetch_traffic_timeseries(area_key: str) -> pd.DataFrame:
-    _empty = pd.DataFrame(
-        columns=["obs_time", "detector_id", "site_name", "total_flow"]
-    )
+def fetch_traffic_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
+    _e = pd.DataFrame(columns=["obs_time", "detector_id", "site_name", "total_flow"])
     path = _MART / "mart_traffic.parquet"
     if not path.exists():
-        return _empty
+        return _e
     df = pd.read_parquet(path)
     df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-    df = df[df["obs_time"].between("2025-12-01", "2025-12-31 23:59:59")].copy()
+    df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
     if df.empty:
-        return _empty
-
+        return _e
     df = df[~df["detector_id"].astype(str).isin(_EXCLUDED_DETECTOR_IDS)].copy()
     df["total_flow"] = pd.to_numeric(df["total_flow"], errors="coerce")
-
-    # Exclude (detector, day) pairs where all hours are zero or null
     df["_date"] = df["obs_time"].dt.date
     has_flow = df.groupby(["detector_id", "_date"])["total_flow"].transform(
         lambda x: (x.fillna(0) > 0).any()
@@ -198,8 +171,31 @@ def fetch_traffic_timeseries(area_key: str) -> pd.DataFrame:
     return df[["obs_time", "detector_id", "site_name", "total_flow"]]
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_joined_data(area_key: str, year: int, month: int) -> pd.DataFrame:
+    path = _MART / "mart_joined.parquet"
+    if not path.exists():
+        return pd.DataFrame()
+    df = pd.read_parquet(path)
+    df = df[df["area"] == area_key.lower()].copy()
+    df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    return df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_aq_all_areas(year_filter: int | None) -> pd.DataFrame:
+    path = _MART / "mart_aq.parquet"
+    if not path.exists():
+        return pd.DataFrame()
+    df = pd.read_parquet(path)
+    df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    if year_filter is not None:
+        df = df[df["obs_time"].dt.year == year_filter]
+    return df
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# Map
+# Map helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
 _MAP_LEGEND_HTML = """
@@ -215,118 +211,135 @@ _MAP_LEGEND_HTML = """
 </div>
 """
 
+_ESTONIA_LEGEND_HTML = """
+<div style="position:fixed;bottom:24px;left:24px;z-index:9999;
+     background:white;padding:8px 14px;border:1px solid #bbb;
+     border-radius:6px;font-size:12px;line-height:2;color:#222">
+  <svg width="14" height="10" style="vertical-align:middle">
+    <rect width="14" height="10" fill="none" stroke="#555"
+          stroke-dasharray="4 2" stroke-width="1.5"/>
+  </svg>&nbsp;Uuringualad
+</div>
+"""
+
 
 def _bbox_filter(df: pd.DataFrame | None, bbox: dict) -> pd.DataFrame:
     if df is None or df.empty:
         return pd.DataFrame()
-    return df[
-        df["lat"].between(bbox["lat_s"], bbox["lat_n"])
-        & df["lon"].between(bbox["lon_w"], bbox["lon_e"])
-    ]
+    return df[df["lat"].between(bbox["lat_s"], bbox["lat_n"])
+              & df["lon"].between(bbox["lon_w"], bbox["lon_e"])]
 
 
-def render_map(area_key: str, station_data: dict) -> None:
+def _add_marker_layer(m: folium.Map, df: pd.DataFrame, colour: str,
+                      radius: int, tooltip_col: str, id_col: str) -> None:
+    if df is None or df.empty:
+        return
+    for _, row in df.iterrows():
+        lat, lon = row.get("lat"), row.get("lon")
+        if pd.isna(lat) or pd.isna(lon):
+            continue
+        folium.CircleMarker(
+            location=[float(lat), float(lon)],
+            radius=radius, color=colour, fill=True,
+            fill_color=colour, fill_opacity=0.8, weight=1.5,
+            popup=folium.Popup(
+                f"<b>{row.get(tooltip_col, '')}</b><br>"
+                f"<small>{row.get(id_col, '')}</small>",
+                max_width=220,
+            ),
+            tooltip=row.get(tooltip_col, ""),
+        ).add_to(m)
+
+
+def render_area_map(area_key: str, station_data: dict) -> None:
     area = STUDY_AREAS[area_key]
     bbox = area["bbox_wgs84"]
 
+    # Default tile init (no tiles=None) so Leaflet initialises properly and
+    # fit_bounds works.  Unique key prevents Streamlit reusing the same iframe
+    # across the three area tabs, which caused world-zoom on non-first tabs.
     m = folium.Map(
         location=area["map_center"],
         zoom_start=area["map_zoom"],
-        tiles=None,
         control_scale=True,
     )
-    # Tile layer with control=False so it doesn't appear in LayerControl
-    folium.TileLayer(
-        tiles="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        name="Aluskaart",
-        control=False,
-    ).add_to(m)
 
     folium.Rectangle(
         bounds=[[bbox["lat_s"], bbox["lon_w"]], [bbox["lat_n"], bbox["lon_e"]]],
         color="#555555", weight=1.5, dash_array="6 4", fill=False,
     ).add_to(m)
-
-    # Weather layer
-    raw_weather = station_data.get("weather")
-    filtered_weather = _bbox_filter(raw_weather, bbox)
-    if not filtered_weather.empty:
-        grp = folium.FeatureGroup(name="Ilmavaatlusjaamad", show=True)
-        for _, row in filtered_weather.iterrows():
-            if pd.isna(row.get("lat")) or pd.isna(row.get("lon")):
-                continue
-            folium.CircleMarker(
-                location=[float(row["lat"]), float(row["lon"])],
-                radius=8, color="#1f77b4", fill=True,
-                fill_color="#1f77b4", fill_opacity=0.8, weight=1.5,
-                popup=folium.Popup(
-                    f"<b>{row.get('station_name','')}</b><br>"
-                    f"<small>{row.get('station_id','')}</small>",
-                    max_width=200,
-                ),
-                tooltip=row.get("station_name", ""),
-            ).add_to(grp)
-        grp.add_to(m)
-
-    # AQ layer
-    raw_aq = station_data.get("aq")
-    filtered_aq = _bbox_filter(raw_aq, bbox)
-    if not filtered_aq.empty:
-        grp = folium.FeatureGroup(name="Õhukvaliteedi seirejaam", show=True)
-        for _, row in filtered_aq.iterrows():
-            if pd.isna(row.get("lat")) or pd.isna(row.get("lon")):
-                continue
-            folium.CircleMarker(
-                location=[float(row["lat"]), float(row["lon"])],
-                radius=8, color="#d62728", fill=True,
-                fill_color="#d62728", fill_opacity=0.8, weight=1.5,
-                popup=folium.Popup(
-                    f"<b>{row.get('station_name','')}</b><br>"
-                    f"<small>{row.get('station_id','')}</small>",
-                    max_width=200,
-                ),
-                tooltip=row.get("station_name", ""),
-            ).add_to(grp)
-        grp.add_to(m)
-
-    # Traffic layer
-    raw_traffic = station_data.get("traffic")
-    if raw_traffic is not None and not raw_traffic.empty:
-        id_col   = "detector_id"   if "detector_id"  in raw_traffic.columns else "traffic_detector_id"
-        name_col = "site_name"     if "site_name"     in raw_traffic.columns else id_col
-        filtered_traffic = _bbox_filter(raw_traffic, bbox)
-        if not filtered_traffic.empty:
-            grp = folium.FeatureGroup(name="Liikluse loenduspunkt", show=True)
-            for _, row in filtered_traffic.iterrows():
-                if pd.isna(row.get("lat")) or pd.isna(row.get("lon")):
-                    continue
-                folium.CircleMarker(
-                    location=[float(row["lat"]), float(row["lon"])],
-                    radius=5, color="#2ca02c", fill=True,
-                    fill_color="#2ca02c", fill_opacity=0.8, weight=1.5,
-                    popup=folium.Popup(
-                        f"<b>{row.get(name_col,'')}</b><br>"
-                        f"<small>{row.get(id_col,'')}</small>",
-                        max_width=200,
-                    ),
-                    tooltip=row.get(name_col, ""),
-                ).add_to(grp)
-            grp.add_to(m)
-
-    folium.LayerControl(collapsed=False).add_to(m)
+    _add_marker_layer(m, _bbox_filter(station_data.get("weather"), bbox),
+                      "#1f77b4", 8, "station_name", "station_id")
+    _add_marker_layer(m, _bbox_filter(station_data.get("aq"), bbox),
+                      "#d62728", 8, "station_name", "station_id")
+    traffic_df = station_data.get("traffic")
+    if traffic_df is not None and not traffic_df.empty:
+        id_col   = "detector_id" if "detector_id" in traffic_df.columns else "station_id"
+        name_col = "site_name"   if "site_name"   in traffic_df.columns else id_col
+        _add_marker_layer(m, _bbox_filter(traffic_df, bbox),
+                          "#2ca02c", 5, name_col, id_col)
     m.get_root().html.add_child(folium.Element(_MAP_LEGEND_HTML))
-    st_folium(m, height=350, use_container_width=True, returned_objects=[])
+    st_folium(m, height=350, use_container_width=True, returned_objects=[],
+              key=f"area_map_{area_key}")
+
+
+def render_estonia_map() -> None:
+    m = folium.Map(location=[58.65, 25.5], zoom_start=7, control_scale=True)
+    _label_off = {"Tallinn": (0.06, 0), "Narva": (0.03, 0.04), "Tartu": (-0.06, 0)}
+    for name, data in STUDY_AREAS.items():
+        bb  = data["bbox_wgs84"]
+        ctr = data["map_center"]
+        off = _label_off.get(name, (0, 0))
+        folium.Rectangle(
+            bounds=[[bb["lat_s"], bb["lon_w"]], [bb["lat_n"], bb["lon_e"]]],
+            color="#555555", weight=1.5, dash_array="6 4",
+            fill=True, fill_color="#aaaaaa", fill_opacity=0.15, tooltip=name,
+        ).add_to(m)
+        folium.Marker(
+            location=[ctr[0] + off[0], ctr[1] + off[1]],
+            icon=folium.DivIcon(
+                html=f'<div style="font-size:13px;font-weight:bold;color:#222;'
+                     f'white-space:nowrap;text-shadow:1px 1px 2px white">{name}</div>',
+                icon_size=(80, 20),
+            ),
+        ).add_to(m)
+    m.get_root().html.add_child(folium.Element(_ESTONIA_LEGEND_HTML))
+    st_folium(m, height=380, use_container_width=True, returned_objects=[],
+              key="estonia_map")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Chart builders
+# Chart helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _x_enc() -> alt.X:
+def _x_enc(year: int, month: int) -> alt.X:
+    """Time x-axis with explicit day ticks; label centred within each day."""
+    import datetime as _dt
+    last_day = calendar.monthrange(year, month)[1]
+    # Explicit tick list: exactly one tick per day of the month — prevents
+    # Vega-Lite from adding a "Jan 1" tick at the right edge.
+    tick_values = [_dt.datetime(year, month, d) for d in range(1, last_day + 1)]
     return alt.X(
         "obs_time:T",
-        axis=alt.Axis(format="%d", tickCount="day", labelAngle=0, title=None),
+        scale=alt.Scale(
+            domain=[
+                f"{year}-{month:02d}-01T00:00:00",
+                f"{year}-{month:02d}-{last_day}T23:59:59",
+            ],
+            nice=False,
+            clamp=True,
+        ),
+        axis=alt.Axis(
+            values=tick_values,    # explicit ticks: no Jan 1
+            format="%d",
+            labelOffset=15,        # shift label rightward → visually centred in the day
+            labelAngle=0,
+            title=None,
+            tickSize=10,
+            tickWidth=2,
+            gridColor="#bbbbbb",
+            gridWidth=1,
+        ),
     )
 
 
@@ -334,148 +347,181 @@ def _t_tip() -> alt.Tooltip:
     return alt.Tooltip("obs_time:T", format="%d.%m %H:%M", title="Aeg")
 
 
-def make_weather_chart(df: pd.DataFrame | None) -> alt.LayerChart | None:
-    if df is None or df.empty:
+def make_weather_chart(df: pd.DataFrame | None, year: int, month: int
+                       ) -> alt.LayerChart | None:
+    if df is None or df.dropna(subset=["obs_time"]).empty:
         return None
     df = df.dropna(subset=["obs_time"])
-    if df.empty:
-        return None
-    base = alt.Chart(df)
-    temp = base.mark_line(color=_C_TEMP, strokeWidth=1.5).encode(
-        x=_x_enc(),
-        y=alt.Y("temperature_c:Q", axis=alt.Axis(title="°C")),
-        tooltip=[_t_tip(), alt.Tooltip("temperature_c:Q", format=".1f", title="Temperatuur °C")],
-    )
-    prec = base.mark_bar(color=_C_PREC, opacity=0.6).encode(
-        x=_x_enc(),
-        y=alt.Y("precip_mm:Q", axis=alt.Axis(title="mm")),
-        tooltip=[_t_tip(), alt.Tooltip("precip_mm:Q", format=".1f", title="Sademed mm")],
-    )
-    return (
-        alt.layer(temp, prec)
-        .resolve_scale(y="independent")
-        .properties(title="Temperatuur (°C) & Sademed (mm)", height=180)
-    )
+    # Slim DataFrames — only the columns each mark needs
+    temp_df = df[["obs_time", "temperature_c"]].copy().assign(mõõdik="Õhutemperatuur")
+    prec_df = df[["obs_time", "precip_mm"]].copy()
+    prec_df["precip_mm"] = prec_df["precip_mm"].clip(lower=0)   # no negative precipitation
+    prec_df = prec_df.assign(mõõdik="Sademete hulk")
 
+    cscale = alt.Scale(domain=["Õhutemperatuur", "Sademete hulk"], range=[_C_TEMP, _C_PREC])
+    leg    = alt.Legend(title="", orient="bottom")
+    x      = _x_enc(year, month)
 
-def make_wind_chart(df: pd.DataFrame | None) -> alt.Chart | None:
-    if df is None or df.empty:
-        return None
-    df = df.dropna(subset=["obs_time"])
-    if df.empty:
-        return None
-    return (
-        alt.Chart(df)
-        .mark_line(color=_C_WIND, strokeWidth=1.5)
+    temp = (
+        alt.Chart(temp_df).mark_line(strokeWidth=1.5)
         .encode(
-            x=_x_enc(),
-            y=alt.Y("wind_speed_ms:Q", axis=alt.Axis(title="m/s")),
-            tooltip=[_t_tip(),
-                     alt.Tooltip("wind_speed_ms:Q", format=".1f", title="Tuul (m/s)")],
+            x=x,
+            y=alt.Y("temperature_c:Q", axis=alt.Axis(title="°C")),
+            color=alt.Color("mõõdik:N", scale=cscale, legend=leg),
+            tooltip=[_t_tip(), alt.Tooltip("temperature_c:Q", format=".1f", title="Temperatuur °C")],
         )
-        .properties(title="Tuule kiirus (m/s)", height=130)
+    )
+    prec = (
+        alt.Chart(prec_df).mark_bar(opacity=0.6)
+        .encode(
+            x=x,
+            y=alt.Y("precip_mm:Q",
+                    axis=alt.Axis(title="mm"),
+                    scale=alt.Scale(domainMin=0)),
+            color=alt.Color("mõõdik:N", scale=cscale, legend=leg),
+            tooltip=[_t_tip(), alt.Tooltip("precip_mm:Q", format=".1f", title="Sademed mm")],
+        )
+    )
+    return (
+        alt.layer(temp, prec).resolve_scale(y="independent")
+        .properties(title="Temperatuur & Sademed", height=260)
     )
 
 
-def make_traffic_chart(df: pd.DataFrame | None) -> alt.Chart | None:
-    if df is None or df.empty:
+def make_wind_chart(df: pd.DataFrame | None, year: int, month: int
+                    ) -> alt.Chart | None:
+    if df is None or df.dropna(subset=["obs_time"]).empty:
         return None
     df = df.dropna(subset=["obs_time"])
-    if df.empty:
+    # Pass only the required columns — extra numeric columns confuse the Y scale
+    wind_df = df[["obs_time", "wind_speed_ms"]].copy().assign(mõõdik="Mõõdetud tuulekiirus")
+    return (
+        alt.Chart(wind_df).mark_line(strokeWidth=1.5)
+        .encode(
+            x=_x_enc(year, month),
+            y=alt.Y("wind_speed_ms:Q",
+                    axis=alt.Axis(title="m/s", tickCount=5),
+                    scale=alt.Scale(zero=True, nice=True)),
+            color=alt.Color("mõõdik:N",
+                            scale=alt.Scale(domain=["Mõõdetud tuulekiirus"],
+                                            range=[_C_WIND]),
+                            legend=alt.Legend(title="", orient="bottom")),
+            tooltip=[_t_tip(), alt.Tooltip("wind_speed_ms:Q", format=".1f", title="Tuul (m/s)")],
+        )
+        .properties(title="Tuule kiirus", height=220)
+    )
+
+
+def make_traffic_chart(df: pd.DataFrame | None, year: int, month: int
+                       ) -> alt.Chart | None:
+    if df is None or df.dropna(subset=["obs_time"]).empty:
         return None
+    df = df.dropna(subset=["obs_time"])
+    hourly  = df.groupby(["obs_time", "detector_id", "site_name"],
+                          as_index=False)["total_flow"].sum()
 
-    # Aggregate per (time, detector) — lanes already summed by fetch function
-    hourly = df.groupby(["obs_time", "detector_id"], as_index=False)["total_flow"].sum()
+    # Slim DataFrame for mean layer — no extra columns
     mean_df = hourly.groupby("obs_time", as_index=False)["total_flow"].mean()
+    mean_df = mean_df[["obs_time", "total_flow"]].copy()
+    mean_df["mõõdik"] = "Keskmine liiklussagedus"
 
-    y_scale = alt.Y("total_flow:Q", axis=alt.Axis(title="sõidukit/h"))
+    y_scale = alt.Scale(zero=True, nice=True)
+    y_axis  = alt.Axis(title="sõidukit/h", tickCount=5)
 
-    n_detectors = hourly["detector_id"].nunique()
-    if n_detectors > 1:
-        n_det = hourly["detector_id"].nunique()
-        grey = (
-            alt.Chart(hourly)
-            .mark_line(strokeWidth=1, opacity=0.5)
-            .encode(
-                x=_x_enc(),
-                y=y_scale,
-                color=alt.Color(
-                    "detector_id:N",
-                    scale=alt.Scale(range=[_C_TRAFFIC_GREY] * n_det),
-                    legend=None,
-                ),
-                tooltip=[
-                    _t_tip(),
-                    alt.Tooltip("site_name:N",   title="Asukoht"),
-                    alt.Tooltip("total_flow:Q",  format=".0f", title="Sõidukit/h"),
-                ],
-            )
+    mean_layer = (
+        alt.Chart(mean_df).mark_line(strokeWidth=2.5)
+        .encode(
+            x=_x_enc(year, month),
+            y=alt.Y("total_flow:Q", scale=y_scale, axis=y_axis),
+            color=alt.Color("mõõdik:N",
+                            scale=alt.Scale(domain=["Keskmine liiklussagedus"],
+                                            range=[_C_TRAFFIC_MEAN]),
+                            legend=alt.Legend(title="", orient="bottom")),
+            tooltip=[_t_tip(),
+                     alt.Tooltip("total_flow:Q", format=".0f", title="Keskmiselt sõidukit/h")],
         )
-        orange = (
-            alt.Chart(mean_df)
-            .mark_line(color=_C_TRAFFIC_MEAN, strokeWidth=2.5)
+    )
+    n_det = hourly["detector_id"].nunique()
+    if n_det > 1:
+        # Slim grey layer — only obs_time, total_flow, detector_id, site_name
+        grey_df = hourly[["obs_time", "total_flow", "detector_id", "site_name"]].copy()
+        grey_layer = (
+            alt.Chart(grey_df).mark_line(strokeWidth=1, opacity=0.4)
             .encode(
-                x=_x_enc(),
-                y=y_scale,
+                x=_x_enc(year, month),
+                y=alt.Y("total_flow:Q", scale=y_scale, axis=y_axis),
+                color=alt.Color("detector_id:N",
+                                scale=alt.Scale(range=[_C_TRAFFIC_GREY] * n_det),
+                                legend=None),
                 tooltip=[_t_tip(),
-                         alt.Tooltip("total_flow:Q", format=".0f", title="Keskmiselt sõidukit/h")],
-            )
-        )
-        chart = alt.layer(grey, orange)
-    else:
-        chart = (
-            alt.Chart(mean_df)
-            .mark_line(color=_C_TRAFFIC_MEAN, strokeWidth=2)
-            .encode(
-                x=_x_enc(),
-                y=y_scale,
-                tooltip=[_t_tip(),
+                         alt.Tooltip("site_name:N", title="Asukoht"),
                          alt.Tooltip("total_flow:Q", format=".0f", title="Sõidukit/h")],
             )
         )
-    return chart.properties(title="Liiklussagedus (sõidukit tunnis)", height=150)
+        chart = (
+            alt.layer(grey_layer, mean_layer)
+            .resolve_scale(color="independent")
+        )
+    else:
+        chart = mean_layer
+
+    return chart.properties(title="Liiklussagedus", height=220)
 
 
-def make_aq_chart(df: pd.DataFrame | None) -> alt.Chart | None:
-    if df is None or df.empty:
+def make_aq_chart(df: pd.DataFrame | None, year: int, month: int
+                  ) -> alt.Chart | None:
+    if df is None or df.dropna(subset=["obs_time"]).empty:
         return None
     df = df.dropna(subset=["obs_time"])
-    if df.empty:
-        return None
-    long_df = df.melt(
-        id_vars=["obs_time"],
-        value_vars=["SO2", "O3", "NO2", "PM10", "PM25"],
-        var_name="pollutant",
-        value_name="concentration",
-    ).dropna(subset=["concentration"])
+    # Only melt the columns we need — drop station_id etc.
+    cols = ["obs_time"] + [c for c in _INDICATORS if c in df.columns]
+    long_df = df[cols].melt(id_vars=["obs_time"], value_vars=_INDICATORS,
+                            var_name="indikaator", value_name="kontsentratsioon"
+                            ).dropna(subset=["kontsentratsioon"])
     if long_df.empty:
         return None
     return (
-        alt.Chart(long_df)
-        .mark_line(strokeWidth=1.5)
+        alt.Chart(long_df).mark_line(strokeWidth=1.5)
         .encode(
-            x=_x_enc(),
-            y=alt.Y("concentration:Q", axis=alt.Axis(title="µg/m³")),
-            color=alt.Color(
-                "pollutant:N",
-                scale=alt.Scale(
-                    domain=["SO2", "O3",  "NO2",   "PM10",  "PM25"],
-                    range= [_C_SO2, _C_O3, _C_NO2, _C_PM10, _C_PM25],
-                ),
-                legend=alt.Legend(title="Indikaator"),
-            ),
-            tooltip=[
-                _t_tip(),
-                alt.Tooltip("pollutant:N",     title="Indikaator"),
-                alt.Tooltip("concentration:Q", format=".2f", title="µg/m³"),
-            ],
+            x=_x_enc(year, month),
+            y=alt.Y("kontsentratsioon:Q",
+                    axis=alt.Axis(title="µg/m³", tickCount=5),
+                    scale=alt.Scale(zero=True, nice=True)),
+            color=alt.Color("indikaator:N",
+                            scale=alt.Scale(domain=_INDICATORS,
+                                            range=[_AQ_COLOURS[i] for i in _INDICATORS]),
+                            legend=alt.Legend(orient="bottom", title="Indikaator")),
+            tooltip=[_t_tip(),
+                     alt.Tooltip("indikaator:N", title="Indikaator"),
+                     alt.Tooltip("kontsentratsioon:Q", format=".2f", title="µg/m³")],
         )
-        .properties(title="Õhukvaliteet (µg/m³)", height=180)
+        .properties(title="Õhukvaliteet", height=260)
+    )
+
+
+def make_scatter(df: pd.DataFrame, x_col: str, x_title: str,
+                 y_col: str, y_title: str, title: str,
+                 indicator: str) -> alt.Chart | None:
+    if df is None or df.empty:
+        return None
+    plot_df = df[[x_col, y_col]].dropna()
+    if plot_df.empty:
+        return None
+    return (
+        alt.Chart(plot_df).mark_circle(size=25, opacity=0.45,
+                                       color=_AQ_COLOURS.get(indicator, "#888"))
+        .encode(
+            x=alt.X(f"{x_col}:Q", title=x_title),
+            y=alt.Y(f"{y_col}:Q", title=y_title),
+            tooltip=[alt.Tooltip(f"{x_col}:Q", format=".2f", title=x_title),
+                     alt.Tooltip(f"{y_col}:Q", format=".2f", title=y_title)],
+        )
+        .properties(title=title, height=260)
     )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Tab renderer
+# Shared renderer helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _show(chart: alt.Chart | None, fallback: str = "Andmed puuduvad.") -> None:
@@ -487,11 +533,12 @@ def _show(chart: alt.Chart | None, fallback: str = "Andmed puuduvad.") -> None:
 
 def _last_updated_str() -> str:
     import datetime
-    # Prefer the explicit marker written by run_pipeline.py
-    marker = _STAGING / "_last_updated.txt"
-    if marker.exists():
-        return marker.read_text().strip()[:16].replace("T", " ")
-    # Fall back to newest mart parquet modification time (mart files are in git)
+    for marker in [
+        _MART    / "_last_updated.txt",   # written by run_mart.py; tracked in git
+        _STAGING / "_last_updated.txt",   # written by run_pipeline.py
+    ]:
+        if marker.exists():
+            return marker.read_text().strip()[:16].replace("T", " ")
     parquets = list(_MART.glob("*.parquet"))
     if parquets:
         ts = max(p.stat().st_mtime for p in parquets)
@@ -499,224 +546,213 @@ def _last_updated_str() -> str:
     return "—"
 
 
+def _area_filter(area_key: str) -> tuple[int, int]:
+    """Render year/month selectors for a tab; returns (year, month)."""
+    year_key  = f"year_{area_key}"
+    month_key = f"month_{area_key}"
+
+    if year_key  not in st.session_state: st.session_state[year_key]  = 2025
+    if month_key not in st.session_state: st.session_state[month_key] = 12
+
+    def _reset_month() -> None:
+        st.session_state[month_key] = 1
+
+    col_y, col_m, _ = st.columns([1, 2, 6])
+    with col_y:
+        st.selectbox("Aasta", [2024, 2025, 2026], key=year_key,
+                     on_change=_reset_month)
+    with col_m:
+        st.selectbox("Kuu", list(range(1, 13)),
+                     format_func=lambda m: _MONTH_NAMES[m],
+                     key=month_key)
+
+    return st.session_state[year_key], st.session_state[month_key]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Area tab renderer
+# ─────────────────────────────────────────────────────────────────────────────
+
 def render_area_tab(area_key: str) -> None:
-    loc = load_station_locations()
-    for src, msg in loc["errors"].items():
-        st.warning(f"Ei saanud laadida {src} jaamaandmeid: {msg}")
+    station_data = load_station_locations()
+    render_area_map(area_key, station_data)
 
-    render_map(area_key, loc["data"])
+    year, month = _area_filter(area_key)
+    st.caption(f"{_MONTH_NAMES[month]} {year}")
 
-    # Context label
-    st.caption(_DATA_PERIOD)
+    # ── Mõõdistus- ja vaatlusandmed ──────────────────────────────────────────
+    st.subheader("Mõõdistus- ja vaatlusandmed")
 
-    # ── Weather ──────────────────────────────────────────────────────────────
     weather_df = None
     try:
-        weather_df = fetch_weather_timeseries(area_key)
+        weather_df = fetch_weather_timeseries(area_key, year, month)
     except Exception as exc:
         st.warning(f"Ilmaandmete laadimine ebaõnnestus: {exc}")
 
-    _show(make_weather_chart(weather_df))
-    _show(make_wind_chart(weather_df))
+    _show(make_weather_chart(weather_df, year, month))
+    _show(make_wind_chart(weather_df, year, month))
+    st.markdown("")   # breathing room between wind and traffic charts
 
-    # ── Traffic ──────────────────────────────────────────────────────────────
     traffic_df = None
     try:
-        traffic_df = fetch_traffic_timeseries(area_key)
+        traffic_df = fetch_traffic_timeseries(area_key, year, month)
     except Exception as exc:
         st.warning(f"Liiklusandmete laadimine ebaõnnestus: {exc}")
 
-    _show(
-        make_traffic_chart(traffic_df),
-        fallback="Liiklusandmed puuduvad — käivita `ingest_traffic.py --mode backfill`.",
-    )
+    _show(make_traffic_chart(traffic_df, year, month),
+          fallback="Liiklusandmed puuduvad — käivita `ingest_traffic.py --mode backfill`.")
 
-    # ── Air quality ───────────────────────────────────────────────────────────
     aq_df = None
     try:
-        aq_df = fetch_aq_timeseries(area_key)
+        aq_df = fetch_aq_timeseries(area_key, year, month)
     except Exception as exc:
         st.warning(f"Õhukvaliteedi andmete laadimine ebaõnnestus: {exc}")
 
-    _show(make_aq_chart(aq_df))
-    # ── KPI kastid: Tartu vs Tallinn PM10 ─────────────────────────────────────
-    if area_key.lower() == "tartu":
-        try:
-            df = pd.read_parquet(_MART / "mart_aq.parquet")
-            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-            df["month"] = df["obs_time"].dt.to_period("M")
+    _show(make_aq_chart(aq_df, year, month))
 
-            # Tartu ja Tallinn
-            tartu = df[df["station_id"] == 8].copy()
-            tallinn = df[df["station_id"].isin([5, 7])].copy()
+    # ── Analüütika ────────────────────────────────────────────────────────────
+    st.subheader("Analüütika")
 
-            # Kuude keskmised
-            tartu_pm10 = tartu.groupby("month")["PM10"].mean().sort_values(ascending=False)
-            tallinn_pm10 = tallinn.groupby("month")["PM10"].mean().sort_values(ascending=False)
+    sel_ind = st.selectbox("Indikaator", _INDICATORS, index=0, key=f"ind_{area_key}")
 
-            # KPI väärtused
-            tartu_month = str(tartu_pm10.index[0])
-            tartu_value = tartu_pm10.iloc[0]
+    try:
+        joined = fetch_joined_data(area_key, year, month)
+    except Exception as exc:
+        st.warning(f"Andmete laadimine ebaõnnestus: {exc}")
+        joined = pd.DataFrame()
 
-            tallinn_month = str(tallinn_pm10.index[0])
-            tallinn_value = tallinn_pm10.iloc[0]
+    ind_label = f"{sel_ind} (µg/m³)"
+    scatter_defs = [
+        ("total_flow",    "Liiklussagedus (sõidukit/h)", f"{sel_ind} vs liiklussagedus"),
+        ("temperature_c", "Temperatuur (°C)",             f"{sel_ind} vs temperatuur"),
+        ("precip_mm",     "Sademed (mm)",                 f"{sel_ind} vs sademed"),
+        ("wind_speed_ms", "Tuulekiirus (m/s)",            f"{sel_ind} vs tuulekiirus"),
+    ]
+    r1c1, r1c2 = st.columns(2)
+    r2c1, r2c2 = st.columns(2)
+    for (x_col, x_title, title), container in zip(
+        scatter_defs, [r1c1, r1c2, r2c1, r2c2]
+    ):
+        with container:
+            _show(make_scatter(joined, x_col, x_title, sel_ind, ind_label,
+                               title, sel_ind))
 
-            diff = tartu_value - tallinn_value
 
-            # Kuvame KPI kastid kõrvuti
-            col1, col2, col3 = st.columns(3)
+# ─────────────────────────────────────────────────────────────────────────────
+# Võrdlused tab renderer
+# ─────────────────────────────────────────────────────────────────────────────
 
-            with col1:
-                st.metric(
-                    label="Tartu kõige saastatum kuu (PM10)",
-                    value=tartu_month,
-                    delta=f"{tartu_value:.2f} µg/m³"
-                )
+def render_voordlused_tab() -> None:
+    st.subheader("Eesti uuringualad")
+    render_estonia_map()
 
-            with col2:
-                st.metric(
-                    label="Tallinna kõige saastatum kuu (PM10)",
-                    value=tallinn_month,
-                    delta=f"{tallinn_value:.2f} µg/m³"
-                )
+    # Year filter — label without "(võrdlus)", applies to all blocks below
+    year_opt = st.selectbox(
+        "Aasta", ["2024", "2025", "2026", "Kõik"], index=3, key="voordlus_year"
+    )
+    year_filter = None if year_opt == "Kõik" else int(year_opt)
 
-            with col3:
-                st.metric(
-                    label="Tartu – Tallinn erinevus",
-                    value=f"{diff:+.2f} µg/m³",
-                    delta="Tartu vs Tallinn"
-                )
+    try:
+        df_all = fetch_aq_all_areas(year_filter)
+    except Exception as exc:
+        st.warning(f"Andmete laadimine ebaõnnestus: {exc}")
+        return
 
-        except Exception as exc:
-            st.warning(f"KPI kastide loomine ebaõnnestus: {exc}")
+    if df_all.empty:
+        st.info("Andmed puuduvad.")
+        return
 
-    # ── Võrdlus: Tartu vs Tallinn PM10 kuude keskmised ─────────────────────────
-    if area_key.lower() == "tartu":
-        try:
-            df = pd.read_parquet(_MART / "mart_aq.parquet")
-            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-            df["month"] = df["obs_time"].dt.to_period("M")
+    # Map station IDs → city names; Tallinn has two stations → averaged
+    _station_city = {8: "Tartu", 5: "Tallinn", 7: "Tallinn", 4: "Narva"}
+    df_all = df_all[df_all["station_id"].isin(_station_city)].copy()
+    df_all["linn"]     = df_all["station_id"].map(_station_city)
+    df_all["month_ts"] = df_all["obs_time"].dt.to_period("M").dt.to_timestamp()
 
-            # Filtreerime Tartu ja Tallinna jaamad
-            tartu = df[df["station_id"] == 8].copy()
-            tallinn = df[df["station_id"].isin([5, 7])].copy()  # Liivalaia + Õismäe
+    _city_order = ["Tallinn", "Tartu", "Narva"]
 
-            # Arvutame kuude keskmised
-            tartu_pm10 = (
-                tartu.groupby("month")["PM10"]
-                .mean()
-                .reset_index()
-                .assign(area="Tartu")
+    # ── One block per indicator ───────────────────────────────────────────────
+    for indicator in _INDICATORS:
+        ind_label = _INDICATOR_FULL_NAMES.get(indicator, indicator)
+        st.subheader(ind_label)
+
+        # Monthly city averages — exclude 0 values (they represent missing data,
+        # not a real zero concentration)
+        monthly = (
+            df_all[df_all[indicator] > 0]
+            .groupby(["linn", "month_ts"], as_index=False)[indicator].mean()
+            .dropna(subset=[indicator])
+        )
+
+        if monthly.empty:
+            st.info("Andmed puuduvad.")
+            continue
+
+        # X-axis: numeric MM.YYYY format, horizontal labels, monthly ticks
+        x_enc = alt.X(
+            "month_ts:T",
+            title=None,
+            axis=alt.Axis(
+                format="%m.%Y",
+                labelAngle=0,
+                tickCount="month",
+            ),
+        )
+        y_enc = alt.Y(
+            f"{indicator}:Q",
+            title="µg/m³",
+            scale=alt.Scale(zero=True, nice=True),
+            axis=alt.Axis(tickCount=5),
+        )
+
+        line = (
+            alt.Chart(monthly).mark_line(point=True)
+            .encode(
+                x=x_enc,
+                y=y_enc,
+                color=alt.Color("linn:N", title="Linn", sort=_city_order),
+                tooltip=[
+                    alt.Tooltip("linn:N",         title="Linn"),
+                    alt.Tooltip("month_ts:T",      format="%m.%Y", title="Kuu"),
+                    alt.Tooltip(f"{indicator}:Q",  format=".2f",   title="µg/m³"),
+                ],
+            )
+        )
+
+        # Dashed vertical rules at year boundaries when data spans multiple years
+        years_present = sorted(monthly["month_ts"].dt.year.unique())
+        if len(years_present) > 1:
+            boundaries = pd.DataFrame({
+                "yr": [pd.Timestamp(f"{y}-01-01") for y in years_present[1:]]
+            })
+            year_rules = (
+                alt.Chart(boundaries)
+                .mark_rule(strokeDash=[4, 4], strokeWidth=1, color="#999999", opacity=0.6)
+                .encode(x=alt.X("yr:T"))
+            )
+            chart = alt.layer(year_rules, line).properties(height=260)
+        else:
+            chart = line.properties(height=260)
+
+        st.altair_chart(chart, use_container_width=True)
+
+        # 3 KPI metrics: Tallinn | Tartu | Narva
+        st.markdown("##### Kõige saastatum kuu")
+        cols = st.columns(3)
+        for col, city in zip(cols, _city_order):
+            city_monthly = monthly[monthly["linn"] == city].dropna(subset=[indicator])
+            if city_monthly.empty:
+                col.metric(city, "—")
+                continue
+            peak      = city_monthly.loc[city_monthly[indicator].idxmax()]
+            peak_ts   = peak["month_ts"]
+            month_str = _MONTH_NAMES.get(peak_ts.month, "?")
+            col.metric(
+                label=city,
+                value=f"{month_str} {peak_ts.year}",
+                delta=f"{peak[indicator]:.2f} µg/m³",
+                delta_color="off",
             )
 
-            tallinn_pm10 = (
-                tallinn.groupby("month")["PM10"]
-                .mean()
-                .reset_index()
-                .assign(area="Tallinn")
-            )
-
-            # Paneme kokku üheks tabeliks
-            compare_df = pd.concat([tartu_pm10, tallinn_pm10], ignore_index=True)
-
-            # Teeme Altairi graafiku
-            chart = (
-                alt.Chart(compare_df)
-                .mark_line(point=True)
-                .encode(
-                    x=alt.X("month:T", title="Kuu"),
-                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
-                    color=alt.Color("area:N", title="Piirkond"),
-                    tooltip=["month:T", "area:N", "PM10:Q"]
-                )
-                .properties(
-                    title="PM10 kuude keskmised: Tartu vs Tallinn",
-                    height=250
-                )
-            )
-
-            st.altair_chart(chart, use_container_width=True)
-
-        except Exception as exc:
-            st.warning(f"Võrdlusgraafiku loomine ebaõnnestus: {exc}")
-    # ── Seos: liiklussagedus vs PM10 ─────────────────────────────────────────
-    if area_key.lower() == "tartu":
-        try:
-            traffic = pd.read_parquet(_MART / "mart_traffic.parquet")
-            traffic = traffic[traffic["area"] == "tartu"].copy()
-            traffic["obs_time"] = pd.to_datetime(traffic["obs_time"], errors="coerce")
-
-            aq = pd.read_parquet(_MART / "mart_aq.parquet")
-            aq = aq[aq["station_id"] == 8].copy()
-            aq["obs_time"] = pd.to_datetime(aq["obs_time"], errors="coerce")
-
-            merged = pd.merge(
-                traffic,
-                aq[["obs_time", "PM10"]],
-                on="obs_time",
-                how="inner"
-            )
-
-            chart = (
-                alt.Chart(merged)
-                .mark_circle(size=40, opacity=0.6)
-                .encode(
-                    x=alt.X("total_flow:Q", title="Liiklussagedus (sõidukit/h)"),
-                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
-                    tooltip=["obs_time:T", "total_flow:Q", "PM10:Q"]
-                )
-                .properties(
-                    title="Seos: liiklussagedus vs PM10 (Tartu)",
-                    height=300
-                )
-            )
-
-            st.altair_chart(chart, use_container_width=True)
-
-        except Exception as exc:
-            st.warning(f"Seose graafiku loomine ebaõnnestus: {exc}")
-
-    # ── PM10: Tartu vs Tallinn vs Narva ─────────────────────────────────────
-    if area_key.lower() == "tartu":
-        try:
-            df = pd.read_parquet(_MART / "mart_aq.parquet")
-            df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
-            df["month"] = df["obs_time"].dt.to_period("M").dt.to_timestamp()
-
-            stations = {
-                8: "Tartu",
-                5: "Tallinn",
-                4: "Narva"
-            }
-
-            df = df[df["station_id"].isin(stations.keys())].copy()
-            df["city"] = df["station_id"].map(stations)
-
-            monthly = (
-                df.groupby(["city", "month"])["PM10"]
-                .mean()
-                .reset_index()
-            )
-
-            st.subheader("PM10 kuude keskmised — Tartu vs Tallinn vs Narva")
-
-            chart = (
-                alt.Chart(monthly)
-                .mark_line(point=True)
-                .encode(
-                    x=alt.X("month:T", title="Kuu"),
-                    y=alt.Y("PM10:Q", title="PM10 (µg/m³)"),
-                    color=alt.Color("city:N", title="Linn"),
-                    tooltip=["city:N", "month:T", "PM10:Q"]
-                )
-                .properties(height=300)
-            )
-
-            st.altair_chart(chart, use_container_width=True)
-
-        except Exception as exc:
-            st.warning(f"PM10 võrdlusgraafiku loomine ebaõnnestus: {exc}")
-        
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
@@ -724,7 +760,9 @@ def render_area_tab(area_key: str) -> None:
 
 st.caption(f"Viimati uuendatud: {_last_updated_str()}")
 
-tabs = st.tabs(["Tallinn", "Narva", "Tartu"])
-for _tab, _area_key in zip(tabs, ["Tallinn", "Narva", "Tartu"]):
+tabs = st.tabs(["Tallinn", "Narva", "Tartu", "Võrdlused"])
+for _tab, _area_key in zip(tabs[:3], ["Tallinn", "Narva", "Tartu"]):
     with _tab:
         render_area_tab(_area_key)
+with tabs[3]:
+    render_voordlused_tab()
