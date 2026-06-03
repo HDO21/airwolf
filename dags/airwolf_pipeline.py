@@ -337,6 +337,7 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     schedule="@hourly",
     catchup=False,
+    max_active_runs=1,
     params={
         # Backfill käivitub ainult käsitsi, kui run_weather_backfill=true.
         "run_weather_backfill": Param(False, type="boolean"),
