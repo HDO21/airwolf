@@ -347,8 +347,73 @@ def load_weather(
     return total_inserted
 
 
-if __name__ == "__main__":
-    raise SystemExit(
-        "This module is intended to be called by Airflow. "
-        "Use load_weather(hook=..., run_id=..., ...) from dags/airwolf_pipeline.py."
+def _upsert_parquet(path: "Path", new_df: pd.DataFrame, pk: list[str]) -> None:
+    from pathlib import Path as _Path
+    path = _Path(path)
+    if path.exists():
+        existing = pd.read_parquet(path)
+        combined = (
+            pd.concat([existing, new_df], ignore_index=True)
+            .drop_duplicates(subset=pk, keep="last")
+        )
+    else:
+        combined = new_df
+    combined.to_parquet(path, index=False)
+    log.info("Written %d rows to %s", len(combined), path)
+
+
+def main_cli() -> None:
+    """Parquet-based CLI entry point for the staging pipeline.
+
+    Usage:
+        python ingest_weather.py 2025 12
+        python ingest_weather.py 2025 1 2025 11
+    """
+    import datetime
+    import sys
+    from pathlib import Path
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
     )
+
+    argv = sys.argv[1:]
+    if len(argv) == 2:
+        y1, m1, y2, m2 = int(argv[0]), int(argv[1]), int(argv[0]), int(argv[1])
+    elif len(argv) == 4:
+        y1, m1, y2, m2 = int(argv[0]), int(argv[1]), int(argv[2]), int(argv[3])
+    else:
+        print("Usage: python ingest_weather.py <year> <month> [year_end month_end]",
+              file=sys.stderr)
+        sys.exit(1)
+
+    staging = Path("data/staging")
+    staging.mkdir(parents=True, exist_ok=True)
+
+    # Station coordinates
+    stations_df = _fetch_station_coordinates()
+    if not stations_df.empty:
+        stations_out = stations_df.copy()
+        stations_out["_ingested_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        _upsert_parquet(staging / "weather_stations.parquet", stations_out, pk=["jaam_kood"])
+
+    # Observations — keep raw long format
+    y, m = y1, m1
+    while (y, m) <= (y2, m2):
+        obs_df = _fetch_observations(y, m)
+        if not obs_df.empty:
+            obs_df["_ingested_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            _upsert_parquet(
+                staging / f"weather_raw_{y}_{m:02d}.parquet",
+                obs_df,
+                pk=["jaam_kood", "aasta", "kuu", "paev", "tund", "element_kood"],
+            )
+        m += 1
+        if m > 12:
+            m, y = 1, y + 1
+
+
+if __name__ == "__main__":
+    main_cli()
