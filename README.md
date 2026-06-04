@@ -34,6 +34,6 @@ data\raw\stations\counts\traffic_2026.csv
 
 Allikas: https://andmed.eesti.ee/datasets/liiklusloendusseadmed
 
-Tegemist on liiklusloendusjaamade nimekirjaga. See fail on vaja alla laadida ja salvestada data\raw\stations kausta nimega LL_jaamad.csv
+Tegemist on liiklusloendusjaamade nimekirjaga. See fail on vaja alla laadida ja salvestada data\raw\stations kausta nimega LL_jaamad.xlsx
 
 

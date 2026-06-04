@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+"""Lokaalne parquet-põhine andmetoru — ilmaandmete sissevõtt.
+
+See skript on osa LOKAALSEST andmetorust (Docker pole vajalik):
+    ingest_weather.py  →  run_transform.py  →  run_mart.py  →  streamlit_app.py
+
+Andmebaasi kasutava andmetoru jaoks vaata ingestion/ingest_weather.py,
+mis kirjutab andmed otse analytics-db staging-skeemi PostgresHook'i kaudu.
+
+Jooksutamise näited:
+    python ingest_weather.py 2025 12
+    python ingest_weather.py 2025 1 2025 12
+"""
 from __future__ import annotations
 
 import logging

@@ -3,11 +3,12 @@ CREATE SCHEMA IF NOT EXISTS intermediate;
 CREATE SCHEMA IF NOT EXISTS marts;
 
 CREATE TABLE IF NOT EXISTS staging.pipeline_runs (
-    run_id      uuid PRIMARY KEY,
-    loaded_at  timestamptz NOT NULL DEFAULT now(),
-    source_name text NOT NULL,
-    status      text NOT NULL CHECK (status IN ('running', 'success', 'failed')),
+    run_id      uuid        PRIMARY KEY,
+    source_name text        NOT NULL,
+    status      text        NOT NULL,
     message     text,
+    loaded_at   timestamptz NOT NULL DEFAULT now(),
+    finished_at timestamptz,
 
     CONSTRAINT chk_pipeline_runs_status
         CHECK (status IN ('running', 'success', 'failed'))
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS staging.air_quality_raw (
 CREATE TABLE IF NOT EXISTS staging.weather_raw (
     run_id              uuid             NOT NULL REFERENCES staging.pipeline_runs(run_id),
     jaam_kood           text             NOT NULL,
-    obs_time            timestamp        NOT NULL,
+    obs_time            timestamptz      NOT NULL,
     lat                 double precision,
     lon                 double precision,
     temperature_c       double precision,

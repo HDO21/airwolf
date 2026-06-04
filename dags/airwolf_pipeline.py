@@ -355,7 +355,7 @@ with DAG(
         # Liiklusandmete CSV backfill käivitub ainult käsitsi, kui run_traffic_counts_backfill=true.
         "run_traffic_counts_backfill": Param(False, type="boolean"),
         "traffic_counts_files": Param("/opt/airflow/data/raw/traffic/counts", type="string"),
-        "traffic_stations_file": Param("/opt/airflow/data/raw/traffic/stations/LL_jaamad.csv", type="string"),
+        "traffic_stations_file": Param("/opt/airflow/data/raw/traffic/stations/LL jaamad.xlsx", type="string"),
     },
     tags=["airwolf", "ingestion", "dbt"],
 ) as dag:
@@ -400,6 +400,10 @@ with DAG(
         task_id="dbt_run",
         bash_command=(
             f"cd {DBT_PROJECT_DIR} && "
+            # Käivitatakse enne mudeleid, et viitetabelid
+            # (weather_stations, aq_stations) oleksid olemas enne vahe-mudeleid,
+            # mis neid JOIN-iga kasutavad.
+            "dbt seed --profiles-dir . && "
             "dbt run --profiles-dir ."
         ),
     )

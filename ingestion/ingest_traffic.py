@@ -267,7 +267,10 @@ def _load_station_lookup(stations_file: Path | None) -> dict[str, dict[str, Any]
     if not stations_file.exists():
         raise FileNotFoundError(f"Traffic station file not found: {stations_file}")
 
-    df = _read_csv_flexible(stations_file, dtype=str)
+    if stations_file.suffix.lower() in (".xlsx", ".xls"):
+        df = pd.read_excel(stations_file, dtype=str)
+    else:
+        df = _read_csv_flexible(stations_file, dtype=str)
 
     df.columns = [str(col).strip() for col in df.columns]
 

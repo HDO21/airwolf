@@ -9,6 +9,10 @@ macro-paths: ["macros"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
+seeds:
+  airwolf_dbt:
+    +schema: reference
+
 models:
   airwolf_dbt:
     staging:
