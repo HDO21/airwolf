@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: int_weather
+    description: Normalised hourly weather observations from staging.weather_raw.
+    columns:
+      - name: station_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+      - name: area
+        tests:
+          - accepted_values:
+              values: ['tallinn', 'tartu', 'narva']
+
+  - name: int_air_quality
+    description: Pivoted hourly air quality observations from staging.air_quality_raw.
+    columns:
+      - name: station_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+      - name: area
+        tests:
+          - accepted_values:
+              values: ['tallinn', 'tartu', 'narva']
+
+  - name: int_traffic
+    description: Hourly traffic counts joined from backfill and live raw tables.
+    columns:
+      - name: detector_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+      - name: area
+        tests:
+          - accepted_values:
+              values: ['tallinn', 'tartu', 'narva']
+
+  - name: mart_weather
+    columns:
+      - name: station_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+
+  - name: mart_aq
+    columns:
+      - name: station_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+
+  - name: mart_traffic
+    columns:
+      - name: detector_id
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]
+
+  - name: mart_joined
+    description: Area-hour joined mart for dashboard scatter and analytics charts.
+    columns:
+      - name: area
+        tests: [not_null]
+      - name: obs_time
+        tests: [not_null]

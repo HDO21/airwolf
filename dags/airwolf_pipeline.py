@@ -11,7 +11,7 @@ sys.path.append("/opt/airflow")
 from airflow.sdk import DAG, Param
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-# from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 
 from ingestion.ingest_weather import load_weather_backfill, load_weather_recent
 from ingestion.ingest_air_quality import load_air_quality_backfill, load_air_quality_recent
@@ -337,6 +337,7 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     schedule="@hourly",
     catchup=False,
+    max_active_runs=1,
     params={
         # Backfill käivitub ainult käsitsi, kui run_weather_backfill=true.
         "run_weather_backfill": Param(False, type="boolean"),
@@ -395,24 +396,21 @@ with DAG(
         python_callable=ingest_traffic_hourly,
     )
 
-    # Kui dbt on seadistatud, võta BashOperator import ülevalt kommentaarist välja
-    # ja aktiveeri need taskid.
-    # dbt_run = BashOperator(
-    #     task_id="dbt_run",
-    #     bash_command=(
-    #         f"cd {DBT_PROJECT_DIR} && "
-    #         "dbt seed --profiles-dir . && "
-    #         "dbt run --profiles-dir ."
-    #     ),
-    # )
+    dbt_run = BashOperator(
+        task_id="dbt_run",
+        bash_command=(
+            f"cd {DBT_PROJECT_DIR} && "
+            "dbt run --profiles-dir ."
+        ),
+    )
 
-    # dbt_test = BashOperator(
-    #     task_id="dbt_test",
-    #     bash_command=(
-    #         f"cd {DBT_PROJECT_DIR} && "
-    #         "dbt test --profiles-dir ."
-    #     ),
-    # )
+    dbt_test = BashOperator(
+        task_id="dbt_test",
+        bash_command=(
+            f"cd {DBT_PROJECT_DIR} && "
+            "dbt test --profiles-dir ."
+        ),
+    )
 
     create_tables_task >> [
         ingest_weather_backfill_task,
@@ -423,11 +421,12 @@ with DAG(
         ingest_traffic_hourly_task,
     ]
 
-    # Kui dbt taskid aktiveerid, kasuta näiteks:
-    # [
-    #     ingest_weather_backfill_task,
-    #     ingest_weather_hourly_task,
-    #     ingest_air_quality_task,
-    #     ingest_traffic_live_task,
-    #     ingest_traffic_backfill_task,
-    # ] >> dbt_run >> dbt_test
+    [
+        ingest_weather_backfill_task,
+        ingest_weather_hourly_task,
+        ingest_air_quality_backfill_task,
+        ingest_air_quality_hourly_task,
+        ingest_traffic_counts_backfill_task,
+        ingest_traffic_hourly_task,
+    ] >> dbt_run >> dbt_test
+
