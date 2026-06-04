@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Ingest raw air-quality observations from ohuseire.ee into data/staging/.
+"""Lokaalne parquet-põhine andmetoru — õhukvaliteedi andmete sissevõtt.
 
-Preserves the API response with minimal modification. All normalisation,
-indicator name mapping, spatial filtering and validation are done by
-run_transform.py.
+See skript on osa LOKAALSEST andmetorust (Docker pole vajalik):
+    ingest_air_quality.py  →  run_transform.py  →  run_mart.py  →  streamlit_app.py
 
-Staging files are never overwritten: new records are merged and deduplicated
-by their natural primary key (station × indicator × measured).
+Andmebaasi kasutava andmetoru jaoks vaata ingestion/ingest_air_quality.py,
+mis kirjutab andmed otse analytics-db staging-skeemi PostgresHook'i kaudu.
 
-Usage:
+Laeb toorandmed ohuseire.ee API-st kausta data/staging/.
+
+Jooksutamise näited:
     python ingest_air_quality.py 2024 1 2025 12
 """
 from __future__ import annotations
@@ -38,7 +39,7 @@ _TIMEOUT     = 30
 _MAX_RETRIES = 3
 _BACKOFF     = 5
 
-# All stations that measure all five target indicators (Rahu/6 excluded: no PM2.5)
+# Seirejaamad, kus monitoritakse kõiki viit indikaatorit (SO2, NO2, O3, PM10, PM25)
 _STATION_IDS  = [4, 5, 7, 8]   # Narva, Liivalaia, Õismäe, Tartu
 _INDICATOR_IDS = [1, 3, 6, 21, 23]  # SO2, NO2, O3, PM10, PM25
 

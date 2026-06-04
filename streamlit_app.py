@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import calendar
+import os
 from pathlib import Path
 
 import altair as alt
@@ -13,6 +14,52 @@ from streamlit_folium import st_folium
 _DATA_DIR = Path(__file__).parent / "data"
 _STAGING  = _DATA_DIR / "staging"
 _MART     = _DATA_DIR / "mart"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Database connection — used when POSTGRES_HOST is set (Docker / production).
+# Falls back to local parquet mart files when the DB is not available.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _db_engine():
+    """Return a SQLAlchemy engine if DB env vars are present, else None."""
+    host = os.getenv("POSTGRES_HOST")
+    if not host:
+        return None
+    try:
+        from sqlalchemy import create_engine, text
+        dsn = (
+            f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:"
+            f"{os.environ['POSTGRES_PASSWORD']}@{host}:"
+            f"{os.getenv('POSTGRES_PORT', '5432')}/"
+            f"{os.environ['POSTGRES_DB']}"
+        )
+        engine = create_engine(dsn, pool_pre_ping=True)
+        # Quick connectivity check
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return engine
+    except Exception:
+        return None
+
+
+@st.cache_resource
+def _get_engine():
+    return _db_engine()
+
+
+def _read_mart(table: str, sql: str | None = None) -> pd.DataFrame:
+    """Read from DB mart table when available, otherwise from parquet fallback."""
+    engine = _get_engine()
+    if engine is not None:
+        query = sql or f"SELECT * FROM marts.{table}"
+        try:
+            return pd.read_sql(query, engine)
+        except Exception:
+            pass
+    parquet = _MART / f"{table}.parquet"
+    if parquet.exists():
+        return pd.read_parquet(parquet)
+    return pd.DataFrame()
 
 st.set_page_config(page_title="Õhuhunt", layout="wide")
 
@@ -37,7 +84,7 @@ STUDY_AREAS: dict[str, dict] = {
         "bbox_wgs84": {"lat_n": 58.426894, "lon_w": 26.455566,
                        "lat_s": 58.248549, "lon_e": 26.780029},
         "map_center": [58.338, 26.618],
-        "map_zoom":   11,
+        "map_zoom":   10,
     },
 }
 
@@ -96,9 +143,8 @@ st.markdown("*Andmetoru, mis kõnetab su hingetoru*")
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def load_station_locations() -> dict:
-    dim_path = _MART / "dim_stations.parquet"
-    if dim_path.exists():
-        dim = pd.read_parquet(dim_path)
+    dim = _read_mart("dim_stations")
+    if not dim.empty:
         traffic = dim[dim["source"] == "traffic"].rename(columns={"station_id": "detector_id"})
         traffic = traffic[~traffic["detector_id"].astype(str).isin(_EXCLUDED_DETECTOR_IDS)]
         return {
@@ -120,12 +166,15 @@ def load_station_locations() -> dict:
 def fetch_weather_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
     _e = pd.DataFrame(columns=["station_id", "station_name", "obs_time",
                                 "temperature_c", "wind_speed_ms", "precip_mm"])
-    path = _MART / "mart_weather.parquet"
-    if not path.exists():
+    df = _read_mart("mart_weather",
+                    f"SELECT * FROM marts.mart_weather"
+                    f" WHERE area = '{area_key.lower()}'"
+                    f" AND EXTRACT(year FROM obs_time) = {year}"
+                    f" AND EXTRACT(month FROM obs_time) = {month}")
+    if df.empty:
         return _e
-    df = pd.read_parquet(path)
-    df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    df = df[df["area"] == area_key.lower()]
     df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
     return df if not df.empty else _e
 
@@ -133,12 +182,15 @@ def fetch_weather_timeseries(area_key: str, year: int, month: int) -> pd.DataFra
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_aq_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
     _e = pd.DataFrame(columns=["station_id", "obs_time"] + _INDICATORS)
-    path = _MART / "mart_aq.parquet"
-    if not path.exists():
+    df = _read_mart("mart_aq",
+                    f"SELECT * FROM marts.mart_aq"
+                    f" WHERE area = '{area_key.lower()}'"
+                    f" AND EXTRACT(year FROM obs_time) = {year}"
+                    f" AND EXTRACT(month FROM obs_time) = {month}")
+    if df.empty:
         return _e
-    df = pd.read_parquet(path)
-    df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    df = df[df["area"] == area_key.lower()]
     df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
     if df.empty:
         return _e
@@ -150,12 +202,15 @@ def fetch_aq_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_traffic_timeseries(area_key: str, year: int, month: int) -> pd.DataFrame:
     _e = pd.DataFrame(columns=["obs_time", "detector_id", "site_name", "total_flow"])
-    path = _MART / "mart_traffic.parquet"
-    if not path.exists():
+    df = _read_mart("mart_traffic",
+                    f"SELECT * FROM marts.mart_traffic"
+                    f" WHERE area = '{area_key.lower()}'"
+                    f" AND EXTRACT(year FROM obs_time) = {year}"
+                    f" AND EXTRACT(month FROM obs_time) = {month}")
+    if df.empty:
         return _e
-    df = pd.read_parquet(path)
-    df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    df = df[df["area"] == area_key.lower()]
     df = df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
     if df.empty:
         return _e
@@ -173,21 +228,26 @@ def fetch_traffic_timeseries(area_key: str, year: int, month: int) -> pd.DataFra
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_joined_data(area_key: str, year: int, month: int) -> pd.DataFrame:
-    path = _MART / "mart_joined.parquet"
-    if not path.exists():
+    df = _read_mart("mart_joined",
+                    f"SELECT * FROM marts.mart_joined"
+                    f" WHERE area = '{area_key.lower()}'"
+                    f" AND EXTRACT(year FROM obs_time) = {year}"
+                    f" AND EXTRACT(month FROM obs_time) = {month}")
+    if df.empty:
         return pd.DataFrame()
-    df = pd.read_parquet(path)
-    df = df[df["area"] == area_key.lower()].copy()
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
+    df = df[df["area"] == area_key.lower()]
     return df[(df["obs_time"].dt.year == year) & (df["obs_time"].dt.month == month)]
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_aq_all_areas(year_filter: int | None) -> pd.DataFrame:
-    path = _MART / "mart_aq.parquet"
-    if not path.exists():
+    sql = "SELECT * FROM marts.mart_aq"
+    if year_filter is not None:
+        sql += f" WHERE EXTRACT(year FROM obs_time) = {year_filter}"
+    df = _read_mart("mart_aq", sql)
+    if df.empty:
         return pd.DataFrame()
-    df = pd.read_parquet(path)
     df["obs_time"] = pd.to_datetime(df["obs_time"], errors="coerce")
     if year_filter is not None:
         df = df[df["obs_time"].dt.year == year_filter]
@@ -505,18 +565,39 @@ def make_scatter(df: pd.DataFrame, x_col: str, x_title: str,
     if df is None or df.empty:
         return None
     plot_df = df[[x_col, y_col]].dropna()
-    if plot_df.empty:
+    # Need at least 3 points to fit a line and compute a meaningful correlation
+    if len(plot_df) < 3:
         return None
-    return (
-        alt.Chart(plot_df).mark_circle(size=25, opacity=0.45,
-                                       color=_AQ_COLOURS.get(indicator, "#888"))
+
+    r = plot_df[x_col].corr(plot_df[y_col])
+    r_str = f"{r:.2f}" if pd.notna(r) else "n/a"
+    title_with_r = f"{title} (r = {r_str})"
+
+    colour = _AQ_COLOURS.get(indicator, "#888")
+
+    dots = (
+        alt.Chart(plot_df).mark_circle(size=25, opacity=0.45, color=colour)
         .encode(
             x=alt.X(f"{x_col}:Q", title=x_title),
             y=alt.Y(f"{y_col}:Q", title=y_title),
             tooltip=[alt.Tooltip(f"{x_col}:Q", format=".2f", title=x_title),
                      alt.Tooltip(f"{y_col}:Q", format=".2f", title=y_title)],
         )
-        .properties(title=title, height=260)
+    )
+
+    trend = (
+        alt.Chart(plot_df)
+        .mark_line(color="#8B0000", opacity=0.85, strokeWidth=2, strokeDash=[6, 3])
+        .transform_regression(x_col, y_col)
+        .encode(
+            x=alt.X(f"{x_col}:Q"),
+            y=alt.Y(f"{y_col}:Q"),
+        )
+    )
+
+    return (
+        alt.layer(dots, trend)
+        .properties(title=title_with_r, height=260)
     )
 
 

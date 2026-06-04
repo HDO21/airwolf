@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Ingest raw traffic detector data into data/staging/.
+"""Lokaalne parquet-põhine andmetoru — liilkusandmete sissevõtt.
 
-Preserves source data with minimal modification. All transformation,
-lane aggregation, spatial filtering and validation are done by run_transform.py.
+See skript on osa LOKAALSEST andmetorust (Docker pole vajalik):
+    ingest_traffic.py  →  run_transform.py  →  run_mart.py  →  streamlit_app.py
 
-live mode   — Fetches current ArcGIS snapshot; stores timestamped raw parquet
-              and updates the detector registry used by transform.
-backfill    — Reads historical CSV; upserts raw lane-level rows into
-              traffic_backfill.parquet (deduplicated on id × kanal × aeg).
+Andmebaasi kasutava andmetoru jaoks vaata ingestion/ingest_traffic.py,
+mis kirjutab andmed otse analytics-db staging-skeemi PostgresHook'i kaudu.
 
-Usage:
+Jooksutamise näited:
     python ingest_traffic.py --mode live
     python ingest_traffic.py --mode backfill --file /path/to/ll_2025.csv \\
         [--stations-file "/path/to/LL jaamad.xlsx"]

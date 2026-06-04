@@ -8,5 +8,6 @@ RUN pip install --no-cache-dir \
     "urllib3<2.6" \
     psycopg2-binary \
     pyproj \
+    openpyxl \
     dbt-core==1.9.0 \
     dbt-postgres==1.9.0
