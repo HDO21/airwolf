@@ -339,7 +339,7 @@ def render_area_map(area_key: str, station_data: dict) -> None:
         _add_marker_layer(m, _bbox_filter(traffic_df, bbox),
                           "#2ca02c", 5, name_col, id_col)
     m.get_root().html.add_child(folium.Element(_MAP_LEGEND_HTML))
-    st_folium(m, height=350, use_container_width=True, returned_objects=[],
+    st_folium(m, height=350, width="100%", returned_objects=[],
               key=f"area_map_{area_key}")
 
 
@@ -364,7 +364,7 @@ def render_estonia_map() -> None:
             ),
         ).add_to(m)
     m.get_root().html.add_child(folium.Element(_ESTONIA_LEGEND_HTML))
-    st_folium(m, height=380, use_container_width=True, returned_objects=[],
+    st_folium(m, height=380, width="100%", returned_objects=[],
               key="estonia_map")
 
 
@@ -609,7 +609,7 @@ def _show(chart: alt.Chart | None, fallback: str = "Andmed puuduvad.") -> None:
     if chart is None:
         st.info(fallback)
     else:
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
 
 
 def _last_updated_str() -> str:
@@ -814,7 +814,7 @@ def render_voordlused_tab() -> None:
         else:
             chart = line.properties(height=260)
 
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
 
         # 3 KPI metrics: Tallinn | Tartu | Narva
         st.markdown("##### Kõige saastatum kuu")
@@ -834,6 +834,48 @@ def render_voordlused_tab() -> None:
                 delta_color="off",
             )
 
+    # ── PM10 korrelatsioonid: tuul vs liiklus ─────────────────────────────────
+    st.markdown("---")
+    st.subheader("PM10 korrelatsioonid: tuul vs liiklus")
+    try:
+        jdf = _read_mart("mart_joined")
+        if not jdf.empty and "PM10" in jdf.columns:
+            jdf["obs_time"] = pd.to_datetime(jdf["obs_time"], errors="coerce")
+            if year_filter is not None:
+                jdf = jdf[jdf["obs_time"].dt.year == year_filter]
+            jdf = jdf[jdf["PM10"] > 0]
+            _area_labels = [("tallinn", "Tallinn"), ("tartu", "Tartu"), ("narva", "Narva")]
+            conclusions = []
+            for area_key, area_label in _area_labels:
+                sub = jdf[jdf["area"] == area_key][["PM10", "wind_speed_ms", "total_flow"]].dropna()
+                if len(sub) < 5:
+                    conclusions.append((area_label, float("nan"), float("nan")))
+                    continue
+                conclusions.append((
+                    area_label,
+                    sub["PM10"].corr(sub["wind_speed_ms"]),
+                    sub["PM10"].corr(sub["total_flow"]),
+                ))
+            corr_cols = st.columns(len(conclusions))
+            for col, (label, r_wind, r_traffic) in zip(corr_cols, conclusions):
+                with col:
+                    w = abs(r_wind) if pd.notna(r_wind) else 0.0
+                    t = abs(r_traffic) if pd.notna(r_traffic) else 0.0
+                    r_w_str = f"{r_wind:.2f}" if pd.notna(r_wind) else "—"
+                    r_t_str = f"{r_traffic:.2f}" if pd.notna(r_traffic) else "—"
+                    st.metric(label, f"r(tuul) = {r_w_str}", f"r(liiklus) = {r_t_str}",
+                              delta_color="off")
+                    if w > t and w > 0:
+                        st.success("PM10 sõltub rohkem tuule kiirusest.")
+                    elif t > w and t > 0:
+                        st.warning("PM10 sõltub rohkem liiklustihedusest.")
+                    else:
+                        st.info("Andmed puuduvad või seosed on võrdsed.")
+        else:
+            st.info("Ühendatud andmed puuduvad korrelatsioonide arvutamiseks.")
+    except Exception:
+        pass
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
@@ -847,28 +889,3 @@ for _tab, _area_key in zip(tabs[:3], ["Tallinn", "Narva", "Tartu"]):
         render_area_tab(_area_key)
 with tabs[3]:
     render_voordlused_tab()
-
-import pandas as pd
-from sqlalchemy import create_engine
-import streamlit as st
-
-engine = create_engine("postgresql://airflow:airflow@airwolf-analytics-db:5432/airflow")
-
-st.header("PM10 korrelatsioonid ja järeldused")
-
-corr = pd.read_sql("SELECT * FROM analytics.mart_correlations", engine)
-
-st.subheader("Korrelatsioonid")
-st.dataframe(corr)
-
-st.subheader("Järeldused")
-
-for _, row in corr.iterrows():
-    area = row["area"]
-    wind = abs(row["corr_pm10_wind"])
-    traffic = abs(row["corr_pm10_traffic"])
-
-    if wind > traffic:
-        st.success(f"{area}: PM10 sõltub rohkem tuule kiirusest.")
-    else:
-        st.warning(f"{area}: PM10 sõltub rohkem liiklustihedusest.")
