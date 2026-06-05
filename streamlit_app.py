@@ -834,45 +834,50 @@ def render_voordlused_tab() -> None:
                 delta_color="off",
             )
 
-    # ── PM10 korrelatsioonid: tuul vs liiklus ─────────────────────────────────
+    # ── Korrelatsioonid tuule ja liiklusega kõigi näitajate lõikes ───────────
     st.markdown("---")
-    st.subheader("PM10 korrelatsioonid: tuul vs liiklus")
     try:
         jdf = _read_mart("mart_joined")
-        if not jdf.empty and "PM10" in jdf.columns:
+        if jdf.empty:
+            st.info("Ühendatud andmed puuduvad korrelatsioonide arvutamiseks.")
+        else:
             jdf["obs_time"] = pd.to_datetime(jdf["obs_time"], errors="coerce")
             if year_filter is not None:
                 jdf = jdf[jdf["obs_time"].dt.year == year_filter]
-            jdf = jdf[jdf["PM10"] > 0]
             _area_labels = [("tallinn", "Tallinn"), ("tartu", "Tartu"), ("narva", "Narva")]
-            conclusions = []
-            for area_key, area_label in _area_labels:
-                sub = jdf[jdf["area"] == area_key][["PM10", "wind_speed_ms", "total_flow"]].dropna()
-                if len(sub) < 5:
-                    conclusions.append((area_label, float("nan"), float("nan")))
+            for indicator in _INDICATORS:
+                if indicator not in jdf.columns:
                     continue
-                conclusions.append((
-                    area_label,
-                    sub["PM10"].corr(sub["wind_speed_ms"]),
-                    sub["PM10"].corr(sub["total_flow"]),
-                ))
-            corr_cols = st.columns(len(conclusions))
-            for col, (label, r_wind, r_traffic) in zip(corr_cols, conclusions):
-                with col:
-                    w = abs(r_wind) if pd.notna(r_wind) else 0.0
-                    t = abs(r_traffic) if pd.notna(r_traffic) else 0.0
-                    r_w_str = f"{r_wind:.2f}" if pd.notna(r_wind) else "—"
-                    r_t_str = f"{r_traffic:.2f}" if pd.notna(r_traffic) else "—"
-                    st.metric(label, f"r(tuul) = {r_w_str}", f"r(liiklus) = {r_t_str}",
-                              delta_color="off")
-                    if w > t and w > 0:
-                        st.success("PM10 sõltub rohkem tuule kiirusest.")
-                    elif t > w and t > 0:
-                        st.warning("PM10 sõltub rohkem liiklustihedusest.")
-                    else:
-                        st.info("Andmed puuduvad või seosed on võrdsed.")
-        else:
-            st.info("Ühendatud andmed puuduvad korrelatsioonide arvutamiseks.")
+                ind_label = _INDICATOR_FULL_NAMES.get(indicator, indicator)
+                st.subheader(f"{ind_label}: tuul vs liiklus")
+                idf = jdf[jdf[indicator] > 0]
+                conclusions = []
+                for area_key, area_label in _area_labels:
+                    sub = (idf[idf["area"] == area_key]
+                           [[indicator, "wind_speed_ms", "total_flow"]].dropna())
+                    if len(sub) < 5:
+                        conclusions.append((area_label, float("nan"), float("nan")))
+                        continue
+                    conclusions.append((
+                        area_label,
+                        sub[indicator].corr(sub["wind_speed_ms"]),
+                        sub[indicator].corr(sub["total_flow"]),
+                    ))
+                corr_cols = st.columns(3)
+                for col, (label, r_wind, r_traffic) in zip(corr_cols, conclusions):
+                    with col:
+                        w = abs(r_wind) if pd.notna(r_wind) else 0.0
+                        t = abs(r_traffic) if pd.notna(r_traffic) else 0.0
+                        r_w_str = f"{r_wind:.2f}" if pd.notna(r_wind) else "—"
+                        r_t_str = f"{r_traffic:.2f}" if pd.notna(r_traffic) else "—"
+                        st.metric(label, f"r(tuul) = {r_w_str}", f"r(liiklus) = {r_t_str}",
+                                  delta_color="off")
+                        if w > t and w > 0:
+                            st.success(f"{indicator} sõltub rohkem tuule kiirusest.")
+                        elif t > w and t > 0:
+                            st.warning(f"{indicator} sõltub rohkem liiklustihedusest.")
+                        else:
+                            st.info("Andmed puuduvad või seosed on võrdsed.")
     except Exception:
         pass
 
