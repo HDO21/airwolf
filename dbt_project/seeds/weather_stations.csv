@@ -1,4 +1,12 @@
-jaam_kood,station_name,area
-AJHARK01,Tallinn-Harku,tallinn
-AJTART01,Tartu-Tõravere,tartu
-AJNARV01,Narva,narva
+
+    
+    
+    truncate table "airwolf"."reference"."weather_stations";
+    -- dbt seed --
+    
+          insert into "airwolf"."reference"."weather_stations" ("jaam_kood", "station_name", "area") values
+          (%s,%s,%s),(%s,%s,%s),(%s,%s,%s)
+      
+
+;
+  

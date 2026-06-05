@@ -8,6 +8,7 @@ data/quality/
 data/raw/traffic/counts/*.csv
 data/raw/traffic/stations/*.xlsx
 data/raw/traffic/stations/*.csv
+target/
 .DS_Store
 *.egg-info/
 dist/

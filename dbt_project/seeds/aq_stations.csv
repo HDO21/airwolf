@@ -1,5 +1,12 @@
-station_id,station_name,area,lat,lon
-4,Narva,narva,59.3722,28.2007
-5,Liivalaia,tallinn,59.4310,24.7605
-7,Õismäe,tallinn,59.4140,24.6497
-8,Tartu,tartu,58.3706,26.7348
+
+    
+    
+    truncate table "airwolf"."reference"."aq_stations";
+    -- dbt seed --
+    
+          insert into "airwolf"."reference"."aq_stations" ("station_id", "station_name", "area", "lat", "lon") values
+          (%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s)
+      
+
+;
+  
