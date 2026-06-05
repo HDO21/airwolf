@@ -847,3 +847,28 @@ for _tab, _area_key in zip(tabs[:3], ["Tallinn", "Narva", "Tartu"]):
         render_area_tab(_area_key)
 with tabs[3]:
     render_voordlused_tab()
+
+import pandas as pd
+from sqlalchemy import create_engine
+import streamlit as st
+
+engine = create_engine("postgresql://airflow:airflow@airwolf-analytics-db:5432/airflow")
+
+st.header("PM10 korrelatsioonid ja järeldused")
+
+corr = pd.read_sql("SELECT * FROM analytics.mart_correlations", engine)
+
+st.subheader("Korrelatsioonid")
+st.dataframe(corr)
+
+st.subheader("Järeldused")
+
+for _, row in corr.iterrows():
+    area = row["area"]
+    wind = abs(row["corr_pm10_wind"])
+    traffic = abs(row["corr_pm10_traffic"])
+
+    if wind > traffic:
+        st.success(f"{area}: PM10 sõltub rohkem tuule kiirusest.")
+    else:
+        st.warning(f"{area}: PM10 sõltub rohkem liiklustihedusest.")
