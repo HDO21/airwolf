@@ -270,7 +270,8 @@ def _prepare_weather_rows(
     rows: list[tuple] = []
     for _, row in wide.iterrows():
         rows.append(
-            (
+            (   
+                str(run_id),
                 row["jaam_kood"],
                 row["obs_time"].to_pydatetime(),
                 None if pd.isna(row["lat"]) else float(row["lat"]),
@@ -309,11 +310,12 @@ def _upsert_weather_rows(hook, rows: list[tuple], schema: str = "staging") -> in
 
     sql = f"""
         INSERT INTO {schema}.weather_raw
-            (jaam_kood, obs_time, lat, lon,
+            (run_id, jaam_kood, obs_time, lat, lon,
              temperature_c, wind_speed_ms, wind_direction_deg, precip_mm, loaded_at)
         VALUES
-            (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
         ON CONFLICT (jaam_kood, obs_time) DO UPDATE SET
+            run_id = EXCLUDED.run_id,
             lat = EXCLUDED.lat,
             lon = EXCLUDED.lon,
             temperature_c = EXCLUDED.temperature_c,
@@ -340,7 +342,7 @@ def _filter_rows_by_time(
     filtered: list[tuple] = []
 
     for row in rows:
-        obs_time = row[1]
+        obs_time = row[2]
 
         if start_time is not None and obs_time < start_time:
             continue
@@ -364,7 +366,7 @@ def load_weather_backfill(
     """
     Backfill: laeb kuu-vahemiku staging.weather_raw tabelisse.
 
-    Vaikimisi: 2026 märtsist käesoleva kuuni.
+    Vaikimisi: 2025 märtsist käesoleva kuuni.
     UPSERT tõttu sama perioodi korduv käivitamine ei tekita duplikaate.
     """
     today = datetime.today()

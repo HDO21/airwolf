@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS staging.pipeline_runs (
 );
 
 -- Õhukvaliteet: ohuseire.ee /api/monitoring/et.
--- Algfail deduplikeeris võtmega station × indicator × measured.
 CREATE TABLE IF NOT EXISTS staging.air_quality_raw (
     run_id      uuid REFERENCES staging.pipeline_runs(run_id),
     station     text NOT NULL,
@@ -29,7 +28,6 @@ CREATE TABLE IF NOT EXISTS staging.air_quality_raw (
 );
 
 -- Ilm: keskkonnaandmed.envir.ee / f_kliima_tund.
--- Algfail deduplikeeris võtmega jaam_kood × aasta × kuu × paev × tund × element_kood.
 -- Toorandmed Keskkonnaandmed f_kliima_tund API-st.
 -- Üks rida = üks ilmajaam × üks vaatlustund × üks pipeline'i käivitus.
 --
@@ -54,7 +52,7 @@ CREATE TABLE IF NOT EXISTS staging.weather_raw (
         PRIMARY KEY (jaam_kood, obs_time)
 );
 
---CSV backfill
+--Liiklusandmete CSV failist backfill
 CREATE TABLE IF NOT EXISTS staging.traffic_counts_raw (
     run_id                         uuid REFERENCES staging.pipeline_runs(run_id),
 
@@ -100,7 +98,7 @@ CREATE TABLE IF NOT EXISTS staging.traffic_counts_raw (
         PRIMARY KEY (id, kanal, aeg)
 );
 
---Hourly APi
+--Liiklusandmete APi-st live andmed
 CREATE TABLE IF NOT EXISTS staging.traffic_live_raw (
     run_id                         uuid REFERENCES staging.pipeline_runs(run_id),
 

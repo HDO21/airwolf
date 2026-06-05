@@ -5,6 +5,7 @@ import argparse
 import logging
 import json
 import time
+import urllib3
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,8 @@ except ModuleNotFoundError:  # Allows local linting/testing outside the Airflow 
     execute_values = None
 
 log = logging.getLogger(__name__)
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 ARCGIS_BASE = "https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer/0"
 HEADERS = {"Accept": "application/json"}
@@ -182,7 +185,13 @@ def _query_arcgis(params: dict[str, Any]) -> dict[str, Any]:
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.get(url, params=base, headers=HEADERS, timeout=TIMEOUT)
+            resp = requests.get(
+                url,
+                params=base,
+                headers=HEADERS,
+                timeout=TIMEOUT,
+                verify=False,
+        )
             if resp.status_code >= 500:
                 raise requests.HTTPError(response=resp)
             resp.raise_for_status()

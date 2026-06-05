@@ -190,12 +190,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      REQUIRE_POSTGRES: "1"
     depends_on:
       analytics-db:
         condition: service_healthy
     ports:
       - "${DASHBOARD_PORT_HOST:-8501}:8501"
-    command: ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
+    command: ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"] 
 
 
 

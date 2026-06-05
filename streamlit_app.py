@@ -25,8 +25,16 @@ def _db_engine():
     host = os.getenv("POSTGRES_HOST")
     if not host:
         return None
+
+    required = ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
+    missing = [name for name in required if not os.getenv(name)]
+    if missing:
+        st.error(f"Puuduvad andmebaasi keskkonnamuutujad: {', '.join(missing)}")
+        return None
+
     try:
         from sqlalchemy import create_engine, text
+
         dsn = (
             f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:"
             f"{os.environ['POSTGRES_PASSWORD']}@{host}:"
@@ -34,11 +42,11 @@ def _db_engine():
             f"{os.environ['POSTGRES_DB']}"
         )
         engine = create_engine(dsn, pool_pre_ping=True)
-        # Quick connectivity check
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return engine
-    except Exception:
+    except Exception as exc:
+        st.error(f"Andmebaasiga ühendamine ebaõnnestus: {exc}")
         return None
 
 
@@ -48,14 +56,20 @@ def _get_engine():
 
 
 def _read_mart(table: str, sql: str | None = None) -> pd.DataFrame:
-    """Read from DB mart table when available, otherwise from parquet fallback."""
+    """Read mart table from PostgreSQL; optionally fall back to parquet locally."""
     engine = _get_engine()
     if engine is not None:
         query = sql or f"SELECT * FROM marts.{table}"
         try:
             return pd.read_sql(query, engine)
-        except Exception:
-            pass
+        except Exception as exc:
+            st.error(f"Tabeli marts.{table} lugemine ebaõnnestus: {exc}")
+            return pd.DataFrame()
+
+    if os.getenv("REQUIRE_POSTGRES", "0") == "1":
+        st.error("POSTGRES_HOST ei ole seatud, aga REQUIRE_POSTGRES=1. Dashboard ootab andmeid andmebaasist.")
+        return pd.DataFrame()
+
     parquet = _MART / f"{table}.parquet"
     if parquet.exists():
         return pd.read_parquet(parquet)
@@ -259,7 +273,7 @@ def fetch_aq_all_areas(year_filter: int | None) -> pd.DataFrame:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _MAP_LEGEND_HTML = """
-<div style="position:fixed;bottom:24px;left:24px;z-index:9999;
+<div style="position:fixed;bottom:70px;left:24px;z-index:9999;
      background:white;padding:8px 14px;border:1px solid #bbb;
      border-radius:6px;font-size:12px;line-height:2;color:#222">
   <svg width="14" height="14" style="vertical-align:middle">
@@ -640,7 +654,7 @@ def _area_filter(area_key: str) -> tuple[int, int]:
 
     col_y, col_m, _ = st.columns([1, 2, 6])
     with col_y:
-        st.selectbox("Aasta", [2024, 2025, 2026], key=year_key,
+        st.selectbox("Aasta", [2025, 2026], key=year_key,
                      on_change=_reset_month)
     with col_m:
         st.selectbox("Kuu", list(range(1, 13)),
@@ -729,7 +743,7 @@ def render_voordlused_tab() -> None:
 
     # Year filter — label without "(võrdlus)", applies to all blocks below
     year_opt = st.selectbox(
-        "Aasta", ["2024", "2025", "2026", "Kõik"], index=3, key="voordlus_year"
+        "Aasta", ["2025", "2026", "Kõik"], index=2, key="voordlus_year"
     )
     year_filter = None if year_opt == "Kõik" else int(year_opt)
 
@@ -886,7 +900,8 @@ def render_voordlused_tab() -> None:
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
-st.caption(f"Viimati uuendatud: {_last_updated_str()}")
+_source_label = "PostgreSQL / marts skeem" if _get_engine() is not None else "kohalik parquet fallback"
+st.caption(f"Andmeallikas: {_source_label} · Viimati uuendatud: {_last_updated_str()}")
 
 tabs = st.tabs(["Tallinn", "Narva", "Tartu", "Võrdlused"])
 for _tab, _area_key in zip(tabs[:3], ["Tallinn", "Narva", "Tartu"]):
