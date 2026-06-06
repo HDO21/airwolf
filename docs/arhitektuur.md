@@ -6,27 +6,23 @@ Kas, kuidas ja millisel määral sõltuvad Eesti linnades (Tallinn, Tartu ja Nar
 
 Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, tehakse esialgne PoC 2025. aasta kohta.
 
-## Mõõdikud
+## Uurimisküsimused
 
-1. **Saasteaine kontsentratsiooni seos liiklussageduse ja ilmastikuteguritega**
-   SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seos liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Kuvatakse **Analüütika** vahekaardil hajuvusdiagrammidena koos lineaarse trendijoone ja Pearson **r** korrelatsioonikordajaga. Indikaator on kasutaja poolt valitav.
+1. Kui tugev on seos õhusaasteainete kontsentratsiooni ja ilmastikutegurite (temperatuur, sademed, tuulekiirus) vahel Tallinna, Tartu ja Narva piirkonnas?
 
-2. **Kõige saastatum kuu**
-   Iga saasteaine ja linna kohta kuvatakse **Võrdlused** vahekaardil kuukeskmised kontsentratsioonid ning kõrgeima väärtusega kuu koos kontsentratsiooniga (µg/m³).
+2. Kui tugev on seos õhusaasteainete kontsentratsiooni ja liiklussageduse vahel kolmes uurimispiirkonnas?
 
-3. **Tuulekiiruse ja liiklussageduse korrelatsioon saasteainetega**
-   Iga saasteaine kohta kuvatakse **Võrdlused** vahekaardil Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega kolme linna lõikes, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
+3. Kumb tegur — tuulekiirus või liiklussagedus — näitab tugevamat statistilist seost saasteainete kontsentratsiooniga, ja kas see erineb piirkonniti?
 
-### Mõõdikud dashboardil
+## Mõõdikud dashboardil
 
-1. **Saasteaine kontsentratsiooni seos liiklussageduse ja ilmastikuteguritega**
-   SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seos liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Kuvatakse **Analüütika** vahekaardil hajuvusdiagrammidena koos lineaarse trendijoone ja Pearson **r** korrelatsioonikordajaga. Indikaator on kasutaja poolt valitav.
+Dashboard on jagatud kolmeks vahekaardiks:
 
-2. **Kõige saastatum kuu**
-   Iga saasteaine ja linna kohta kuvatakse **Võrdlused** vahekaardil kuukeskmised kontsentratsioonid ning kõrgeima väärtusega kuu koos kontsentratsiooniga (µg/m³).
+**Mõõdistus- ja vaatlusandmed** — tunnipõhised ajagraafikud valitud kuu lõikes: temperatuur ja sademed (kaheteljeliselt), tuulekiirus ning liiklussagedus koos üksikdetektorite vaadetega.
 
-3. **Tuulekiiruse ja liiklussageduse korrelatsioon saasteainetega**
-   Iga saasteaine kohta kuvatakse **Võrdlused** vahekaardil Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega kolme linna lõikes, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
+**Analüütika** — hajuvusdiagrammid SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seosest liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Iga diagramm sisaldab lineaarset trendjoont ja Pearson **r** korrelatsioonikordajat. Indikaator on kasutaja poolt valitav.
+
+**Võrdlus** — kuukeskmised kontsentratsioonid kolme linna lõikes koos kõrgeima väärtusega kuu ja kontsentratsiooniga (µg/m³). Lisaks Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega iga saasteaine ja linna kohta, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
 
 
 ## Andmeallikad
