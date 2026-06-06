@@ -23,10 +23,10 @@ Kuna 2026. aasta õhukvaliteedi mõõtmiste andmeid ei ole veel avalikustatud, t
    SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seos liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Kuvatakse **Analüütika** vahekaardil hajuvusdiagrammidena koos lineaarse trendijoone ja Pearson **r** korrelatsioonikordajaga. Indikaator on kasutaja poolt valitav.
 
 2. **Kõige saastatum kuu**
-   Iga saasteaine ja linna kohta kuvatakse **Võrdlus** vahekaardil kuukeskmised kontsentratsioonid ning kõrgeima väärtusega kuu koos kontsentratsiooniga (µg/m³).
+   Iga saasteaine ja linna kohta kuvatakse **Võrdlused** vahekaardil kuukeskmised kontsentratsioonid ning kõrgeima väärtusega kuu koos kontsentratsiooniga (µg/m³).
 
 3. **Tuulekiiruse ja liiklussageduse korrelatsioon saasteainetega**
-   Iga saasteaine kohta kuvatakse **Võrdlus** vahekaardil Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega kolme linna lõikes, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
+   Iga saasteaine kohta kuvatakse **Võrdlused** vahekaardil Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega kolme linna lõikes, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
 
 
 ## Andmeallikad
