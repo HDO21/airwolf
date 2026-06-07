@@ -26,24 +26,62 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 
 ## Projekti struktuur
 
-    ingestion/             — andmete laadimine (ilm, õhukvaliteet, liiklus)
-    dbt_project/           — transformatsioonid ja mart-kihi mudelid
-    dags/                  — Airflow DAG igapäevaseks käivituseks
-    sql/                   — andmebaasi skeemid ja tabelite loomine
-    data/mart/             — mart-kihi andmefailid (dashboardi sisend)
-    docs/                  — arhitektuur ja dokumentatsioon
-    streamlit_app.py       — dashboard
-    compose.yml            — Docker Compose seadistus
-    .env.example           — keskkonnamuutujate näidis
+.
+├── archive_old_pipeline/
+│
+├── dags/
+│   └── airwolf_pipeline.py		-Airflow töövoog: loob tabelid, laeb andmed, käivitab dbt mudelid ja testid
+├── data/
+│    └── raw
+│  		  ├── counts    		-liiklusloenduste andmed csv failidena
+│   	  └── stations 			-liiklusloenduste jaamad csv failina 
+		 
+├── dbt_project/				
+│   ├── logs/
+│   ├── macros/
+│   ├── models/					-transformatsioonid
+│   ├── seeds/					-õhukvaliteedi ja ilmavaatluste jaamad (csv)
+│   ├── target/
+│   ├── tests/					-testid
+│   ├── tests_disabled/			-testid, mis pole hetkel kasutusel
+│   ├── dbt_project.yml
+│   └── profiles.yml
+│
+├── docs/                       -arhitektuur ja dokumentatsioon
+│   ├── arhitektuur.md
+│   └── progress.md
+│
+├── ingestion/					-andmete laadimine (ilm, õhukvaliteet, liiklus)
+│   ├── ingest_air_quality.py
+│   ├── ingest_traffic.py
+│   └── ingest_weather.py
+│
+├── sql/						-andmebaasi stating tabelite loomine (SQL)
+│
+├──.env.example					-kopeeri .env failiks
+├──compose.yml					-Docker Compose seadistus, mis käivitab kogu projekti teenused
+├──Dockerfile.airflow           -Airflow konteineri ehitusfail
+├──Dockerfile.app               -Streamlit dashboardi konteineri ehitusfail
+└──streamlit_app.py             -dashboard
+
 
 ## Käivitamine
 
+    # 1. Kopeeri keskkonnamuutujad
     cp .env.example .env
-    # Täida .env-is liikluse sisendfailide teed
+    
+    # 2. Lae alla liiklusloenduste failid https://andmed.eesti.ee/ keskkonnast ja salvesta õige kausta alla
+        * traffic_2025.csv ja traffic_2026.csv      -> data/raw/traffic/counts
+        * LL_jaamad.csv                             -> data/raw/traffic/stations
+      
+    # 3. Käivita kõik teenused
     docker compose up -d --build
 
-Dashboard: http://localhost:8501  
-Airflow UI: http://localhost:8080
+    # 4. Ava Airflow UI Airflow UI: http://localhost:8080
+    Käivita DAG "airwolf_pipeline" koos backfillidega (andmed sisesta alates 2025 a. 1. jaanuar)
+
+    # 5. Ava Streamlit http://localhost:8501 ja uudista
+
 
 ## Dokumentatsioon
 
