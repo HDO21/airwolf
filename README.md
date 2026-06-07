@@ -134,6 +134,17 @@ AIRWOLF/
 ## Kokkuvõte, puudused ja võimalikud edasiarendused
 
 Kokkuvõte: Uurisime seost nii liiklussageduse kui ka ilmastikunähtustega. Esialgne analüüs viitab suuremat seost pigem ilmastikuga, eriti tuulekiirusega, kui liiklusega. Nagu kaartidelt nähtub, on eri näitajate mõõdistuspunktid eri asukohtadega ja nende paiknemistihedus varieerub, siis peab arvestama võimalikest ruumilistest variatsioonidest tulenevate tulemuste ebatäpsuse või moonutusega. võimalik, et liiklusest tingitud keskkonnamõjud on loomult liiga lokaalsed, et üldmõõdistusi märkimisväärselt mõjutada.
+<<<<<<< HEAD
+=======
+
+
+**Puudused:**
+
+-
+
+**Mis edasi:**
+
+>>>>>>> 1dc644f5e132509e06c59015c6b0b87fb27afd9c
 
 
 ## Dokumentatsioon
