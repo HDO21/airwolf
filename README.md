@@ -28,44 +28,38 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 
 ## Projekti struktuur
 
-.
-├── archive_old_pipeline/       -vana töövoog, mis töötab lokaalselt parquet failide põhjal
-│
-├── dags/
-│   └── airwolf_pipeline.py		-Airflow töövoog: loob tabelid, laeb andmed, käivitab dbt mudelid ja testid
-├── data/
-│    └── raw
-│  		  ├── counts    		-liiklusloenduste andmed csv failidena
-│   	  └── stations 			-liiklusloenduste jaamad csv failina 
-		 
-├── dbt_project/				
-│   ├── logs/
-│   ├── macros/
-│   ├── models/					-transformatsioonid
-│   ├── seeds/					-õhukvaliteedi ja ilmavaatluste jaamad (csv)
-│   ├── target/
-│   ├── tests/					-testid
-│   ├── tests_disabled/			-testid, mis pole hetkel kasutusel
-│   ├── dbt_project.yml
-│   └── profiles.yml
-│
-├── docs/                       -arhitektuur ja dokumentatsioon
-│   ├── arhitektuur.md
-│   └── progress.md
-│
-├── ingestion/					-andmete laadimine (ilm, õhukvaliteet, liiklus)
-│   ├── ingest_air_quality.py
-│   ├── ingest_traffic.py
-│   └── ingest_weather.py
-│
-├── sql/						-andmebaasi stating tabelite loomine (SQL)
-│
-├──.env.example					-kopeeri .env failiks
-├──compose.yml					-Docker Compose seadistus, mis käivitab kogu projekti teenused
-├──Dockerfile.airflow           -Airflow konteineri ehitusfail
-├──Dockerfile.app               -Streamlit dashboardi konteineri ehitusfail
-└──streamlit_app.py             -dashboard
-
+| Kaust / fail | Kirjeldus |
+|---|---|
+| `archive_old_pipeline/` | Vana töövoog, mis töötab lokaalselt Parquet-failide põhjal. |
+| `dags/` | Airflow DAG-ide kaust. |
+| `dags/airwolf_pipeline.py` | Airflow töövoog, mis loob tabelid, laeb andmed, käivitab dbt mudelid ja testid. |
+| `data/` | Andmefailide kaust. |
+| `data/raw/` | Toorandmete failide kaust. |
+| `data/raw/counts/` | Liiklusloenduste andmed CSV-failidena. |
+| `data/raw/stations/` | Liiklusloenduste jaamad CSV-failina. |
+| `dbt_project/` | dbt projekti kaust, kus asuvad transformatsioonid, testid ja dbt seadistusfailid. |
+| `dbt_project/logs/` | dbt logifailid. |
+| `dbt_project/macros/` | dbt makrode kaust. |
+| `dbt_project/models/` | dbt transformatsioonimudelid. |
+| `dbt_project/seeds/` | Õhukvaliteedi ja ilmavaatlusjaamade CSV-põhised referentstabelid. |
+| `dbt_project/target/` | dbt automaatselt loodud väljundkaust, kus asuvad kompileeritud SQL ja jooksutamise tulemused. |
+| `dbt_project/tests/` | Aktiivsed dbt andmekvaliteedi testid. |
+| `dbt_project/tests_disabled/` | Testid, mis on olemas, aga mida hetkel ei käivitata. |
+| `dbt_project/dbt_project.yml` | dbt projekti põhiseadistus. |
+| `dbt_project/profiles.yml` | dbt andmebaasiühenduse seadistus. |
+| `docs/` | Projekti arhitektuuri ja dokumentatsiooni kaust. |
+| `docs/arhitektuur.md` | Projekti arhitektuuri kirjeldus. |
+| `docs/progress.md` | Projekti edenemise kirjeldus. |
+| `ingestion/` | Andmete laadimise skriptide kaust. |
+| `ingestion/ingest_air_quality.py` | Õhukvaliteedi andmete laadimise skript. |
+| `ingestion/ingest_traffic.py` | Liiklusandmete laadimise skript. |
+| `ingestion/ingest_weather.py` | Ilmaandmete laadimise skript. |
+| `sql/` | SQL-failide kaust andmebaasi skeemide ja staging-tabelite loomiseks. |
+| `.env.example` | Näidisfail keskkonnamuutujate jaoks; kopeeritakse `.env` failiks. |
+| `compose.yml` | Docker Compose seadistus, mis käivitab kogu projekti teenused. |
+| `Dockerfile.airflow` | Airflow konteineri ehitusfail. |
+| `Dockerfile.app` | Streamlit dashboardi konteineri ehitusfail. |
+| `streamlit_app.py` | Streamlit dashboardi rakendusfail. |
 
 ## Käivitamine
 
