@@ -108,8 +108,8 @@ Testid käivitab `dbt test` automaatselt pärast iga `dbt run`-i. Tulemused logi
 
 ## Kokkuvõte, puudused ja võimalikud edasiarendused
 
-Kokkuvõte: Uurisime seost nii liiklussageduse kui ka ilmastikunähtustega. Esialgne analüüs viitab suuremat seost pigem ilmastikuga, eriti tuulekiirusega, kui liiklusega. Nagu kaartidelt nähtub, on eri näitajate mõõdistuspunktid eri asukohtadega ja nende paiknemistihedus varieerub, siis peab arvestama võimalikest ruumilistest variatsioonidest tulenevate tulemuste ebatäpsuse või moonutusega. võimalik, et liiklusest tingitud keskkonnamõjud on loomult liiga lokaalsed, et üldmõõdistusi märkimisväärselt mõjutada.
--
+**Kokkuvõte: Uurisime seost nii liiklussageduse kui ka ilmastikunähtustega. Esialgne analüüs viitab suuremat seost pigem ilmastikuga, eriti tuulekiirusega, kui liiklusega. Nagu kaartidelt nähtub, on eri näitajate mõõdistuspunktid eri asukohtadega ja nende paiknemistihedus varieerub, siis peab arvestama võimalikest ruumilistest variatsioonidest tulenevate tulemuste ebatäpsuse või moonutusega. võimalik, et liiklusest tingitud keskkonnamõjud on loomult liiga lokaalsed, et üldmõõdistusi märkimisväärselt mõjutada.
+**
 
 **Puudused:**
 
