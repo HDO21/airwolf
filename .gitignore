@@ -17,4 +17,6 @@ build/
 venv/
 .streamlit/
 dbt_project/logs/
+archive_old_pipeline/data/staging/
+archive_old_pipeline/data/intermediate/
 
