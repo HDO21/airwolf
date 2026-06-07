@@ -36,10 +36,7 @@ AIRWOLF/
 │   └── airwolf_pipeline.py        ← põhitöövoog: loob tabelid, laeb andmed, käivitab dbt mudelid ja testid
 │
 ├── data/                          ← failipõhiste andmete kaust
-│   ├── intermediate/              ← vaheandmed failidena, kui kasutatakse failipõhist töövoogu
-│   ├── mart/                      ← dashboardi lõppandmed Parquet-failidena fallbacki jaoks
-│   ├── raw/                       ← algsed toorandmed failidena
-│   └── staging/                   ← staging-kihi failid, kui andmeid hoitakse ajutiselt failidena
+│   └── raw/                       ← algsed toorandmed failidena
 │
 ├── dbt_project/                   ← dbt projekt andmete transformeerimiseks ja testimiseks
 │   ├── macros/                    ← dbt makrod ehk korduvkasutatavad abifunktsioonid
@@ -59,8 +56,8 @@ AIRWOLF/
 │   ├── ingest_traffic.py          ← liiklusandmete laadimine
 │   └── ingest_weather.py          ← ilmaandmete laadimine
 │
-├── sql/                           ← andmebaasi skeemide ja tabelite loomise SQL-failid
-│   └── create_tables.sql          ← staging, intermediate ja marts skeemide ning toortabelite loomine
+├── sql/                           ← andmebaasi tabelite loomise SQL-failid
+│   └── create_tables.sql          ← staging toortabelite loomine
 │
 ├── .env.example                   ← näidis keskkonnamuutujate fail; kopeeritakse lokaalselt .env failiks
 ├── .gitignore                     ← määrab, milliseid faile Git ei jälgi
