@@ -32,8 +32,8 @@ Dashboard on jagatud neljaks vahekaardiks: **Tallinn**, **Narva**, **Tartu** ja 
 | `f_kliima_jaam_vaatlus` | `https://keskkonnaandmed.envir.ee/f_kliima_jaam_vaatlus` | Avalik HTTP API | Pigem aeglaselt muutuv | Ilmajaamade koordinaadid ja metaandmed |
 | `ohuseire.ee` | `https://ohuseire.ee/api/monitoring/et` | Pool-avalik API (kasutusel EKUKi kaardirakenduses) | Jah, uueneb pidevalt | Õhukvaliteedi seireandmed: SO2, NO2, O3, PM10, PM2.5 |
 | `traffic_detectors` MapServer | `https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer/0` | Avalik ArcGIS REST teenus | Jah, jooksev snapshot | Liiklusdetektorite tunnipõhised mõõtmised: liiklusvoog, raskeveokid, kiirus |
-| Ajalooliste liiklussagedusandmete CSV | 'https://andmed.eesti.ee/datasets/liiklusloenduse-andmed' | Kohalik sisendfail (CSV)| Ei | Ajalooline liiklussagedus, mis seotakse detektorite asukohtadega |
-| Ajalooliste detektorite asukohtade fail | 'https://andmed.eesti.ee/datasets/liiklusloenduse-andmed' | Kohalik sisendfail (CSV) | Ei | Detektorite koordinaadid ja nimed backfilli jaoks |
+| Ajalooliste liiklussagedusandmete CSV | `https://andmed.eesti.ee/datasets/liiklusloenduse-andmed` | Kohalik sisendfail (CSV)| Ei | Ajalooline liiklussagedus, mis seotakse detektorite asukohtadega |
+| Ajalooliste detektorite asukohtade fail | `https://andmed.eesti.ee/datasets/liiklusloenduse-andmed` | Kohalik sisendfail (CSV) | Ei | Detektorite koordinaadid ja nimed backfilli jaoks |
 | OpenStreetMap | `https://www.openstreetmap.org` | Avalik kaardiandmestik | Jah | Aluskaart dashboardi kaardivaates |
 
 

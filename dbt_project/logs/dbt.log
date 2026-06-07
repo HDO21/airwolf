@@ -43470,3 +43470,2500 @@ where total_flow < 0
 [0m18:03:18.521661 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x74ffdb8322d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x74ffd93c3c50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x74ffd853a630>]}
 [0m18:03:18.522281 [debug] [MainThread]: Flushing usage events
 [0m18:03:19.255695 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:00:20.286249 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa7f7ddf0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa79f5190>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa79f56d0>]}
+
+
+============================== 19:00:20.289919 | 6dc24db5-ad72-4c95-b68e-4246ad57ed84 ==============================
+[0m19:00:20.289919 [info ] [MainThread]: Running with dbt=1.9.0
+[0m19:00:20.290992 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '.', 'debug': 'False', 'version_check': 'True', 'log_path': '/opt/airflow/dbt_project/logs', 'fail_fast': 'False', 'warn_error': 'None', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'None', 'log_format': 'default', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'target_path': 'None', 'invocation_command': 'dbt seed --profiles-dir .', 'send_anonymous_usage_stats': 'True'}
+[0m19:00:20.461307 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa72e1040>]}
+[0m19:00:20.506487 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa72551f0>]}
+[0m19:00:20.507708 [info ] [MainThread]: Registered adapter: postgres=1.9.0
+[0m19:00:20.592231 [debug] [MainThread]: checksum: c99e828bba267739642b5a3ce85f17518764ea526e0e6c4fdc649171c1a66bff, vars: {}, profile: , target: , version: 1.9.0
+[0m19:00:20.915174 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 1 files added, 0 files changed.
+[0m19:00:20.916114 [debug] [MainThread]: Partial parsing: added file: airwolf_dbt://tests/valid_air_quality_ranges.sql
+[0m19:00:21.042644 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.airwolf_dbt.staging
+[0m19:00:21.051560 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa59a7b60>]}
+[0m19:00:21.130973 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:21.139395 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:21.160705 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa693c590>]}
+[0m19:00:21.161549 [info ] [MainThread]: Found 8 models, 23 data tests, 2 seeds, 4 sources, 435 macros
+[0m19:00:21.162323 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa5902d20>]}
+[0m19:00:21.164804 [info ] [MainThread]: 
+[0m19:00:21.165423 [info ] [MainThread]: Concurrency: 2 threads (target='dev')
+[0m19:00:21.165933 [info ] [MainThread]: 
+[0m19:00:21.166590 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m19:00:21.169820 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf'
+[0m19:00:21.219026 [debug] [ThreadPool]: Using postgres connection "list_airwolf"
+[0m19:00:21.219777 [debug] [ThreadPool]: On list_airwolf: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m19:00:21.220598 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:21.235301 [debug] [ThreadPool]: SQL status: SELECT 8 in 0.015 seconds
+[0m19:00:21.237617 [debug] [ThreadPool]: On list_airwolf: Close
+[0m19:00:21.240281 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf, now list_airwolf_marts)
+[0m19:00:21.241100 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf_intermediate'
+[0m19:00:21.245832 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:21.247677 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:21.248283 [debug] [ThreadPool]: On list_airwolf_marts: BEGIN
+[0m19:00:21.248781 [debug] [ThreadPool]: On list_airwolf_intermediate: BEGIN
+[0m19:00:21.249204 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:21.249680 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:21.260010 [debug] [ThreadPool]: SQL status: BEGIN in 0.011 seconds
+[0m19:00:21.260679 [debug] [ThreadPool]: SQL status: BEGIN in 0.011 seconds
+[0m19:00:21.261157 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:21.261800 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:21.262319 [debug] [ThreadPool]: On list_airwolf_marts: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_marts"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'marts'
+  
+[0m19:00:21.262771 [debug] [ThreadPool]: On list_airwolf_intermediate: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_intermediate"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'intermediate'
+  
+[0m19:00:21.270039 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.007 seconds
+[0m19:00:21.270688 [debug] [ThreadPool]: SQL status: SELECT 3 in 0.007 seconds
+[0m19:00:21.272604 [debug] [ThreadPool]: On list_airwolf_marts: ROLLBACK
+[0m19:00:21.274096 [debug] [ThreadPool]: On list_airwolf_intermediate: ROLLBACK
+[0m19:00:21.275217 [debug] [ThreadPool]: On list_airwolf_marts: Close
+[0m19:00:21.275775 [debug] [ThreadPool]: On list_airwolf_intermediate: Close
+[0m19:00:21.276691 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf_marts, now list_airwolf_reference)
+[0m19:00:21.280439 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:21.281079 [debug] [ThreadPool]: On list_airwolf_reference: BEGIN
+[0m19:00:21.281521 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:21.289946 [debug] [ThreadPool]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:21.290832 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:21.291397 [debug] [ThreadPool]: On list_airwolf_reference: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_reference"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'reference'
+  
+[0m19:00:21.294965 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.003 seconds
+[0m19:00:21.296817 [debug] [ThreadPool]: On list_airwolf_reference: ROLLBACK
+[0m19:00:21.297791 [debug] [ThreadPool]: On list_airwolf_reference: Close
+[0m19:00:21.304249 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.304976 [debug] [MainThread]: On master: BEGIN
+[0m19:00:21.305606 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m19:00:21.313920 [debug] [MainThread]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:21.314589 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.315077 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "master"} */
+with relation as (
+        select
+            pg_rewrite.ev_class as class,
+            pg_rewrite.oid as id
+        from pg_rewrite
+    ),
+    class as (
+        select
+            oid as id,
+            relname as name,
+            relnamespace as schema,
+            relkind as kind
+        from pg_class
+    ),
+    dependency as (
+        select distinct
+            pg_depend.objid as id,
+            pg_depend.refobjid as ref
+        from pg_depend
+    ),
+    schema as (
+        select
+            pg_namespace.oid as id,
+            pg_namespace.nspname as name
+        from pg_namespace
+        where nspname != 'information_schema' and nspname not like 'pg\_%'
+    ),
+    referenced as (
+        select
+            relation.id AS id,
+            referenced_class.name ,
+            referenced_class.schema ,
+            referenced_class.kind
+        from relation
+        join class as referenced_class on relation.class=referenced_class.id
+        where referenced_class.kind in ('r', 'v', 'm')
+    ),
+    relationships as (
+        select
+            referenced.name as referenced_name,
+            referenced.schema as referenced_schema_id,
+            dependent_class.name as dependent_name,
+            dependent_class.schema as dependent_schema_id,
+            referenced.kind as kind
+        from referenced
+        join dependency on referenced.id=dependency.id
+        join class as dependent_class on dependency.ref=dependent_class.id
+        where
+            (referenced.name != dependent_class.name or
+             referenced.schema != dependent_class.schema)
+    )
+
+    select
+        referenced_schema.name as referenced_schema,
+        relationships.referenced_name as referenced_name,
+        dependent_schema.name as dependent_schema,
+        relationships.dependent_name as dependent_name
+    from relationships
+    join schema as dependent_schema on relationships.dependent_schema_id=dependent_schema.id
+    join schema as referenced_schema on relationships.referenced_schema_id=referenced_schema.id
+    group by referenced_schema, referenced_name, dependent_schema, dependent_name
+    order by referenced_schema, referenced_name, dependent_schema, dependent_name;
+[0m19:00:21.322555 [debug] [MainThread]: SQL status: SELECT 0 in 0.007 seconds
+[0m19:00:21.323975 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa551ab40>]}
+[0m19:00:21.324629 [debug] [MainThread]: On master: ROLLBACK
+[0m19:00:21.325265 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.325690 [debug] [MainThread]: On master: BEGIN
+[0m19:00:21.326576 [debug] [MainThread]: SQL status: BEGIN in 0.000 seconds
+[0m19:00:21.327257 [debug] [MainThread]: On master: COMMIT
+[0m19:00:21.327889 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.328552 [debug] [MainThread]: On master: COMMIT
+[0m19:00:21.329417 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:21.329851 [debug] [MainThread]: On master: Close
+[0m19:00:21.332662 [debug] [Thread-1 (]: Began running node seed.airwolf_dbt.aq_stations
+[0m19:00:21.333229 [debug] [Thread-2 (]: Began running node seed.airwolf_dbt.weather_stations
+[0m19:00:21.333856 [info ] [Thread-1 (]: 1 of 2 START seed file reference.aq_stations ................................... [RUN]
+[0m19:00:21.334833 [info ] [Thread-2 (]: 2 of 2 START seed file reference.weather_stations .............................. [RUN]
+[0m19:00:21.335797 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_airwolf_reference, now seed.airwolf_dbt.aq_stations)
+[0m19:00:21.336440 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly list_airwolf_intermediate, now seed.airwolf_dbt.weather_stations)
+[0m19:00:21.337119 [debug] [Thread-1 (]: Began compiling node seed.airwolf_dbt.aq_stations
+[0m19:00:21.337810 [debug] [Thread-2 (]: Began compiling node seed.airwolf_dbt.weather_stations
+[0m19:00:21.338594 [debug] [Thread-1 (]: Began executing node seed.airwolf_dbt.aq_stations
+[0m19:00:21.339156 [debug] [Thread-2 (]: Began executing node seed.airwolf_dbt.weather_stations
+[0m19:00:21.382790 [debug] [Thread-1 (]: Using postgres connection "seed.airwolf_dbt.aq_stations"
+[0m19:00:21.384930 [debug] [Thread-2 (]: Using postgres connection "seed.airwolf_dbt.weather_stations"
+[0m19:00:21.385368 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: BEGIN
+[0m19:00:21.386010 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: BEGIN
+[0m19:00:21.386659 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:21.387495 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:21.397093 [debug] [Thread-2 (]: SQL status: BEGIN in 0.010 seconds
+[0m19:00:21.397677 [debug] [Thread-1 (]: SQL status: BEGIN in 0.011 seconds
+[0m19:00:21.398144 [debug] [Thread-2 (]: Using postgres connection "seed.airwolf_dbt.weather_stations"
+[0m19:00:21.398863 [debug] [Thread-1 (]: Using postgres connection "seed.airwolf_dbt.aq_stations"
+[0m19:00:21.399738 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "seed.airwolf_dbt.weather_stations"} */
+truncate table "airwolf"."reference"."weather_stations"
+[0m19:00:21.400868 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "seed.airwolf_dbt.aq_stations"} */
+truncate table "airwolf"."reference"."aq_stations"
+[0m19:00:21.405903 [debug] [Thread-2 (]: SQL status: TRUNCATE TABLE in 0.004 seconds
+[0m19:00:21.406456 [debug] [Thread-1 (]: SQL status: TRUNCATE TABLE in 0.005 seconds
+[0m19:00:21.420558 [debug] [Thread-1 (]: Using postgres connection "seed.airwolf_dbt.aq_stations"
+[0m19:00:21.417744 [debug] [Thread-2 (]: Using postgres connection "seed.airwolf_dbt.weather_stations"
+[0m19:00:21.421268 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: 
+          insert into "airwolf"."reference"."aq_stations" ("station_id", "station_name", "area", "lat", "lon") values
+          (%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s),(%s,%s,%s,%s,%s)
+      ...
+[0m19:00:21.421918 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: 
+          insert into "airwolf"."reference"."weather_stations" ("jaam_kood", "station_name", "area") values
+          (%s,%s,%s),(%s,%s,%s),(%s,%s,%s)
+      ...
+[0m19:00:21.423877 [debug] [Thread-2 (]: SQL status: INSERT 0 3 in 0.001 seconds
+[0m19:00:21.428812 [debug] [Thread-2 (]: Writing runtime SQL for node "seed.airwolf_dbt.weather_stations"
+[0m19:00:21.429194 [debug] [Thread-1 (]: SQL status: INSERT 0 5 in 0.007 seconds
+[0m19:00:21.430206 [debug] [Thread-1 (]: Writing runtime SQL for node "seed.airwolf_dbt.aq_stations"
+[0m19:00:21.453176 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: COMMIT
+[0m19:00:21.453677 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: COMMIT
+[0m19:00:21.454025 [debug] [Thread-1 (]: Using postgres connection "seed.airwolf_dbt.aq_stations"
+[0m19:00:21.454495 [debug] [Thread-2 (]: Using postgres connection "seed.airwolf_dbt.weather_stations"
+[0m19:00:21.454933 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: COMMIT
+[0m19:00:21.455452 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: COMMIT
+[0m19:00:21.463413 [debug] [Thread-1 (]: SQL status: COMMIT in 0.007 seconds
+[0m19:00:21.464166 [debug] [Thread-2 (]: SQL status: COMMIT in 0.008 seconds
+[0m19:00:21.465801 [debug] [Thread-1 (]: On seed.airwolf_dbt.aq_stations: Close
+[0m19:00:21.467063 [debug] [Thread-2 (]: On seed.airwolf_dbt.weather_stations: Close
+[0m19:00:21.469391 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa9d13530>]}
+[0m19:00:21.469741 [debug] [Thread-2 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '6dc24db5-ad72-4c95-b68e-4246ad57ed84', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa59a7440>]}
+[0m19:00:21.470231 [info ] [Thread-1 (]: 1 of 2 OK loaded seed file reference.aq_stations ............................... [[32mINSERT 5[0m in 0.13s]
+[0m19:00:21.471025 [info ] [Thread-2 (]: 2 of 2 OK loaded seed file reference.weather_stations .......................... [[32mINSERT 3[0m in 0.13s]
+[0m19:00:21.472096 [debug] [Thread-1 (]: Finished running node seed.airwolf_dbt.aq_stations
+[0m19:00:21.472898 [debug] [Thread-2 (]: Finished running node seed.airwolf_dbt.weather_stations
+[0m19:00:21.474836 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.475251 [debug] [MainThread]: On master: BEGIN
+[0m19:00:21.475640 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m19:00:21.484157 [debug] [MainThread]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:21.484962 [debug] [MainThread]: On master: COMMIT
+[0m19:00:21.485350 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:21.485740 [debug] [MainThread]: On master: COMMIT
+[0m19:00:21.486260 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:21.486634 [debug] [MainThread]: On master: Close
+[0m19:00:21.487232 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m19:00:21.487590 [debug] [MainThread]: Connection 'seed.airwolf_dbt.aq_stations' was properly closed.
+[0m19:00:21.487969 [debug] [MainThread]: Connection 'seed.airwolf_dbt.weather_stations' was properly closed.
+[0m19:00:21.488612 [info ] [MainThread]: 
+[0m19:00:21.489369 [info ] [MainThread]: Finished running 2 seeds in 0 hours 0 minutes and 0.32 seconds (0.32s).
+[0m19:00:21.490353 [debug] [MainThread]: Command end result
+[0m19:00:21.581821 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:21.586146 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:21.593307 [debug] [MainThread]: Wrote artifact RunExecutionResult to /opt/airflow/dbt_project/target/run_results.json
+[0m19:00:21.593848 [info ] [MainThread]: 
+[0m19:00:21.594491 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m19:00:21.594964 [info ] [MainThread]: 
+[0m19:00:21.595514 [info ] [MainThread]: Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
+[0m19:00:21.596714 [debug] [MainThread]: Resource report: {"command_name": "seed", "command_success": true, "command_wall_clock_time": 1.3672434, "process_in_blocks": "0", "process_kernel_time": 0.757899, "process_mem_max_rss": "134304", "process_out_blocks": "0", "process_user_time": 1.892678}
+[0m19:00:21.597190 [debug] [MainThread]: Command `dbt seed` succeeded at 19:00:21.597116 after 1.37 seconds
+[0m19:00:21.597569 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794faa4cb950>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fab573680>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x794fa41c6cf0>]}
+[0m19:00:21.598033 [debug] [MainThread]: Flushing usage events
+[0m19:00:22.535333 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:00:24.213010 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726368c3f8f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72636969ea20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726368c3dbe0>]}
+
+
+============================== 19:00:24.216468 | a8979301-2e3e-4cbe-b8cd-e668d16550eb ==============================
+[0m19:00:24.216468 [info ] [MainThread]: Running with dbt=1.9.0
+[0m19:00:24.217228 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'version_check': 'True', 'profiles_dir': '.', 'log_path': '/opt/airflow/dbt_project/logs', 'debug': 'False', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'False', 'quiet': 'False', 'no_print': 'None', 'log_format': 'default', 'introspect': 'True', 'static_parser': 'True', 'invocation_command': 'dbt run --profiles-dir .', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m19:00:24.359193 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726367db7860>]}
+[0m19:00:24.402854 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726368febdd0>]}
+[0m19:00:24.403957 [info ] [MainThread]: Registered adapter: postgres=1.9.0
+[0m19:00:24.486671 [debug] [MainThread]: checksum: c99e828bba267739642b5a3ce85f17518764ea526e0e6c4fdc649171c1a66bff, vars: {}, profile: , target: , version: 1.9.0
+[0m19:00:24.832434 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 0 files changed.
+[0m19:00:24.833066 [debug] [MainThread]: Partial parsing enabled, no changes found, skipping parsing
+[0m19:00:24.837104 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.airwolf_dbt.staging
+[0m19:00:24.875005 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72636797a150>]}
+[0m19:00:24.962451 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:24.970596 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:24.990704 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7263675dd370>]}
+[0m19:00:24.991511 [info ] [MainThread]: Found 8 models, 23 data tests, 2 seeds, 4 sources, 435 macros
+[0m19:00:24.991990 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726366d99a00>]}
+[0m19:00:24.994407 [info ] [MainThread]: 
+[0m19:00:24.994916 [info ] [MainThread]: Concurrency: 2 threads (target='dev')
+[0m19:00:24.995560 [info ] [MainThread]: 
+[0m19:00:24.996275 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m19:00:24.999770 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf'
+[0m19:00:25.007736 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf'
+[0m19:00:25.039023 [debug] [ThreadPool]: Using postgres connection "list_airwolf"
+[0m19:00:25.039453 [debug] [ThreadPool]: Using postgres connection "list_airwolf"
+[0m19:00:25.039885 [debug] [ThreadPool]: On list_airwolf: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m19:00:25.040344 [debug] [ThreadPool]: On list_airwolf: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m19:00:25.040808 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:25.041279 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:25.054700 [debug] [ThreadPool]: SQL status: SELECT 8 in 0.013 seconds
+[0m19:00:25.055238 [debug] [ThreadPool]: SQL status: SELECT 8 in 0.014 seconds
+[0m19:00:25.056670 [debug] [ThreadPool]: On list_airwolf: Close
+[0m19:00:25.057917 [debug] [ThreadPool]: On list_airwolf: Close
+[0m19:00:25.060631 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf, now list_airwolf_intermediate)
+[0m19:00:25.065809 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:25.066515 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf, now list_airwolf_reference)
+[0m19:00:25.067046 [debug] [ThreadPool]: On list_airwolf_intermediate: BEGIN
+[0m19:00:25.068715 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:25.069179 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:25.069585 [debug] [ThreadPool]: On list_airwolf_reference: BEGIN
+[0m19:00:25.070242 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:25.077589 [debug] [ThreadPool]: SQL status: BEGIN in 0.007 seconds
+[0m19:00:25.078112 [debug] [ThreadPool]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:25.078574 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:25.079598 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:25.080495 [debug] [ThreadPool]: On list_airwolf_reference: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_reference"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'reference'
+  
+[0m19:00:25.081149 [debug] [ThreadPool]: On list_airwolf_intermediate: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_intermediate"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'intermediate'
+  
+[0m19:00:25.084577 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.003 seconds
+[0m19:00:25.085107 [debug] [ThreadPool]: SQL status: SELECT 3 in 0.003 seconds
+[0m19:00:25.086679 [debug] [ThreadPool]: On list_airwolf_reference: ROLLBACK
+[0m19:00:25.088553 [debug] [ThreadPool]: On list_airwolf_intermediate: ROLLBACK
+[0m19:00:25.089480 [debug] [ThreadPool]: On list_airwolf_reference: Close
+[0m19:00:25.089780 [debug] [ThreadPool]: On list_airwolf_intermediate: Close
+[0m19:00:25.090511 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf_reference, now list_airwolf_marts)
+[0m19:00:25.092835 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:25.093604 [debug] [ThreadPool]: On list_airwolf_marts: BEGIN
+[0m19:00:25.093976 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:25.101981 [debug] [ThreadPool]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:25.102858 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:25.103313 [debug] [ThreadPool]: On list_airwolf_marts: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_marts"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'marts'
+  
+[0m19:00:25.106022 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.002 seconds
+[0m19:00:25.107441 [debug] [ThreadPool]: On list_airwolf_marts: ROLLBACK
+[0m19:00:25.108003 [debug] [ThreadPool]: On list_airwolf_marts: Close
+[0m19:00:25.113209 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:25.113830 [debug] [MainThread]: On master: BEGIN
+[0m19:00:25.114291 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m19:00:25.123330 [debug] [MainThread]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:25.124051 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:25.124691 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "master"} */
+with relation as (
+        select
+            pg_rewrite.ev_class as class,
+            pg_rewrite.oid as id
+        from pg_rewrite
+    ),
+    class as (
+        select
+            oid as id,
+            relname as name,
+            relnamespace as schema,
+            relkind as kind
+        from pg_class
+    ),
+    dependency as (
+        select distinct
+            pg_depend.objid as id,
+            pg_depend.refobjid as ref
+        from pg_depend
+    ),
+    schema as (
+        select
+            pg_namespace.oid as id,
+            pg_namespace.nspname as name
+        from pg_namespace
+        where nspname != 'information_schema' and nspname not like 'pg\_%'
+    ),
+    referenced as (
+        select
+            relation.id AS id,
+            referenced_class.name ,
+            referenced_class.schema ,
+            referenced_class.kind
+        from relation
+        join class as referenced_class on relation.class=referenced_class.id
+        where referenced_class.kind in ('r', 'v', 'm')
+    ),
+    relationships as (
+        select
+            referenced.name as referenced_name,
+            referenced.schema as referenced_schema_id,
+            dependent_class.name as dependent_name,
+            dependent_class.schema as dependent_schema_id,
+            referenced.kind as kind
+        from referenced
+        join dependency on referenced.id=dependency.id
+        join class as dependent_class on dependency.ref=dependent_class.id
+        where
+            (referenced.name != dependent_class.name or
+             referenced.schema != dependent_class.schema)
+    )
+
+    select
+        referenced_schema.name as referenced_schema,
+        relationships.referenced_name as referenced_name,
+        dependent_schema.name as dependent_schema,
+        relationships.dependent_name as dependent_name
+    from relationships
+    join schema as dependent_schema on relationships.dependent_schema_id=dependent_schema.id
+    join schema as referenced_schema on relationships.referenced_schema_id=referenced_schema.id
+    group by referenced_schema, referenced_name, dependent_schema, dependent_name
+    order by referenced_schema, referenced_name, dependent_schema, dependent_name;
+[0m19:00:25.128101 [debug] [MainThread]: SQL status: SELECT 0 in 0.003 seconds
+[0m19:00:25.129563 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726368fbf590>]}
+[0m19:00:25.130221 [debug] [MainThread]: On master: ROLLBACK
+[0m19:00:25.130862 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:25.131246 [debug] [MainThread]: On master: BEGIN
+[0m19:00:25.132151 [debug] [MainThread]: SQL status: BEGIN in 0.000 seconds
+[0m19:00:25.132873 [debug] [MainThread]: On master: COMMIT
+[0m19:00:25.133588 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:25.134120 [debug] [MainThread]: On master: COMMIT
+[0m19:00:25.134616 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:25.135100 [debug] [MainThread]: On master: Close
+[0m19:00:25.137954 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.int_air_quality
+[0m19:00:25.138473 [debug] [Thread-2 (]: Began running node model.airwolf_dbt.int_traffic
+[0m19:00:25.139085 [info ] [Thread-1 (]: 1 of 8 START sql table model intermediate.int_air_quality ...................... [RUN]
+[0m19:00:25.139849 [info ] [Thread-2 (]: 2 of 8 START sql table model intermediate.int_traffic .......................... [RUN]
+[0m19:00:25.140484 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_airwolf_marts, now model.airwolf_dbt.int_air_quality)
+[0m19:00:25.141059 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly list_airwolf_intermediate, now model.airwolf_dbt.int_traffic)
+[0m19:00:25.141695 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.int_air_quality
+[0m19:00:25.142174 [debug] [Thread-2 (]: Began compiling node model.airwolf_dbt.int_traffic
+[0m19:00:25.148705 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.int_air_quality"
+[0m19:00:25.151363 [debug] [Thread-2 (]: Writing injected SQL for node "model.airwolf_dbt.int_traffic"
+[0m19:00:25.156587 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.int_air_quality
+[0m19:00:25.162508 [debug] [Thread-2 (]: Began executing node model.airwolf_dbt.int_traffic
+[0m19:00:25.201728 [debug] [Thread-2 (]: Writing runtime sql for node "model.airwolf_dbt.int_traffic"
+[0m19:00:25.202356 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.int_air_quality"
+[0m19:00:25.208078 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:25.209100 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: BEGIN
+[0m19:00:25.209682 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:25.210273 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:25.211208 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: BEGIN
+[0m19:00:25.211833 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:25.217540 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:25.218458 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:25.219281 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_traffic"} */
+
+  
+    
+
+  create  table "airwolf"."intermediate"."int_traffic__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+with backfill_raw as (
+
+    select
+        id::text as detector_id,
+        aeg::timestamptz as obs_time,
+        site_name,
+        area,
+        lat::double precision as lat,
+        lon::double precision as lon,
+
+        coalesce(motorcycle_count, 0)
+        + coalesce(car_light_van_count, 0)
+        + coalesce(car_light_van_trailer_count, 0)
+        + coalesce(heavy_van_count, 0)
+        + coalesce(light_goods_count, 0)
+        + coalesce(rigid_count, 0)
+        + coalesce(rigid_trailer_count, 0)
+        + coalesce(articulated_hgv_count, 0)
+        + coalesce(minibus_count, 0)
+        + coalesce(bus_coach_count, 0) as total_flow,
+
+        loaded_at,
+        'backfill' as source_type
+
+    from "airwolf"."staging"."traffic_counts_raw"
+    where id::text <> '944ab'
+
+),
+
+backfill_hourly as (
+
+    select
+        detector_id,
+        obs_time,
+        max(site_name) as site_name,
+        max(area) as area,
+        avg(lat) as lat,
+        avg(lon) as lon,
+        sum(total_flow) as total_flow,
+        max(loaded_at) as loaded_at,
+        'backfill' as source_type
+
+    from backfill_raw
+    group by detector_id, obs_time
+
+),
+
+live_raw as (
+
+    select
+        traffic_detector_id::text as detector_id,
+        measurement_time::timestamptz as obs_time,
+        site_name,
+        area,
+        lat::double precision as lat,
+        lon::double precision as lon,
+
+        coalesce(total_flow_forwards, 0)
+        + coalesce(total_flow_backwards, 0) as total_flow,
+
+        loaded_at,
+        'live' as source_type
+
+    from "airwolf"."staging"."traffic_live_raw"
+    where traffic_detector_id::text <> '944ab'
+
+),
+
+unioned as (
+
+    select * from backfill_hourly
+    union all
+    select * from live_raw
+
+),
+
+deduplicated as (
+
+    select *
+    from (
+        select
+            unioned.*,
+            row_number() over (
+                partition by detector_id, obs_time
+                order by
+                    case when source_type = 'live' then 2 else 1 end desc,
+                    loaded_at desc
+            ) as rn
+        from unioned
+    ) x
+    where rn = 1
+
+)
+
+select
+    detector_id,
+    site_name,
+    area,
+    obs_time,
+    lat,
+    lon,
+    total_flow,
+    source_type,
+    loaded_at
+
+from deduplicated
+where area is not null
+  );
+  
+[0m19:00:25.219682 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:25.220233 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:25.220780 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_air_quality"} */
+
+  
+    
+
+  create  table "airwolf"."intermediate"."int_air_quality__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+-- Jaama metaandmed (nimed, piirkonnad, koordinaadid) ning indikaatori koodide teisendus nimedeks.
+
+with indicator_map (indicator_id, pollutant) as (
+    values
+        (1,  'SO2'),
+        (3,  'NO2'),
+        (6,  'O3'),
+        (21, 'PM10'),
+        (23, 'PM25')
+),
+
+raw as (
+    select
+        station::integer  as station_id,
+        indicator::integer as indicator_id,
+        measured::timestamptz as obs_time,
+        value::numeric as value,
+        loaded_at
+    from "airwolf"."staging"."air_quality_raw"
+),
+
+mapped as (
+    select
+        r.station_id,
+        r.obs_time,
+        i.pollutant,
+        r.value,
+        r.loaded_at
+    from raw r
+    inner join indicator_map i on r.indicator_id = i.indicator_id
+    inner join "airwolf"."reference"."aq_stations" s on r.station_id = s.station_id
+),
+
+latest_values as (
+    select *
+    from (
+        select
+            mapped.*,
+            row_number() over (
+                partition by station_id, pollutant, obs_time
+                order by loaded_at desc
+            ) as rn
+        from mapped
+    ) x
+    where rn = 1
+)
+
+select
+    lv.station_id,
+    s.station_name,
+    s.area,
+    lv.obs_time,
+    s.lat,
+    s.lon,
+    avg(lv.value) filter (where lv.pollutant = 'SO2')  as "SO2",
+    avg(lv.value) filter (where lv.pollutant = 'O3')   as "O3",
+    avg(lv.value) filter (where lv.pollutant = 'NO2')  as "NO2",
+    avg(lv.value) filter (where lv.pollutant = 'PM10') as "PM10",
+    avg(lv.value) filter (where lv.pollutant = 'PM25') as "PM25"
+from latest_values lv
+inner join "airwolf"."reference"."aq_stations" s on lv.station_id = s.station_id
+group by lv.station_id, s.station_name, s.area, lv.obs_time, s.lat, s.lon
+  );
+  
+[0m19:00:26.032820 [debug] [Thread-1 (]: SQL status: SELECT 50116 in 0.811 seconds
+[0m19:00:26.041628 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:26.042331 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_air_quality"} */
+alter table "airwolf"."intermediate"."int_air_quality" rename to "int_air_quality__dbt_backup"
+[0m19:00:26.044282 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.047202 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:26.048056 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_air_quality"} */
+alter table "airwolf"."intermediate"."int_air_quality__dbt_tmp" rename to "int_air_quality"
+[0m19:00:26.049524 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:26.061585 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: COMMIT
+[0m19:00:26.062399 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:26.063101 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: COMMIT
+[0m19:00:26.071401 [debug] [Thread-1 (]: SQL status: COMMIT in 0.008 seconds
+[0m19:00:26.077038 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."intermediate"."int_air_quality__dbt_backup"
+[0m19:00:26.081993 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_air_quality"
+[0m19:00:26.082611 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_air_quality"} */
+drop table if exists "airwolf"."intermediate"."int_air_quality__dbt_backup" cascade
+[0m19:00:26.093892 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.011 seconds
+[0m19:00:26.096591 [debug] [Thread-1 (]: On model.airwolf_dbt.int_air_quality: Close
+[0m19:00:26.098030 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72636b32b140>]}
+[0m19:00:26.098709 [info ] [Thread-1 (]: 1 of 8 OK created sql table model intermediate.int_air_quality ................. [[32mSELECT 50116[0m in 0.96s]
+[0m19:00:26.099458 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.int_air_quality
+[0m19:00:26.100040 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.int_weather
+[0m19:00:26.100858 [info ] [Thread-1 (]: 3 of 8 START sql table model intermediate.int_weather .......................... [RUN]
+[0m19:00:26.101668 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.int_air_quality, now model.airwolf_dbt.int_weather)
+[0m19:00:26.102212 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.int_weather
+[0m19:00:26.105939 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.int_weather"
+[0m19:00:26.113900 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.int_weather
+[0m19:00:26.116964 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.int_weather"
+[0m19:00:26.125922 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.126673 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: BEGIN
+[0m19:00:26.127358 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:26.141302 [debug] [Thread-1 (]: SQL status: BEGIN in 0.014 seconds
+[0m19:00:26.142064 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.142646 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_weather"} */
+
+  
+    
+
+  create  table "airwolf"."intermediate"."int_weather__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+-- Jaamade nimed ja piirkondade vastavused tulevad weather_stations andmestikust
+-- (dbt_project/seeds/weather_stations.csv), et need oleksid defineeritud vaid ühes kohas.
+
+with raw as (
+    select
+        jaam_kood,
+        obs_time::timestamptz as obs_time,
+        lat::double precision as lat,
+        lon::double precision as lon,
+        temperature_c::double precision as temperature_c,
+        wind_speed_ms::double precision as wind_speed_ms,
+        wind_direction_deg::double precision as wind_direction_deg,
+        precip_mm::double precision as precip_mm,
+        loaded_at
+    from "airwolf"."staging"."weather_raw"
+),
+
+latest_per_hour as (
+    select *
+    from (
+        select
+            raw.*,
+            row_number() over (
+                partition by jaam_kood, obs_time
+                order by loaded_at desc
+            ) as rn
+        from raw
+    ) x
+    where rn = 1
+),
+
+stations as (
+    select jaam_kood, station_name, area
+    from "airwolf"."reference"."weather_stations"
+)
+
+select
+    r.jaam_kood as station_id,
+    s.station_name,
+    s.area,
+    r.obs_time,
+    r.lat,
+    r.lon,
+    r.temperature_c,
+    r.wind_speed_ms,
+    r.wind_direction_deg,
+    greatest(r.precip_mm, 0) as precip_mm
+from latest_per_hour r
+inner join stations s on r.jaam_kood = s.jaam_kood
+  );
+  
+[0m19:00:26.313851 [debug] [Thread-1 (]: SQL status: SELECT 37551 in 0.170 seconds
+[0m19:00:26.316875 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.317863 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_weather"} */
+alter table "airwolf"."intermediate"."int_weather" rename to "int_weather__dbt_backup"
+[0m19:00:26.319002 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:26.321520 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.322214 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_weather"} */
+alter table "airwolf"."intermediate"."int_weather__dbt_tmp" rename to "int_weather"
+[0m19:00:26.324046 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.325838 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: COMMIT
+[0m19:00:26.326458 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.327072 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: COMMIT
+[0m19:00:26.381282 [debug] [Thread-1 (]: SQL status: COMMIT in 0.053 seconds
+[0m19:00:26.384248 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."intermediate"."int_weather__dbt_backup"
+[0m19:00:26.385297 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.int_weather"
+[0m19:00:26.386100 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_weather"} */
+drop table if exists "airwolf"."intermediate"."int_weather__dbt_backup" cascade
+[0m19:00:26.397519 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.011 seconds
+[0m19:00:26.399868 [debug] [Thread-1 (]: On model.airwolf_dbt.int_weather: Close
+[0m19:00:26.401031 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726369023080>]}
+[0m19:00:26.402142 [info ] [Thread-1 (]: 3 of 8 OK created sql table model intermediate.int_weather ..................... [[32mSELECT 37551[0m in 0.30s]
+[0m19:00:26.403128 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.int_weather
+[0m19:00:26.403761 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.mart_aq
+[0m19:00:26.404629 [info ] [Thread-1 (]: 4 of 8 START sql table model marts.mart_aq ..................................... [RUN]
+[0m19:00:26.405289 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.int_weather, now model.airwolf_dbt.mart_aq)
+[0m19:00:26.405808 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.mart_aq
+[0m19:00:26.408191 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.mart_aq"
+[0m19:00:26.416988 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.mart_aq
+[0m19:00:26.419646 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.mart_aq"
+[0m19:00:26.427547 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.428219 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: BEGIN
+[0m19:00:26.428995 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:26.437236 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:26.437926 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.438647 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_aq"} */
+
+  
+    
+
+  create  table "airwolf"."marts"."mart_aq__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+select *
+from "airwolf"."intermediate"."int_air_quality"
+where area is not null
+  );
+  
+[0m19:00:26.629706 [debug] [Thread-1 (]: SQL status: SELECT 50116 in 0.190 seconds
+[0m19:00:26.634194 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.634838 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_aq"} */
+alter table "airwolf"."marts"."mart_aq" rename to "mart_aq__dbt_backup"
+[0m19:00:26.635968 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.639207 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.639953 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_aq"} */
+alter table "airwolf"."marts"."mart_aq__dbt_tmp" rename to "mart_aq"
+[0m19:00:26.641409 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.643283 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: COMMIT
+[0m19:00:26.644007 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.644804 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: COMMIT
+[0m19:00:26.684919 [debug] [Thread-1 (]: SQL status: COMMIT in 0.039 seconds
+[0m19:00:26.687930 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."marts"."mart_aq__dbt_backup"
+[0m19:00:26.688875 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_aq"
+[0m19:00:26.689402 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_aq"} */
+drop table if exists "airwolf"."marts"."mart_aq__dbt_backup" cascade
+[0m19:00:26.705330 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.015 seconds
+[0m19:00:26.707458 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_aq: Close
+[0m19:00:26.708432 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364fe1760>]}
+[0m19:00:26.709360 [info ] [Thread-1 (]: 4 of 8 OK created sql table model marts.mart_aq ................................ [[32mSELECT 50116[0m in 0.30s]
+[0m19:00:26.710339 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.mart_aq
+[0m19:00:26.711220 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.mart_weather
+[0m19:00:26.712026 [info ] [Thread-1 (]: 5 of 8 START sql table model marts.mart_weather ................................ [RUN]
+[0m19:00:26.712962 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.mart_aq, now model.airwolf_dbt.mart_weather)
+[0m19:00:26.713663 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.mart_weather
+[0m19:00:26.716683 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.mart_weather"
+[0m19:00:26.725385 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.mart_weather
+[0m19:00:26.728827 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.mart_weather"
+[0m19:00:26.737446 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.738266 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: BEGIN
+[0m19:00:26.738958 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:26.748131 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:26.748917 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.752730 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_weather"} */
+
+  
+    
+
+  create  table "airwolf"."marts"."mart_weather__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+select *
+from "airwolf"."intermediate"."int_weather"
+where area is not null
+  );
+  
+[0m19:00:26.866776 [debug] [Thread-1 (]: SQL status: SELECT 37551 in 0.113 seconds
+[0m19:00:26.870018 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.870626 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_weather"} */
+alter table "airwolf"."marts"."mart_weather" rename to "mart_weather__dbt_backup"
+[0m19:00:26.871920 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.875368 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.875976 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_weather"} */
+alter table "airwolf"."marts"."mart_weather__dbt_tmp" rename to "mart_weather"
+[0m19:00:26.877211 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.878712 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: COMMIT
+[0m19:00:26.879600 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.880290 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: COMMIT
+[0m19:00:26.949816 [debug] [Thread-1 (]: SQL status: COMMIT in 0.069 seconds
+[0m19:00:26.952107 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."marts"."mart_weather__dbt_backup"
+[0m19:00:26.953047 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_weather"
+[0m19:00:26.953729 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_weather"} */
+drop table if exists "airwolf"."marts"."mart_weather__dbt_backup" cascade
+[0m19:00:26.971848 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.017 seconds
+[0m19:00:26.973519 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_weather: Close
+[0m19:00:26.974238 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364fd20f0>]}
+[0m19:00:26.975086 [info ] [Thread-1 (]: 5 of 8 OK created sql table model marts.mart_weather ........................... [[32mSELECT 37551[0m in 0.26s]
+[0m19:00:26.976471 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.mart_weather
+[0m19:00:26.986856 [debug] [Thread-2 (]: SQL status: SELECT 176316 in 1.767 seconds
+[0m19:00:26.990180 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:26.990819 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_traffic"} */
+alter table "airwolf"."intermediate"."int_traffic" rename to "int_traffic__dbt_backup"
+[0m19:00:26.992986 [debug] [Thread-2 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:26.996062 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:26.996924 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_traffic"} */
+alter table "airwolf"."intermediate"."int_traffic__dbt_tmp" rename to "int_traffic"
+[0m19:00:26.997959 [debug] [Thread-2 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:26.999619 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: COMMIT
+[0m19:00:27.000585 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:27.001171 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: COMMIT
+[0m19:00:27.033359 [debug] [Thread-2 (]: SQL status: COMMIT in 0.032 seconds
+[0m19:00:27.035333 [debug] [Thread-2 (]: Applying DROP to: "airwolf"."intermediate"."int_traffic__dbt_backup"
+[0m19:00:27.036023 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.int_traffic"
+[0m19:00:27.036696 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.int_traffic"} */
+drop table if exists "airwolf"."intermediate"."int_traffic__dbt_backup" cascade
+[0m19:00:27.061223 [debug] [Thread-2 (]: SQL status: DROP TABLE in 0.024 seconds
+[0m19:00:27.063063 [debug] [Thread-2 (]: On model.airwolf_dbt.int_traffic: Close
+[0m19:00:27.063945 [debug] [Thread-2 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364f2c230>]}
+[0m19:00:27.064902 [info ] [Thread-2 (]: 2 of 8 OK created sql table model intermediate.int_traffic ..................... [[32mSELECT 176316[0m in 1.92s]
+[0m19:00:27.065714 [debug] [Thread-2 (]: Finished running node model.airwolf_dbt.int_traffic
+[0m19:00:27.067200 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.mart_traffic
+[0m19:00:27.068122 [info ] [Thread-1 (]: 6 of 8 START sql table model marts.mart_traffic ................................ [RUN]
+[0m19:00:27.068928 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.mart_weather, now model.airwolf_dbt.mart_traffic)
+[0m19:00:27.069390 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.mart_traffic
+[0m19:00:27.072049 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.081699 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.mart_traffic
+[0m19:00:27.086269 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.095751 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.096500 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: BEGIN
+[0m19:00:27.096972 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:27.114670 [debug] [Thread-1 (]: SQL status: BEGIN in 0.018 seconds
+[0m19:00:27.115543 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.116139 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_traffic"} */
+
+  
+    
+
+  create  table "airwolf"."marts"."mart_traffic__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+select
+    detector_id,
+    site_name,
+    area,
+    obs_time,
+    lat,
+    lon,
+    total_flow,
+    source_type,
+    loaded_at
+from "airwolf"."intermediate"."int_traffic"
+  );
+  
+[0m19:00:27.639570 [debug] [Thread-1 (]: SQL status: SELECT 176316 in 0.523 seconds
+[0m19:00:27.710425 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.711157 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_traffic"} */
+alter table "airwolf"."marts"."mart_traffic" rename to "mart_traffic__dbt_backup"
+[0m19:00:27.712247 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:27.715667 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.716473 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_traffic"} */
+alter table "airwolf"."marts"."mart_traffic__dbt_tmp" rename to "mart_traffic"
+[0m19:00:27.717403 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:27.719065 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: COMMIT
+[0m19:00:27.719765 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.720408 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: COMMIT
+[0m19:00:27.753170 [debug] [Thread-1 (]: SQL status: COMMIT in 0.032 seconds
+[0m19:00:27.755642 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."marts"."mart_traffic__dbt_backup"
+[0m19:00:27.756602 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_traffic"
+[0m19:00:27.757300 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_traffic"} */
+drop table if exists "airwolf"."marts"."mart_traffic__dbt_backup" cascade
+[0m19:00:27.781182 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.023 seconds
+[0m19:00:27.782841 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_traffic: Close
+[0m19:00:27.783501 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364638050>]}
+[0m19:00:27.784101 [info ] [Thread-1 (]: 6 of 8 OK created sql table model marts.mart_traffic ........................... [[32mSELECT 176316[0m in 0.71s]
+[0m19:00:27.784867 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.mart_traffic
+[0m19:00:27.786263 [debug] [Thread-2 (]: Began running node model.airwolf_dbt.dim_stations
+[0m19:00:27.786776 [debug] [Thread-1 (]: Began running node model.airwolf_dbt.mart_joined
+[0m19:00:27.787225 [info ] [Thread-2 (]: 7 of 8 START sql table model marts.dim_stations ................................ [RUN]
+[0m19:00:27.787974 [info ] [Thread-1 (]: 8 of 8 START sql table model marts.mart_joined ................................. [RUN]
+[0m19:00:27.788878 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.int_traffic, now model.airwolf_dbt.dim_stations)
+[0m19:00:27.789485 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.airwolf_dbt.mart_traffic, now model.airwolf_dbt.mart_joined)
+[0m19:00:27.790109 [debug] [Thread-2 (]: Began compiling node model.airwolf_dbt.dim_stations
+[0m19:00:27.790699 [debug] [Thread-1 (]: Began compiling node model.airwolf_dbt.mart_joined
+[0m19:00:27.793692 [debug] [Thread-2 (]: Writing injected SQL for node "model.airwolf_dbt.dim_stations"
+[0m19:00:27.796853 [debug] [Thread-1 (]: Writing injected SQL for node "model.airwolf_dbt.mart_joined"
+[0m19:00:27.802121 [debug] [Thread-2 (]: Began executing node model.airwolf_dbt.dim_stations
+[0m19:00:27.802751 [debug] [Thread-1 (]: Began executing node model.airwolf_dbt.mart_joined
+[0m19:00:27.805284 [debug] [Thread-2 (]: Writing runtime sql for node "model.airwolf_dbt.dim_stations"
+[0m19:00:27.809202 [debug] [Thread-1 (]: Writing runtime sql for node "model.airwolf_dbt.mart_joined"
+[0m19:00:27.816061 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.817031 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: BEGIN
+[0m19:00:27.817505 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:27.817929 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:27.818621 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: BEGIN
+[0m19:00:27.819414 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:27.827846 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:27.828638 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:27.829319 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_joined"} */
+
+  
+    
+
+  create  table "airwolf"."marts"."mart_joined__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+with aq_area as (
+    select
+        area,
+        obs_time,
+        avg("SO2") as "SO2",
+        avg("O3") as "O3",
+        avg("NO2") as "NO2",
+        avg("PM10") as "PM10",
+        avg("PM25") as "PM25"
+    from "airwolf"."marts"."mart_aq"
+    group by area, obs_time
+),
+
+weather_area as (
+    select
+        area,
+        obs_time,
+        avg(temperature_c) as temperature_c,
+        avg(wind_speed_ms) as wind_speed_ms,
+        avg(precip_mm) as precip_mm
+    from "airwolf"."marts"."mart_weather"
+    group by area, obs_time
+),
+
+traffic_area as (
+    select
+        area,
+        obs_time,
+        avg(total_flow) as total_flow
+    from "airwolf"."marts"."mart_traffic"
+    group by area, obs_time
+)
+
+select
+    aq_area.area,
+    aq_area.obs_time,
+    aq_area."SO2",
+    aq_area."O3",
+    aq_area."NO2",
+    aq_area."PM10",
+    aq_area."PM25",
+    weather_area.temperature_c,
+    weather_area.wind_speed_ms,
+    weather_area.precip_mm,
+    traffic_area.total_flow
+from aq_area
+left join weather_area
+    on aq_area.area = weather_area.area
+   and aq_area.obs_time = weather_area.obs_time
+left join traffic_area
+    on aq_area.area = traffic_area.area
+   and aq_area.obs_time = traffic_area.obs_time
+  );
+  
+[0m19:00:27.830738 [debug] [Thread-2 (]: SQL status: BEGIN in 0.013 seconds
+[0m19:00:27.831696 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.832550 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.dim_stations"} */
+
+  
+    
+
+  create  table "airwolf"."marts"."dim_stations__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+with weather as (
+    select distinct
+        station_id::text as station_id,
+        station_name,
+        area,
+        lat,
+        lon,
+        'weather' as source
+    from "airwolf"."marts"."mart_weather"
+),
+
+aq as (
+    select distinct
+        station_id::text as station_id,
+        station_name,
+        area,
+        lat,
+        lon,
+        'air_quality' as source
+    from "airwolf"."marts"."mart_aq"
+),
+
+traffic as (
+    select distinct
+        detector_id::text as station_id,
+        site_name as station_name,
+        area,
+        lat,
+        lon,
+        'traffic' as source
+    from "airwolf"."marts"."mart_traffic"
+)
+
+select * from weather
+union all
+select * from aq
+union all
+select * from traffic
+  );
+  
+[0m19:00:27.916993 [debug] [Thread-2 (]: SQL status: SELECT 37 in 0.084 seconds
+[0m19:00:27.920229 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.920833 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.dim_stations"} */
+alter table "airwolf"."marts"."dim_stations" rename to "dim_stations__dbt_backup"
+[0m19:00:27.921739 [debug] [Thread-2 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:27.924719 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.925485 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.dim_stations"} */
+alter table "airwolf"."marts"."dim_stations__dbt_tmp" rename to "dim_stations"
+[0m19:00:27.926628 [debug] [Thread-2 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:27.928068 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: COMMIT
+[0m19:00:27.928927 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.929524 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: COMMIT
+[0m19:00:27.931474 [debug] [Thread-2 (]: SQL status: COMMIT in 0.001 seconds
+[0m19:00:27.933526 [debug] [Thread-2 (]: Applying DROP to: "airwolf"."marts"."dim_stations__dbt_backup"
+[0m19:00:27.934274 [debug] [Thread-2 (]: Using postgres connection "model.airwolf_dbt.dim_stations"
+[0m19:00:27.934840 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.dim_stations"} */
+drop table if exists "airwolf"."marts"."dim_stations__dbt_backup" cascade
+[0m19:00:27.937692 [debug] [Thread-2 (]: SQL status: DROP TABLE in 0.002 seconds
+[0m19:00:27.938903 [debug] [Thread-2 (]: On model.airwolf_dbt.dim_stations: Close
+[0m19:00:27.940379 [debug] [Thread-2 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364f71d30>]}
+[0m19:00:27.941616 [info ] [Thread-2 (]: 7 of 8 OK created sql table model marts.dim_stations ........................... [[32mSELECT 37[0m in 0.15s]
+[0m19:00:27.942639 [debug] [Thread-2 (]: Finished running node model.airwolf_dbt.dim_stations
+[0m19:00:28.207807 [debug] [Thread-1 (]: SQL status: SELECT 37592 in 0.378 seconds
+[0m19:00:28.212172 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:28.213189 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_joined"} */
+alter table "airwolf"."marts"."mart_joined" rename to "mart_joined__dbt_backup"
+[0m19:00:28.215224 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.001 seconds
+[0m19:00:28.217936 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:28.218538 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_joined"} */
+alter table "airwolf"."marts"."mart_joined__dbt_tmp" rename to "mart_joined"
+[0m19:00:28.219614 [debug] [Thread-1 (]: SQL status: ALTER TABLE in 0.000 seconds
+[0m19:00:28.221137 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: COMMIT
+[0m19:00:28.221594 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:28.222153 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: COMMIT
+[0m19:00:28.284901 [debug] [Thread-1 (]: SQL status: COMMIT in 0.062 seconds
+[0m19:00:28.287455 [debug] [Thread-1 (]: Applying DROP to: "airwolf"."marts"."mart_joined__dbt_backup"
+[0m19:00:28.288394 [debug] [Thread-1 (]: Using postgres connection "model.airwolf_dbt.mart_joined"
+[0m19:00:28.289162 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "model.airwolf_dbt.mart_joined"} */
+drop table if exists "airwolf"."marts"."mart_joined__dbt_backup" cascade
+[0m19:00:28.296811 [debug] [Thread-1 (]: SQL status: DROP TABLE in 0.007 seconds
+[0m19:00:28.298422 [debug] [Thread-1 (]: On model.airwolf_dbt.mart_joined: Close
+[0m19:00:28.299082 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a8979301-2e3e-4cbe-b8cd-e668d16550eb', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726364f42780>]}
+[0m19:00:28.299694 [info ] [Thread-1 (]: 8 of 8 OK created sql table model marts.mart_joined ............................ [[32mSELECT 37592[0m in 0.51s]
+[0m19:00:28.300774 [debug] [Thread-1 (]: Finished running node model.airwolf_dbt.mart_joined
+[0m19:00:28.302898 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:28.303535 [debug] [MainThread]: On master: BEGIN
+[0m19:00:28.304092 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m19:00:28.312161 [debug] [MainThread]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:28.312919 [debug] [MainThread]: On master: COMMIT
+[0m19:00:28.313361 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:28.313739 [debug] [MainThread]: On master: COMMIT
+[0m19:00:28.314371 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:28.314730 [debug] [MainThread]: On master: Close
+[0m19:00:28.315351 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m19:00:28.315843 [debug] [MainThread]: Connection 'model.airwolf_dbt.dim_stations' was properly closed.
+[0m19:00:28.316232 [debug] [MainThread]: Connection 'model.airwolf_dbt.mart_joined' was properly closed.
+[0m19:00:28.316959 [info ] [MainThread]: 
+[0m19:00:28.317631 [info ] [MainThread]: Finished running 8 table models in 0 hours 0 minutes and 3.32 seconds (3.32s).
+[0m19:00:28.319376 [debug] [MainThread]: Command end result
+[0m19:00:28.348757 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:28.353647 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:28.362648 [debug] [MainThread]: Wrote artifact RunExecutionResult to /opt/airflow/dbt_project/target/run_results.json
+[0m19:00:28.363331 [info ] [MainThread]: 
+[0m19:00:28.364117 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m19:00:28.364709 [info ] [MainThread]: 
+[0m19:00:28.365173 [info ] [MainThread]: Done. PASS=8 WARN=0 ERROR=0 SKIP=0 TOTAL=8
+[0m19:00:28.366215 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": true, "command_wall_clock_time": 4.2092233, "process_in_blocks": "0", "process_kernel_time": 0.482283, "process_mem_max_rss": "132212", "process_out_blocks": "0", "process_user_time": 2.096883}
+[0m19:00:28.366937 [debug] [MainThread]: Command `dbt run` succeeded at 19:00:28.366818 after 4.21 seconds
+[0m19:00:28.367502 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x726369702f90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72636a646120>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7263688a65d0>]}
+[0m19:00:28.368081 [debug] [MainThread]: Flushing usage events
+[0m19:00:29.645134 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m19:00:32.919229 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f621d74080>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f624974350>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f621eecc50>]}
+
+
+============================== 19:00:32.922733 | ad51afba-b14f-4eba-a671-6b858e55a3ff ==============================
+[0m19:00:32.922733 [info ] [MainThread]: Running with dbt=1.9.0
+[0m19:00:32.923588 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'version_check': 'True', 'debug': 'False', 'log_path': '/opt/airflow/dbt_project/logs', 'fail_fast': 'False', 'profiles_dir': '.', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'None', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'target_path': 'None', 'invocation_command': 'dbt test --profiles-dir .', 'send_anonymous_usage_stats': 'True'}
+[0m19:00:33.061658 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f620d63710>]}
+[0m19:00:33.104215 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f622908740>]}
+[0m19:00:33.105368 [info ] [MainThread]: Registered adapter: postgres=1.9.0
+[0m19:00:33.188062 [debug] [MainThread]: checksum: c99e828bba267739642b5a3ce85f17518764ea526e0e6c4fdc649171c1a66bff, vars: {}, profile: , target: , version: 1.9.0
+[0m19:00:33.522724 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 0 files changed.
+[0m19:00:33.523414 [debug] [MainThread]: Partial parsing enabled, no changes found, skipping parsing
+[0m19:00:33.528164 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.airwolf_dbt.staging
+[0m19:00:33.565608 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f6209ad460>]}
+[0m19:00:33.653017 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:33.661888 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:33.693854 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f61f53f6e0>]}
+[0m19:00:33.694554 [info ] [MainThread]: Found 8 models, 23 data tests, 2 seeds, 4 sources, 435 macros
+[0m19:00:33.695115 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f61fde38f0>]}
+[0m19:00:33.698671 [info ] [MainThread]: 
+[0m19:00:33.699363 [info ] [MainThread]: Concurrency: 2 threads (target='dev')
+[0m19:00:33.699792 [info ] [MainThread]: 
+[0m19:00:33.700448 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m19:00:33.704593 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf_intermediate'
+[0m19:00:33.705410 [debug] [ThreadPool]: Acquiring new postgres connection 'list_airwolf_marts'
+[0m19:00:33.738869 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:33.739413 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:33.739923 [debug] [ThreadPool]: On list_airwolf_intermediate: BEGIN
+[0m19:00:33.740561 [debug] [ThreadPool]: On list_airwolf_marts: BEGIN
+[0m19:00:33.741131 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:33.741751 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m19:00:33.752423 [debug] [ThreadPool]: SQL status: BEGIN in 0.011 seconds
+[0m19:00:33.752974 [debug] [ThreadPool]: SQL status: BEGIN in 0.012 seconds
+[0m19:00:33.753245 [debug] [ThreadPool]: Using postgres connection "list_airwolf_marts"
+[0m19:00:33.753695 [debug] [ThreadPool]: Using postgres connection "list_airwolf_intermediate"
+[0m19:00:33.754366 [debug] [ThreadPool]: On list_airwolf_marts: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_marts"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'marts'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'marts'
+  
+[0m19:00:33.755253 [debug] [ThreadPool]: On list_airwolf_intermediate: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_intermediate"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'intermediate'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'intermediate'
+  
+[0m19:00:33.758784 [debug] [ThreadPool]: SQL status: SELECT 5 in 0.003 seconds
+[0m19:00:33.759371 [debug] [ThreadPool]: SQL status: SELECT 3 in 0.003 seconds
+[0m19:00:33.760664 [debug] [ThreadPool]: On list_airwolf_marts: ROLLBACK
+[0m19:00:33.761869 [debug] [ThreadPool]: On list_airwolf_intermediate: ROLLBACK
+[0m19:00:33.762553 [debug] [ThreadPool]: On list_airwolf_marts: Close
+[0m19:00:33.762806 [debug] [ThreadPool]: On list_airwolf_intermediate: Close
+[0m19:00:33.763339 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_airwolf_marts, now list_airwolf_reference)
+[0m19:00:33.767045 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:33.767685 [debug] [ThreadPool]: On list_airwolf_reference: BEGIN
+[0m19:00:33.768087 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m19:00:33.775577 [debug] [ThreadPool]: SQL status: BEGIN in 0.007 seconds
+[0m19:00:33.776482 [debug] [ThreadPool]: Using postgres connection "list_airwolf_reference"
+[0m19:00:33.777093 [debug] [ThreadPool]: On list_airwolf_reference: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "list_airwolf_reference"} */
+select
+      'airwolf' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'reference'
+    union all
+    select
+      'airwolf' as database,
+      matviewname as name,
+      schemaname as schema,
+      'materialized_view' as type
+    from pg_matviews
+    where schemaname ilike 'reference'
+  
+[0m19:00:33.780277 [debug] [ThreadPool]: SQL status: SELECT 2 in 0.002 seconds
+[0m19:00:33.781706 [debug] [ThreadPool]: On list_airwolf_reference: ROLLBACK
+[0m19:00:33.782423 [debug] [ThreadPool]: On list_airwolf_reference: Close
+[0m19:00:33.787645 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:33.788420 [debug] [MainThread]: On master: BEGIN
+[0m19:00:33.789071 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m19:00:33.797776 [debug] [MainThread]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:33.798420 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:33.798843 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "connection_name": "master"} */
+with relation as (
+        select
+            pg_rewrite.ev_class as class,
+            pg_rewrite.oid as id
+        from pg_rewrite
+    ),
+    class as (
+        select
+            oid as id,
+            relname as name,
+            relnamespace as schema,
+            relkind as kind
+        from pg_class
+    ),
+    dependency as (
+        select distinct
+            pg_depend.objid as id,
+            pg_depend.refobjid as ref
+        from pg_depend
+    ),
+    schema as (
+        select
+            pg_namespace.oid as id,
+            pg_namespace.nspname as name
+        from pg_namespace
+        where nspname != 'information_schema' and nspname not like 'pg\_%'
+    ),
+    referenced as (
+        select
+            relation.id AS id,
+            referenced_class.name ,
+            referenced_class.schema ,
+            referenced_class.kind
+        from relation
+        join class as referenced_class on relation.class=referenced_class.id
+        where referenced_class.kind in ('r', 'v', 'm')
+    ),
+    relationships as (
+        select
+            referenced.name as referenced_name,
+            referenced.schema as referenced_schema_id,
+            dependent_class.name as dependent_name,
+            dependent_class.schema as dependent_schema_id,
+            referenced.kind as kind
+        from referenced
+        join dependency on referenced.id=dependency.id
+        join class as dependent_class on dependency.ref=dependent_class.id
+        where
+            (referenced.name != dependent_class.name or
+             referenced.schema != dependent_class.schema)
+    )
+
+    select
+        referenced_schema.name as referenced_schema,
+        relationships.referenced_name as referenced_name,
+        dependent_schema.name as dependent_schema,
+        relationships.dependent_name as dependent_name
+    from relationships
+    join schema as dependent_schema on relationships.dependent_schema_id=dependent_schema.id
+    join schema as referenced_schema on relationships.referenced_schema_id=referenced_schema.id
+    group by referenced_schema, referenced_name, dependent_schema, dependent_name
+    order by referenced_schema, referenced_name, dependent_schema, dependent_name;
+[0m19:00:33.802073 [debug] [MainThread]: SQL status: SELECT 0 in 0.003 seconds
+[0m19:00:33.803765 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'ad51afba-b14f-4eba-a671-6b858e55a3ff', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f6209ad520>]}
+[0m19:00:33.804714 [debug] [MainThread]: On master: ROLLBACK
+[0m19:00:33.805578 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:33.806034 [debug] [MainThread]: On master: BEGIN
+[0m19:00:33.806997 [debug] [MainThread]: SQL status: BEGIN in 0.000 seconds
+[0m19:00:33.807698 [debug] [MainThread]: On master: COMMIT
+[0m19:00:33.808286 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:33.808783 [debug] [MainThread]: On master: COMMIT
+[0m19:00:33.809487 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:33.809985 [debug] [MainThread]: On master: Close
+[0m19:00:33.813313 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e
+[0m19:00:33.813778 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53
+[0m19:00:33.814139 [info ] [Thread-1 (]: 1 of 23 START test accepted_values_int_air_quality_area__tallinn__tartu__narva . [RUN]
+[0m19:00:33.814666 [info ] [Thread-2 (]: 2 of 23 START test accepted_values_int_traffic_area__tallinn__tartu__narva ..... [RUN]
+[0m19:00:33.815272 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly list_airwolf_reference, now test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e)
+[0m19:00:33.815912 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly list_airwolf_intermediate, now test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53)
+[0m19:00:33.816519 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e
+[0m19:00:33.817083 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53
+[0m19:00:33.833012 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53"
+[0m19:00:33.834817 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e"
+[0m19:00:33.841582 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53
+[0m19:00:33.847512 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e
+[0m19:00:33.862196 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53"
+[0m19:00:33.862837 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e"
+[0m19:00:33.867762 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53"
+[0m19:00:33.868830 [debug] [Thread-2 (]: On test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53: BEGIN
+[0m19:00:33.869596 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:33.870165 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e"
+[0m19:00:33.870810 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e: BEGIN
+[0m19:00:33.871317 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:33.878533 [debug] [Thread-2 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:33.879108 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:33.879429 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53"
+[0m19:00:33.879892 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e"
+[0m19:00:33.880404 [debug] [Thread-2 (]: On test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+with all_values as (
+
+    select
+        area as value_field,
+        count(*) as n_records
+
+    from "airwolf"."intermediate"."int_traffic"
+    group by area
+
+)
+
+select *
+from all_values
+where value_field not in (
+    'tallinn','tartu','narva'
+)
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.880857 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+with all_values as (
+
+    select
+        area as value_field,
+        count(*) as n_records
+
+    from "airwolf"."intermediate"."int_air_quality"
+    group by area
+
+)
+
+select *
+from all_values
+where value_field not in (
+    'tallinn','tartu','narva'
+)
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.886606 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.005 seconds
+[0m19:00:33.890474 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e: ROLLBACK
+[0m19:00:33.891557 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e: Close
+[0m19:00:33.892620 [info ] [Thread-1 (]: 1 of 23 PASS accepted_values_int_air_quality_area__tallinn__tartu__narva ....... [[32mPASS[0m in 0.08s]
+[0m19:00:33.893401 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e
+[0m19:00:33.893986 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3
+[0m19:00:33.894519 [info ] [Thread-1 (]: 3 of 23 START test accepted_values_int_weather_area__tallinn__tartu__narva ..... [RUN]
+[0m19:00:33.895114 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.accepted_values_int_air_quality_area__tallinn__tartu__narva.64cc8aad9e, now test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3)
+[0m19:00:33.895511 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.014 seconds
+[0m19:00:33.895938 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3
+[0m19:00:33.897642 [debug] [Thread-2 (]: On test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53: ROLLBACK
+[0m19:00:33.901753 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3"
+[0m19:00:33.902968 [debug] [Thread-2 (]: On test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53: Close
+[0m19:00:33.903898 [info ] [Thread-2 (]: 2 of 23 PASS accepted_values_int_traffic_area__tallinn__tartu__narva ........... [[32mPASS[0m in 0.09s]
+[0m19:00:33.904715 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53
+[0m19:00:33.905473 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d
+[0m19:00:33.906264 [info ] [Thread-2 (]: 4 of 23 START test not_null_int_air_quality_obs_time ........................... [RUN]
+[0m19:00:33.906943 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.accepted_values_int_traffic_area__tallinn__tartu__narva.3df91e4a53, now test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d)
+[0m19:00:33.907647 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d
+[0m19:00:33.914107 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d"
+[0m19:00:33.915717 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3
+[0m19:00:33.917875 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3"
+[0m19:00:33.920618 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d
+[0m19:00:33.923400 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d"
+[0m19:00:33.925478 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3"
+[0m19:00:33.926014 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3: BEGIN
+[0m19:00:33.926504 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:33.928101 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d"
+[0m19:00:33.928817 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d: BEGIN
+[0m19:00:33.929384 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:33.934983 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:33.935622 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3"
+[0m19:00:33.936044 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+with all_values as (
+
+    select
+        area as value_field,
+        count(*) as n_records
+
+    from "airwolf"."intermediate"."int_weather"
+    group by area
+
+)
+
+select *
+from all_values
+where value_field not in (
+    'tallinn','tartu','narva'
+)
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.937576 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:33.938135 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d"
+[0m19:00:33.938812 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."intermediate"."int_air_quality"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.941623 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.005 seconds
+[0m19:00:33.943482 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3: ROLLBACK
+[0m19:00:33.943794 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.004 seconds
+[0m19:00:33.945536 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d: ROLLBACK
+[0m19:00:33.945844 [debug] [Thread-1 (]: On test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3: Close
+[0m19:00:33.946390 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d: Close
+[0m19:00:33.947345 [info ] [Thread-1 (]: 3 of 23 PASS accepted_values_int_weather_area__tallinn__tartu__narva ........... [[32mPASS[0m in 0.05s]
+[0m19:00:33.949196 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3
+[0m19:00:33.948460 [info ] [Thread-2 (]: 4 of 23 PASS not_null_int_air_quality_obs_time ................................. [[32mPASS[0m in 0.04s]
+[0m19:00:33.950254 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78
+[0m19:00:33.951214 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d
+[0m19:00:33.951851 [info ] [Thread-1 (]: 5 of 23 START test not_null_int_air_quality_station_id ......................... [RUN]
+[0m19:00:33.952650 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f
+[0m19:00:33.953348 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.accepted_values_int_weather_area__tallinn__tartu__narva.4138cd92d3, now test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78)
+[0m19:00:33.954013 [info ] [Thread-2 (]: 6 of 23 START test not_null_int_traffic_detector_id ............................ [RUN]
+[0m19:00:33.954797 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78
+[0m19:00:33.955874 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_air_quality_obs_time.0cb56add6d, now test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f)
+[0m19:00:33.959282 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78"
+[0m19:00:33.960076 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f
+[0m19:00:33.964313 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f"
+[0m19:00:33.969361 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78
+[0m19:00:33.971940 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78"
+[0m19:00:33.972525 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f
+[0m19:00:33.974612 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f"
+[0m19:00:33.979277 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78"
+[0m19:00:33.980065 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78: BEGIN
+[0m19:00:33.980640 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:33.981052 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f"
+[0m19:00:33.981708 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f: BEGIN
+[0m19:00:33.982307 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:33.989843 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:33.990276 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:33.990585 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78"
+[0m19:00:33.991048 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f"
+[0m19:00:33.991496 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select station_id
+from "airwolf"."intermediate"."int_air_quality"
+where station_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.991949 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select detector_id
+from "airwolf"."intermediate"."int_traffic"
+where detector_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:33.996267 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.004 seconds
+[0m19:00:33.997769 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78: ROLLBACK
+[0m19:00:33.998573 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78: Close
+[0m19:00:33.999663 [info ] [Thread-1 (]: 5 of 23 PASS not_null_int_air_quality_station_id ............................... [[32mPASS[0m in 0.05s]
+[0m19:00:34.000849 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78
+[0m19:00:34.001722 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514
+[0m19:00:34.002506 [info ] [Thread-1 (]: 7 of 23 START test not_null_int_traffic_obs_time ............................... [RUN]
+[0m19:00:34.003181 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.011 seconds
+[0m19:00:34.003609 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_air_quality_station_id.45a67bfc78, now test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514)
+[0m19:00:34.004911 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f: ROLLBACK
+[0m19:00:34.005381 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514
+[0m19:00:34.009289 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514"
+[0m19:00:34.009912 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f: Close
+[0m19:00:34.011494 [info ] [Thread-2 (]: 6 of 23 PASS not_null_int_traffic_detector_id .................................. [[32mPASS[0m in 0.06s]
+[0m19:00:34.012573 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f
+[0m19:00:34.013300 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21
+[0m19:00:34.013751 [info ] [Thread-2 (]: 8 of 23 START test not_null_int_weather_obs_time ............................... [RUN]
+[0m19:00:34.014327 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_traffic_detector_id.cb7f0bc60f, now test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21)
+[0m19:00:34.014750 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21
+[0m19:00:34.018895 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21"
+[0m19:00:34.020374 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514
+[0m19:00:34.022100 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514"
+[0m19:00:34.024030 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21
+[0m19:00:34.025886 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21"
+[0m19:00:34.031109 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514"
+[0m19:00:34.031669 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514: BEGIN
+[0m19:00:34.032072 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21"
+[0m19:00:34.032636 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.033350 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21: BEGIN
+[0m19:00:34.034180 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.041498 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.042285 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514"
+[0m19:00:34.042581 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.042919 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."intermediate"."int_traffic"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.043511 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21"
+[0m19:00:34.044374 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."intermediate"."int_weather"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.048167 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.050132 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21: ROLLBACK
+[0m19:00:34.051289 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21: Close
+[0m19:00:34.052761 [info ] [Thread-2 (]: 8 of 23 PASS not_null_int_weather_obs_time ..................................... [[32mPASS[0m in 0.04s]
+[0m19:00:34.053637 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21
+[0m19:00:34.054126 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4
+[0m19:00:34.054916 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.011 seconds
+[0m19:00:34.054608 [info ] [Thread-2 (]: 9 of 23 START test not_null_int_weather_station_id ............................. [RUN]
+[0m19:00:34.056166 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514: ROLLBACK
+[0m19:00:34.056897 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_weather_obs_time.f93c207e21, now test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4)
+[0m19:00:34.057795 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4
+[0m19:00:34.058108 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514: Close
+[0m19:00:34.061882 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4"
+[0m19:00:34.063203 [info ] [Thread-1 (]: 7 of 23 PASS not_null_int_traffic_obs_time ..................................... [[32mPASS[0m in 0.06s]
+[0m19:00:34.064547 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514
+[0m19:00:34.065263 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb
+[0m19:00:34.066111 [info ] [Thread-1 (]: 10 of 23 START test not_null_mart_aq_obs_time .................................. [RUN]
+[0m19:00:34.067014 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_traffic_obs_time.f945cc7514, now test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb)
+[0m19:00:34.067664 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb
+[0m19:00:34.071451 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb"
+[0m19:00:34.073106 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4
+[0m19:00:34.075290 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4"
+[0m19:00:34.077817 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb
+[0m19:00:34.079970 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb"
+[0m19:00:34.085037 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4"
+[0m19:00:34.085637 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb"
+[0m19:00:34.086027 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4: BEGIN
+[0m19:00:34.086723 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb: BEGIN
+[0m19:00:34.087208 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.087674 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.095707 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.096185 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.096630 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4"
+[0m19:00:34.097252 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb"
+[0m19:00:34.097675 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select station_id
+from "airwolf"."intermediate"."int_weather"
+where station_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.098157 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."marts"."mart_aq"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.102455 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.102845 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.004 seconds
+[0m19:00:34.104598 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4: ROLLBACK
+[0m19:00:34.106596 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb: ROLLBACK
+[0m19:00:34.107862 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4: Close
+[0m19:00:34.108678 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb: Close
+[0m19:00:34.109332 [info ] [Thread-2 (]: 9 of 23 PASS not_null_int_weather_station_id ................................... [[32mPASS[0m in 0.05s]
+[0m19:00:34.110535 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4
+[0m19:00:34.110013 [info ] [Thread-1 (]: 10 of 23 PASS not_null_mart_aq_obs_time ........................................ [[32mPASS[0m in 0.04s]
+[0m19:00:34.111113 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e
+[0m19:00:34.111916 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb
+[0m19:00:34.112646 [info ] [Thread-2 (]: 11 of 23 START test not_null_mart_aq_station_id ................................ [RUN]
+[0m19:00:34.113494 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0
+[0m19:00:34.114309 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_int_weather_station_id.1afa14c3f4, now test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e)
+[0m19:00:34.114818 [info ] [Thread-1 (]: 12 of 23 START test not_null_mart_joined_area .................................. [RUN]
+[0m19:00:34.115380 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e
+[0m19:00:34.116067 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_aq_obs_time.5b24cf47cb, now test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0)
+[0m19:00:34.119462 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e"
+[0m19:00:34.120135 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0
+[0m19:00:34.123243 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0"
+[0m19:00:34.128070 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e
+[0m19:00:34.128650 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0
+[0m19:00:34.130549 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e"
+[0m19:00:34.132549 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0"
+[0m19:00:34.137637 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0"
+[0m19:00:34.138256 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0: BEGIN
+[0m19:00:34.138713 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.139489 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e"
+[0m19:00:34.140252 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e: BEGIN
+[0m19:00:34.140878 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.146781 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.147871 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0"
+[0m19:00:34.148435 [debug] [Thread-2 (]: SQL status: BEGIN in 0.007 seconds
+[0m19:00:34.148940 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select area
+from "airwolf"."marts"."mart_joined"
+where area is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.149514 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e"
+[0m19:00:34.150318 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select station_id
+from "airwolf"."marts"."mart_aq"
+where station_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.153738 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.004 seconds
+[0m19:00:34.154178 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.155618 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0: ROLLBACK
+[0m19:00:34.157825 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e: ROLLBACK
+[0m19:00:34.159151 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0: Close
+[0m19:00:34.159693 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e: Close
+[0m19:00:34.160539 [info ] [Thread-1 (]: 12 of 23 PASS not_null_mart_joined_area ........................................ [[32mPASS[0m in 0.04s]
+[0m19:00:34.161513 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0
+[0m19:00:34.161138 [info ] [Thread-2 (]: 11 of 23 PASS not_null_mart_aq_station_id ...................................... [[32mPASS[0m in 0.05s]
+[0m19:00:34.162089 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc
+[0m19:00:34.162861 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e
+[0m19:00:34.163500 [info ] [Thread-1 (]: 13 of 23 START test not_null_mart_joined_obs_time .............................. [RUN]
+[0m19:00:34.164170 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635
+[0m19:00:34.164900 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_joined_area.062e9b55a0, now test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc)
+[0m19:00:34.165363 [info ] [Thread-2 (]: 14 of 23 START test not_null_mart_traffic_detector_id .......................... [RUN]
+[0m19:00:34.165781 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc
+[0m19:00:34.166294 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_aq_station_id.568afea06e, now test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635)
+[0m19:00:34.171500 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc"
+[0m19:00:34.172531 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635
+[0m19:00:34.234793 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635"
+[0m19:00:34.238215 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc
+[0m19:00:34.238809 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635
+[0m19:00:34.240665 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc"
+[0m19:00:34.242493 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635"
+[0m19:00:34.247086 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc"
+[0m19:00:34.247606 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc: BEGIN
+[0m19:00:34.248197 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.248601 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635"
+[0m19:00:34.249203 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635: BEGIN
+[0m19:00:34.249755 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.256243 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.257034 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc"
+[0m19:00:34.257519 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.257818 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."marts"."mart_joined"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.258494 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635"
+[0m19:00:34.259459 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select detector_id
+from "airwolf"."marts"."mart_traffic"
+where detector_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.262018 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.263422 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc: ROLLBACK
+[0m19:00:34.264266 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc: Close
+[0m19:00:34.265230 [info ] [Thread-1 (]: 13 of 23 PASS not_null_mart_joined_obs_time .................................... [[32mPASS[0m in 0.10s]
+[0m19:00:34.266120 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc
+[0m19:00:34.267073 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62
+[0m19:00:34.267833 [info ] [Thread-1 (]: 15 of 23 START test not_null_mart_traffic_obs_time ............................. [RUN]
+[0m19:00:34.269062 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_joined_obs_time.61c519efcc, now test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62)
+[0m19:00:34.269740 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62
+[0m19:00:34.270260 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.010 seconds
+[0m19:00:34.273394 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62"
+[0m19:00:34.274767 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635: ROLLBACK
+[0m19:00:34.275957 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635: Close
+[0m19:00:34.277615 [info ] [Thread-2 (]: 14 of 23 PASS not_null_mart_traffic_detector_id ................................ [[32mPASS[0m in 0.11s]
+[0m19:00:34.278266 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635
+[0m19:00:34.278727 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47
+[0m19:00:34.279278 [info ] [Thread-2 (]: 16 of 23 START test not_null_mart_weather_obs_time ............................. [RUN]
+[0m19:00:34.280146 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_traffic_detector_id.6e05bf5635, now test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47)
+[0m19:00:34.280968 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47
+[0m19:00:34.285093 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47"
+[0m19:00:34.286460 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62
+[0m19:00:34.288493 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62"
+[0m19:00:34.290612 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47
+[0m19:00:34.292609 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47"
+[0m19:00:34.296980 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62"
+[0m19:00:34.297635 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62: BEGIN
+[0m19:00:34.298184 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.298691 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47"
+[0m19:00:34.299514 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47: BEGIN
+[0m19:00:34.300051 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.307306 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.307951 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62"
+[0m19:00:34.308312 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.308671 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."marts"."mart_traffic"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.309137 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47"
+[0m19:00:34.309773 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select obs_time
+from "airwolf"."marts"."mart_weather"
+where obs_time is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.313439 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.315208 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47: ROLLBACK
+[0m19:00:34.316055 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47: Close
+[0m19:00:34.317448 [info ] [Thread-2 (]: 16 of 23 PASS not_null_mart_weather_obs_time ................................... [[32mPASS[0m in 0.04s]
+[0m19:00:34.318235 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47
+[0m19:00:34.318766 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4
+[0m19:00:34.319362 [info ] [Thread-2 (]: 17 of 23 START test not_null_mart_weather_station_id ........................... [RUN]
+[0m19:00:34.320015 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_weather_obs_time.f614da7f47, now test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4)
+[0m19:00:34.320598 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4
+[0m19:00:34.320970 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.011 seconds
+[0m19:00:34.324709 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4"
+[0m19:00:34.326086 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62: ROLLBACK
+[0m19:00:34.327081 [debug] [Thread-1 (]: On test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62: Close
+[0m19:00:34.327821 [info ] [Thread-1 (]: 15 of 23 PASS not_null_mart_traffic_obs_time ................................... [[32mPASS[0m in 0.06s]
+[0m19:00:34.328631 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62
+[0m19:00:34.329350 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.unique_int_air_quality_station_time
+[0m19:00:34.330053 [info ] [Thread-1 (]: 18 of 23 START test unique_int_air_quality_station_time ........................ [RUN]
+[0m19:00:34.330836 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_traffic_obs_time.d871bcab62, now test.airwolf_dbt.unique_int_air_quality_station_time)
+[0m19:00:34.331238 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.unique_int_air_quality_station_time
+[0m19:00:34.334449 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.unique_int_air_quality_station_time"
+[0m19:00:34.336414 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4
+[0m19:00:34.338668 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4"
+[0m19:00:34.340722 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.unique_int_air_quality_station_time
+[0m19:00:34.342607 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.unique_int_air_quality_station_time"
+[0m19:00:34.347358 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4"
+[0m19:00:34.347915 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.unique_int_air_quality_station_time"
+[0m19:00:34.348483 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4: BEGIN
+[0m19:00:34.349272 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_air_quality_station_time: BEGIN
+[0m19:00:34.349859 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.350461 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.358754 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.359277 [debug] [Thread-2 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.359586 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.unique_int_air_quality_station_time"
+[0m19:00:34.360021 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4"
+[0m19:00:34.360470 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_air_quality_station_time: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.unique_int_air_quality_station_time"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  --Dublikaatide tuvastamine int_air_quality_station_time tabelis, kus station_id ja obs_time kombinatsioon on sama. Kui row_count on suurem kui 1, siis tähendab see, et on leitud duplikaate.
+select
+    station_id,
+    obs_time,
+    count(*) as row_count
+from "airwolf"."intermediate"."int_air_quality"
+group by station_id, obs_time
+having count(*) > 1
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.361001 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  
+    
+    
+
+
+
+select station_id
+from "airwolf"."marts"."mart_weather"
+where station_id is null
+
+
+
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.364922 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.003 seconds
+[0m19:00:34.366996 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4: ROLLBACK
+[0m19:00:34.367698 [debug] [Thread-2 (]: On test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4: Close
+[0m19:00:34.368447 [info ] [Thread-2 (]: 17 of 23 PASS not_null_mart_weather_station_id ................................. [[32mPASS[0m in 0.05s]
+[0m19:00:34.369235 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4
+[0m19:00:34.369928 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.unique_int_traffic_detector_time
+[0m19:00:34.370448 [info ] [Thread-2 (]: 19 of 23 START test unique_int_traffic_detector_time ........................... [RUN]
+[0m19:00:34.370984 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.not_null_mart_weather_station_id.b8c62b4fd4, now test.airwolf_dbt.unique_int_traffic_detector_time)
+[0m19:00:34.371394 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.unique_int_traffic_detector_time
+[0m19:00:34.373809 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.unique_int_traffic_detector_time"
+[0m19:00:34.377257 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.016 seconds
+[0m19:00:34.378886 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_air_quality_station_time: ROLLBACK
+[0m19:00:34.379830 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_air_quality_station_time: Close
+[0m19:00:34.381097 [info ] [Thread-1 (]: 18 of 23 PASS unique_int_air_quality_station_time .............................. [[32mPASS[0m in 0.05s]
+[0m19:00:34.381666 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.unique_int_traffic_detector_time
+[0m19:00:34.382144 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.unique_int_air_quality_station_time
+[0m19:00:34.385740 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.unique_int_traffic_detector_time"
+[0m19:00:34.386493 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.unique_int_weather_station_time
+[0m19:00:34.387363 [info ] [Thread-1 (]: 20 of 23 START test unique_int_weather_station_time ............................ [RUN]
+[0m19:00:34.388294 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.unique_int_air_quality_station_time, now test.airwolf_dbt.unique_int_weather_station_time)
+[0m19:00:34.388880 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.unique_int_weather_station_time
+[0m19:00:34.391154 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.unique_int_weather_station_time"
+[0m19:00:34.392966 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.unique_int_traffic_detector_time"
+[0m19:00:34.393632 [debug] [Thread-2 (]: On test.airwolf_dbt.unique_int_traffic_detector_time: BEGIN
+[0m19:00:34.394021 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.397365 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.unique_int_weather_station_time
+[0m19:00:34.399586 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.unique_int_weather_station_time"
+[0m19:00:34.402044 [debug] [Thread-2 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.402580 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.unique_int_traffic_detector_time"
+[0m19:00:34.403178 [debug] [Thread-2 (]: On test.airwolf_dbt.unique_int_traffic_detector_time: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.unique_int_traffic_detector_time"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  --Dublikaatide tuvastamine int_traffic tabelis, kus detector_id ja obs_time kombinatsioon on sama. Kui row_count on suurem kui 1, siis tähendab see, et on leitud duplikaate.
+select
+    detector_id,
+    obs_time,
+    count(*) as row_count
+from "airwolf"."intermediate"."int_traffic"
+group by detector_id, obs_time
+having count(*) > 1
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.406645 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.unique_int_weather_station_time"
+[0m19:00:34.407172 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_weather_station_time: BEGIN
+[0m19:00:34.407566 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.415772 [debug] [Thread-1 (]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.416561 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.unique_int_weather_station_time"
+[0m19:00:34.417022 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_weather_station_time: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.unique_int_weather_station_time"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  --Tuvastab dublikaatide olemasolu int_weather tabelis, kus station_id ja obs_time kombinatsioon on sama. Kui row_count on suurem kui 1, siis tähendab see, et on leitud duplikaate.
+select
+    station_id,
+    obs_time,
+    count(*) as row_count
+from "airwolf"."intermediate"."int_weather"
+group by station_id, obs_time
+having count(*) > 1
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.431821 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.014 seconds
+[0m19:00:34.434105 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_weather_station_time: ROLLBACK
+[0m19:00:34.434798 [debug] [Thread-1 (]: On test.airwolf_dbt.unique_int_weather_station_time: Close
+[0m19:00:34.435679 [info ] [Thread-1 (]: 20 of 23 PASS unique_int_weather_station_time .................................. [[32mPASS[0m in 0.05s]
+[0m19:00:34.436366 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.unique_int_weather_station_time
+[0m19:00:34.436993 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.valid_air_quality_ranges
+[0m19:00:34.437498 [info ] [Thread-1 (]: 21 of 23 START test valid_air_quality_ranges ................................... [RUN]
+[0m19:00:34.438055 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.unique_int_weather_station_time, now test.airwolf_dbt.valid_air_quality_ranges)
+[0m19:00:34.438451 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.valid_air_quality_ranges
+[0m19:00:34.440797 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.valid_air_quality_ranges"
+[0m19:00:34.447297 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.valid_air_quality_ranges
+[0m19:00:34.449406 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.valid_air_quality_ranges"
+[0m19:00:34.456403 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.valid_air_quality_ranges"
+[0m19:00:34.457119 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_air_quality_ranges: BEGIN
+[0m19:00:34.457762 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.466704 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.467570 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.valid_air_quality_ranges"
+[0m19:00:34.468276 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_air_quality_ranges: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.valid_air_quality_ranges"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  select *
+from "airwolf"."intermediate"."int_air_quality"
+where SO2 < 0
+   or O3 < 0
+   or NO2 < 0
+   or PM10 < 0
+   or PM25 < 0
+   or lat < 57
+   or lat > 60.5
+   or lon < 21
+   or lon > 29
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.470334 [debug] [Thread-1 (]: Postgres adapter: Postgres error: column "so2" does not exist
+LINE 12: where SO2 < 0
+               ^
+
+[0m19:00:34.470962 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_air_quality_ranges: ROLLBACK
+[0m19:00:34.471865 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_air_quality_ranges: Close
+[0m19:00:34.475517 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.072 seconds
+[0m19:00:34.477202 [debug] [Thread-2 (]: On test.airwolf_dbt.unique_int_traffic_detector_time: ROLLBACK
+[0m19:00:34.478246 [debug] [Thread-2 (]: On test.airwolf_dbt.unique_int_traffic_detector_time: Close
+[0m19:00:34.479219 [info ] [Thread-2 (]: 19 of 23 PASS unique_int_traffic_detector_time ................................. [[32mPASS[0m in 0.11s]
+[0m19:00:34.480399 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.unique_int_traffic_detector_time
+[0m19:00:34.481161 [debug] [Thread-2 (]: Began running node test.airwolf_dbt.valid_traffic_ranges
+[0m19:00:34.481626 [info ] [Thread-2 (]: 22 of 23 START test valid_traffic_ranges ....................................... [RUN]
+[0m19:00:34.482192 [debug] [Thread-2 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.unique_int_traffic_detector_time, now test.airwolf_dbt.valid_traffic_ranges)
+[0m19:00:34.482617 [debug] [Thread-2 (]: Began compiling node test.airwolf_dbt.valid_traffic_ranges
+[0m19:00:34.485159 [debug] [Thread-2 (]: Writing injected SQL for node "test.airwolf_dbt.valid_traffic_ranges"
+[0m19:00:34.488991 [debug] [Thread-1 (]: Database Error in test valid_air_quality_ranges (tests/valid_air_quality_ranges.sql)
+  column "so2" does not exist
+  LINE 12: where SO2 < 0
+                 ^
+  compiled code at target/run/airwolf_dbt/tests/valid_air_quality_ranges.sql
+[0m19:00:34.489548 [error] [Thread-1 (]: 21 of 23 ERROR valid_air_quality_ranges ........................................ [[31mERROR[0m in 0.05s]
+[0m19:00:34.490205 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.valid_air_quality_ranges
+[0m19:00:34.490697 [debug] [Thread-1 (]: Began running node test.airwolf_dbt.valid_weather_ranges
+[0m19:00:34.491094 [debug] [Thread-5 (]: Marking all children of 'test.airwolf_dbt.valid_air_quality_ranges' to be skipped because of status 'error'.  Reason: Database Error in test valid_air_quality_ranges (tests/valid_air_quality_ranges.sql)
+  column "so2" does not exist
+  LINE 12: where SO2 < 0
+                 ^
+  compiled code at target/run/airwolf_dbt/tests/valid_air_quality_ranges.sql.
+[0m19:00:34.491503 [info ] [Thread-1 (]: 23 of 23 START test valid_weather_ranges ....................................... [RUN]
+[0m19:00:34.492917 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly test.airwolf_dbt.valid_air_quality_ranges, now test.airwolf_dbt.valid_weather_ranges)
+[0m19:00:34.493468 [debug] [Thread-2 (]: Began executing node test.airwolf_dbt.valid_traffic_ranges
+[0m19:00:34.493855 [debug] [Thread-1 (]: Began compiling node test.airwolf_dbt.valid_weather_ranges
+[0m19:00:34.496118 [debug] [Thread-2 (]: Writing runtime sql for node "test.airwolf_dbt.valid_traffic_ranges"
+[0m19:00:34.498529 [debug] [Thread-1 (]: Writing injected SQL for node "test.airwolf_dbt.valid_weather_ranges"
+[0m19:00:34.504681 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.valid_traffic_ranges"
+[0m19:00:34.505049 [debug] [Thread-1 (]: Began executing node test.airwolf_dbt.valid_weather_ranges
+[0m19:00:34.505371 [debug] [Thread-2 (]: On test.airwolf_dbt.valid_traffic_ranges: BEGIN
+[0m19:00:34.507051 [debug] [Thread-1 (]: Writing runtime sql for node "test.airwolf_dbt.valid_weather_ranges"
+[0m19:00:34.507565 [debug] [Thread-2 (]: Opening a new connection, currently in state closed
+[0m19:00:34.515097 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.valid_weather_ranges"
+[0m19:00:34.515611 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_weather_ranges: BEGIN
+[0m19:00:34.516125 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m19:00:34.516593 [debug] [Thread-2 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.517223 [debug] [Thread-2 (]: Using postgres connection "test.airwolf_dbt.valid_traffic_ranges"
+[0m19:00:34.517673 [debug] [Thread-2 (]: On test.airwolf_dbt.valid_traffic_ranges: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.valid_traffic_ranges"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  select *
+from "airwolf"."intermediate"."int_traffic"
+where total_flow < 0
+   or lat < 57
+   or lat > 60.5
+   or lon < 21
+   or lon > 29
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.525032 [debug] [Thread-1 (]: SQL status: BEGIN in 0.009 seconds
+[0m19:00:34.526055 [debug] [Thread-1 (]: Using postgres connection "test.airwolf_dbt.valid_weather_ranges"
+[0m19:00:34.526559 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_weather_ranges: /* {"app": "dbt", "dbt_version": "1.9.0", "profile_name": "airwolf_dbt", "target_name": "dev", "node_id": "test.airwolf_dbt.valid_weather_ranges"} */
+
+    select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+    
+  select *
+from "airwolf"."intermediate"."int_weather"
+where temperature_c < -50
+   or temperature_c > 50
+   or wind_speed_ms < 0
+   or precip_mm < 0
+   or lat < 57
+   or lat > 60.5
+   or lon < 21
+   or lon > 29
+  
+  
+      
+    ) dbt_internal_test
+[0m19:00:34.532312 [debug] [Thread-1 (]: SQL status: SELECT 1 in 0.005 seconds
+[0m19:00:34.532935 [debug] [Thread-2 (]: SQL status: SELECT 1 in 0.015 seconds
+[0m19:00:34.534585 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_weather_ranges: ROLLBACK
+[0m19:00:34.536312 [debug] [Thread-2 (]: On test.airwolf_dbt.valid_traffic_ranges: ROLLBACK
+[0m19:00:34.537264 [debug] [Thread-1 (]: On test.airwolf_dbt.valid_weather_ranges: Close
+[0m19:00:34.537921 [debug] [Thread-2 (]: On test.airwolf_dbt.valid_traffic_ranges: Close
+[0m19:00:34.538458 [info ] [Thread-1 (]: 23 of 23 PASS valid_weather_ranges ............................................. [[32mPASS[0m in 0.05s]
+[0m19:00:34.539392 [debug] [Thread-1 (]: Finished running node test.airwolf_dbt.valid_weather_ranges
+[0m19:00:34.539023 [info ] [Thread-2 (]: 22 of 23 PASS valid_traffic_ranges ............................................. [[32mPASS[0m in 0.06s]
+[0m19:00:34.540647 [debug] [Thread-2 (]: Finished running node test.airwolf_dbt.valid_traffic_ranges
+[0m19:00:34.544012 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:34.544621 [debug] [MainThread]: On master: BEGIN
+[0m19:00:34.545023 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m19:00:34.553299 [debug] [MainThread]: SQL status: BEGIN in 0.008 seconds
+[0m19:00:34.553923 [debug] [MainThread]: On master: COMMIT
+[0m19:00:34.554363 [debug] [MainThread]: Using postgres connection "master"
+[0m19:00:34.554943 [debug] [MainThread]: On master: COMMIT
+[0m19:00:34.555754 [debug] [MainThread]: SQL status: COMMIT in 0.000 seconds
+[0m19:00:34.556449 [debug] [MainThread]: On master: Close
+[0m19:00:34.557318 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m19:00:34.557969 [debug] [MainThread]: Connection 'test.airwolf_dbt.valid_traffic_ranges' was properly closed.
+[0m19:00:34.558436 [debug] [MainThread]: Connection 'test.airwolf_dbt.valid_weather_ranges' was properly closed.
+[0m19:00:34.558949 [info ] [MainThread]: 
+[0m19:00:34.559455 [info ] [MainThread]: Finished running 23 data tests in 0 hours 0 minutes and 0.86 seconds (0.86s).
+[0m19:00:34.562075 [debug] [MainThread]: Command end result
+[0m19:00:34.593977 [debug] [MainThread]: Wrote artifact WritableManifest to /opt/airflow/dbt_project/target/manifest.json
+[0m19:00:34.598598 [debug] [MainThread]: Wrote artifact SemanticManifest to /opt/airflow/dbt_project/target/semantic_manifest.json
+[0m19:00:34.608151 [debug] [MainThread]: Wrote artifact RunExecutionResult to /opt/airflow/dbt_project/target/run_results.json
+[0m19:00:34.608871 [info ] [MainThread]: 
+[0m19:00:34.609540 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m19:00:34.609958 [info ] [MainThread]: 
+[0m19:00:34.610395 [error] [MainThread]:   Database Error in test valid_air_quality_ranges (tests/valid_air_quality_ranges.sql)
+  column "so2" does not exist
+  LINE 12: where SO2 < 0
+                 ^
+  compiled code at target/run/airwolf_dbt/tests/valid_air_quality_ranges.sql
+[0m19:00:34.610945 [info ] [MainThread]: 
+[0m19:00:34.611604 [info ] [MainThread]: Done. PASS=22 WARN=0 ERROR=1 SKIP=0 TOTAL=23
+[0m19:00:34.613010 [debug] [MainThread]: Resource report: {"command_name": "test", "command_success": false, "command_wall_clock_time": 1.7464929, "process_in_blocks": "128", "process_kernel_time": 0.493233, "process_mem_max_rss": "133260", "process_out_blocks": "0", "process_user_time": 2.152671}
+[0m19:00:34.613634 [debug] [MainThread]: Command `dbt test` failed at 19:00:34.613508 after 1.75 seconds
+[0m19:00:34.614264 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f621fd83e0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f622a83d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x77f622a83620>]}
+[0m19:00:34.614857 [debug] [MainThread]: Flushing usage events
+[0m19:00:35.565525 [debug] [MainThread]: An error was encountered while trying to flush usage events
