@@ -2,7 +2,7 @@
 
 ## Äriküsimus
 
-Kui tugev on statistiline seos Eesti linnade õhukvaliteedi ning ilmastikutegurite (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel? Eesmärk on tuvastada, milliste ilmastiku- ja liiklustingimuste koosesinemisel on õhukvaliteet kõige parem või kõige halvem. Analüüs hõlmab kolme uurimispiirkonda — Tallinn, Tartu ja Narva — ning katab perioodi jaanuar 2024 kuni käesolev kuu.
+Kui tugev on statistiline seos õhukvaliteedi ning ilmastikutegurite (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel Eesti linnades? Eesmärk on tuvastada, milliste ilmastiku- ja liiklustingimuste koosesinemisel on õhukvaliteet kõige halvem. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel — mida madalam kontsentratsioon, seda parem õhukvaliteet, mida kõrgem kontsentratsioon, seda halvem õhukvaliteet. Analüüs hõlmab kolme uurimispiirkonda — Tallinn, Tartu ja Narva — ning katab perioodi jaanuar 2024 kuni käesolev kuu.
 
 ## Uurimisküsimused
 
@@ -14,14 +14,15 @@ Kui tugev on statistiline seos Eesti linnade õhukvaliteedi ning ilmastikuteguri
 
 ## Mõõdikud dashboardil
 
-Dashboard on jagatud kolmeks vahekaardiks:
+Dashboard on jagatud neljaks vahekaardiks: **Tallinn**, **Narva**, **Tartu** ja **Võrdlused**.
 
-**Mõõdistus- ja vaatlusandmed** — tunnipõhised ajagraafikud valitud kuu lõikes: temperatuur ja sademed (kaheteljeliselt), tuulekiirus ning liiklussagedus koos üksikdetektorite vaadetega.
+**Tallinn, Narva, Tartu** — iga linna vahekaart sisaldab nelja osa:
+- Interaktiivne kaart (Leaflet + OpenStreetMap), kus on märgitud ilmavaatlusjaam (sinine), õhukvaliteedi seirejaam (punane) ja liikluse loenduspunkt (roheline) koos uurimisala piiriga.
+- Tunnipõhised ilma- ja liiklusgraafikud valitud kuu lõikes: temperatuur ja sademed (kaheteljeliselt), tuulekiirus ning liiklussagedus koos üksikdetektorite vaadetega.
+- Tunnipõhine õhukvaliteedi ajagraafik: SO2, O3, NO2, PM10 ja PM25 kontsentratsioonid (µg/m³) korraga ühel graafikul.
+- Hajuvusdiagrammid SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seosest liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Iga diagramm sisaldab lineaarset trendjoont ja Pearson **r** korrelatsioonikordajat. Indikaator on kasutaja poolt valitav.
 
-**Analüütika** — hajuvusdiagrammid SO2, PM10, PM2.5, NO2 ja O3 tunnikeskmiste kontsentratsioonide seosest liiklussageduse, temperatuuri, sademete ja tuulekiirusega. Iga diagramm sisaldab lineaarset trendjoont ja Pearson **r** korrelatsioonikordajat. Indikaator on kasutaja poolt valitav.
-
-**Võrdlus** — kuukeskmised kontsentratsioonid kolme linna lõikes koos kõrgeima väärtusega kuu ja kontsentratsiooniga (µg/m³). Lisaks Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega iga saasteaine ja linna kohta, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
-
+**Võrdlused** — kuukeskmised kontsentratsioonid kolme linna lõikes koos kõrgeima väärtusega kuu ja kontsentratsiooniga (µg/m³). Lisaks Pearson **r** korrelatsioonikordajad tuulekiiruse ja liiklussagedusega iga saasteaine ja linna kohta, koos automaatse järeldusega, kumb näitab tugevamat statistilist seost.
 
 ## Andmeallikad
 
