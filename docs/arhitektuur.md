@@ -2,7 +2,7 @@
 
 ## Äriküsimus
 
-Kui tugev on statistiline seos õhukvaliteedi ning ilmastikutegurite (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel Eesti linnades? Eesmärk on tuvastada, milliste ilmastiku- ja liiklustingimuste koosesinemisel on õhukvaliteet kõige halvem. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel — mida madalam kontsentratsioon, seda parem õhukvaliteet, mida kõrgem kontsentratsioon, seda halvem õhukvaliteet. Analüüs hõlmab kolme uurimispiirkonda — Tallinn, Tartu ja Narva — ning katab perioodi jaanuar 2024 kuni käesolev kuu.
+Kui tugev on statistiline seos õhukvaliteedi ning ilmastikutegurite (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel Eesti linnades? Eesmärk on tuvastada, milliste ilmastiku- ja liiklustingimuste koosesinemisel on õhukvaliteet kõige halvem. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel — mida madalam kontsentratsioon, seda parem õhukvaliteet, mida kõrgem kontsentratsioon, seda halvem õhukvaliteet. Analüüs hõlmab kolme uurimispiirkonda — Tallinn, Tartu ja Narva — ning katab perioodi jaanuar 2025 kuni käesolev kuu.
 
 ## Uurimisküsimused
 
@@ -32,8 +32,8 @@ Dashboard on jagatud neljaks vahekaardiks: **Tallinn**, **Narva**, **Tartu** ja 
 | `f_kliima_jaam_vaatlus` | `https://keskkonnaandmed.envir.ee/f_kliima_jaam_vaatlus` | Avalik HTTP API | Pigem aeglaselt muutuv | Ilmajaamade koordinaadid ja metaandmed |
 | `ohuseire.ee` | `https://ohuseire.ee/api/monitoring/et` | Pool-avalik API (kasutusel EKUKi kaardirakenduses) | Jah, uueneb pidevalt | Õhukvaliteedi seireandmed: SO2, NO2, O3, PM10, PM2.5 |
 | `traffic_detectors` MapServer | `https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer/0` | Avalik ArcGIS REST teenus | Jah, jooksev snapshot | Liiklusdetektorite tunnipõhised mõõtmised: liiklusvoog, raskeveokid, kiirus |
-| Ajalooliste liiklussagedusandmete CSV | ⚠️ Algallikas täpsustamisel | Kohalik sisendfail | Ei | Ajalooline liiklussagedus, mis seotakse detektorite asukohtadega |
-| Ajalooliste detektorite asukohtade fail | ⚠️ Algallikas täpsustamisel | Kohalik sisendfail (CSV või XLSX) | Ei | Detektorite koordinaadid ja nimed backfilli jaoks |
+| Ajalooliste liiklussagedusandmete CSV | 'https://andmed.eesti.ee/datasets/liiklusloenduse-andmed' | Kohalik sisendfail (CSV)| Ei | Ajalooline liiklussagedus, mis seotakse detektorite asukohtadega |
+| Ajalooliste detektorite asukohtade fail | 'https://andmed.eesti.ee/datasets/liiklusloenduse-andmed' | Kohalik sisendfail (CSV) | Ei | Detektorite koordinaadid ja nimed backfilli jaoks |
 | OpenStreetMap | `https://www.openstreetmap.org` | Avalik kaardiandmestik | Jah | Aluskaart dashboardi kaardivaates |
 
 
@@ -129,13 +129,13 @@ flowchart LR
 2. **Ingest-skriptid** (`ingestion/`) laevad andmed staging skeemi:
    - `ingest_weather.py` — ilmavaatlused (`staging.weather_raw`); toetab backfilli ja tunnipõhist laadimist
    - `ingest_air_quality.py` — õhukvaliteedi andmed (`staging.air_quality_raw`); toetab backfilli ja tunnipõhist laadimist
-   - `ingest_traffic.py` — liiklusdetektorite live-andmed (`staging.traffic_live_raw`) tunnipõhiselt ja ajaloolised CSV andmed (`staging.traffic_counts_raw`) käsitsi backfillina
+   - `ingest_traffic.py` — liiklusdetektorite live-andmed (`staging.traffic_live_raw`) tunnipõhiselt ja ajaloolised CSV andmed (`staging.traffic_counts_raw`) backfillina
    - Kõik ingest-skriptid kasutavad UPSERT-i, seega korduvad käivitused ei tekita duplikaate
 
 3. **dbt** transformeerib staging andmed mart-kihi mudeliteks:
    - `dbt seed` laeb viitetabelid (jaamade koordinaadid jm)
    - `dbt run` ehitab `intermediate` ja `marts` skeemi mudelid
-   - `dbt test` kontrollib andmekvaliteeti
+   - `dbt test` jooksutab testid ja kontrollib andmekvaliteeti
 
 4. **Streamlit dashboard** (`streamlit_app.py`) loeb mart-kihi tabeleid ja kuvab tulemused kolme vahekaardiga: **Mõõdistus- ja vaatlusandmed**, **Analüütika**, **Võrdlus**.
 
@@ -156,9 +156,7 @@ flowchart LR
 - Dashboard loeb ainult `marts` kihi tabeleid.
 
 
-## Andmekvaliteedi kontrollid
-
-Kontrollid käivitab `dbt test` automaatselt pärast iga `dbt run`-i. Tulemused logitakse Airflow task logidesse.
+## Andmekvaliteedi kontrollid ('ingestion' ajal lokaalse töövoo puhul)
 
 ### Ilmaandmed (`weather_raw`)
 
@@ -187,13 +185,92 @@ Kontrollid käivitab `dbt test` automaatselt pärast iga `dbt run`-i. Tulemused 
 - `area` peab olema üks kolmest: `tallinn`, `tartu`, `narva`
 
 
+## Andmekvaliteedi kontrollid (dbt testid)
+
+Andmekvaliteedi kontrollid on realiseeritud dbt testidena. Testid käivitatakse Airflow töövoos automaatselt pärast `dbt run` sammu. Tulemused on nähtavad Airflow `dbt_test` taski logides.
+
+Testid on tehtud peamiselt `intermediate` kihi mudelite peale, sest selles kihis on toorandmed juba puhastatud, ühtlustatud ja analüüsiks sobivale kujule viidud.
+
+### Üldised dbt testid
+
+Projektis kasutatakse `schema.yml` failis järgmisi teste:
+
+- `not_null` — kontrollib, et olulised väljad ei oleks tühjad;
+- `accepted_values` — kontrollib, et piirkonna (`area`) väärtused oleksid lubatud väärtuste hulgas.
+
+Piirkonna lubatud väärtused on:
+
+```text
+tallinn
+tartu
+narva
+```
+
+Need testid aitavad tagada, et dashboardi filtrid ja vaated töötaksid ühtsete piirkonnanimedega ning et olulised identifikaatorid ja ajaväljad ei oleks puudu.
+
+### Ilmaandmed (`int_weather`)
+
+Ilmaandmete puhul kontrollitakse, et sama jaama sama mõõtmisaja kohta ei tekiks duplikaatridu.
+
+Kontrollitav unikaalne kombinatsioon on:
+
+```text
+station_id + obs_time
+```
+Lisaks kontrollitakse väärtuste loogilisust:
+- temperatuur vahemiku kontroll;
+- tuulekiirus ja sademete hulk ei tohi olla negatiivne;
+- koordinaatide vahemikukontroll (`lat`, `lon`)
+
+### Õhukvaliteedi andmed (`int_air_quality`)
+
+Õhukvaliteedi andmete puhul kontrollitakse, et sama jaama sama mõõtmisaja kohta ei tekiks duplikaatridu.
+
+Kontrollitav unikaalne kombinatsioon on:
+
+```text
+station_id + obs_time
+```
+Lisaks kontrollitakse väärtuste loogilisust:
+- õhukvaliteedi näitajad ei tohi olla negatiivsed
+- koordinaatide vahemikukontroll (`lat`, `lon`)
+
+
+### Liiklusandmed (`int_traffic`)
+
+Liiklusandmete puhul kontrollitakse, et sama liiklusdetektori sama mõõtmisaja kohta ei tekiks duplikaatridu.
+
+Kontrollitav unikaalne kombinatsioon on:
+
+```text
+detector_id + obs_time
+```
+Lisaks kontrollitakse väärtuste loogilisust:
+
+- `total_flow` ehk liiklusvoog ei tohi olla negatiivne;
+- laiuskraad peab jääma vahemikku `57 kuni 60.5`;
+- pikkuskraad peab jääma vahemikku `21 kuni 29`.
+
+
+### Kokkuvõte
+
+Andmekvaliteedi kontrollid hõlmavad nelja põhitüüpi:
+
+1. **Tühjade väärtuste kontroll** — olulised väljad ei tohi olla `NULL`.
+2. **Lubatud väärtuste kontroll** — `area` peab olema üks väärtustest `tallinn`, `tartu` või `narva`.
+3. **Duplikaatide kontroll** — sama jaama või detektori sama mõõtmisaja kohta ei tohi olla mitu rida.
+4. **Väärtusvahemike kontroll** — mõõteväärtused ja koordinaadid peavad jääma loogilistesse piiridesse.
+
+Kui mõni test tagastab ridu, loeb dbt testi ebaõnnestunuks ning Airflow märgib `dbt_test` taski läbikukkunuks. See aitab probleemid andmetes enne dashboardi kasutamist üles leida.
+
 ## Tööjaotus
 
 | Vastutusala | Tegevused | Tegija |
 | --- | --- | --- |
 | Keskkonnaandmed ja liiklusandmed | Ilmavaatluste (`f_kliima_tund`, `f_kliima_jaam_vaatlus`), õhukvaliteedi ja liiklusandmete (`ingest_traffic.py`) päringute ja sissevõtu haldamine | Katrin |
-| Transformatsioonid | dbt mudelite (`intermediate` ja `marts`) ehitamine, ruumilise sidumise loogika ja KPI arvutused | ⚠️ Kontrollida |
-| Andmekvaliteet | Andmekvaliteedi testide (`dbt test`) loomine, ebaõnnestumiste jälgimine ja logide kontroll | ⚠️ Kontrollida |
+| Transformatsioonid | dbt mudelite (`intermediate` ja `marts`) ehitamine, ruumilise sidumise loogika ja KPI arvutused | Katrin |
+| Andmekvaliteet | Andmekvaliteedi testide (`dbt test`) loomine, ebaõnnestumiste jälgimine ja logide kontroll | Hando/ Katrin |
+| Analüüs | Andmete analüüs, graafikud, korrelatsioonid | Hele |
 | Dashboard | Streamlit rakenduse, kaardivaate ja kasutajaliidese arendamine | Hando |
 | Dokumentatsioon | Arhitektuuridokumendi (`docs/arhitektuur.md`) ja README ajakohastamine | Hanna |
 

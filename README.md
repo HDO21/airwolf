@@ -16,7 +16,6 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 | [Ohuseire](https://ohuseire.ee/api/monitoring/et) | Õhukvaliteedi seireandmed (SO2, NO2, O3, PM10, PM2.5) |
 | [Tark Tee](https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer) | Liiklusdetektorite mõõtmised live-s|
 | [Liiklusloenduste andmed](https://andmed.eesti.ee/datasets/liiklusloenduse-andmed) | Liiklusdetektorite mõõtmiste ajalugu |
-| 
 
 ## Tehnoloogiad
 
