@@ -4,7 +4,7 @@
 
 ## Mis see on?
 
-Projekt uurib statistilisi seoseid Eesti linnade õhukvaliteedi ning ilmastiku (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel kolmes linnas — Tallinnas, Tartus ja Narvas — alates jaanuarist 2024.
+Projekt uurib statistilisi seoseid Eesti linnade õhukvaliteedi ning ilmastiku (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel kolmes linnas — Tallinnas, Tartus ja Narvas — alates jaanuarist 2025.
 
 Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](https://est-air-quality-monitor.streamlit.app)
 
@@ -14,7 +14,9 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 | --- | --- |
 | [Keskkonnaandmed](https://keskkonnaandmed.envir.ee/f_kliima_tund) | Tunnipõhised ilmavaatlused (temperatuur, sademed, tuulekiirus) |
 | [Ohuseire](https://ohuseire.ee/api/monitoring/et) | Õhukvaliteedi seireandmed (SO2, NO2, O3, PM10, PM2.5) |
-| [Tark Tee](https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer) | Liiklusdetektorite tunnipõhised mõõtmised |
+| [Tark Tee](https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer) | Liiklusdetektorite mõõtmised live-s|
+| [Liiklusloenduste andmed](https://andmed.eesti.ee/datasets/liiklusloenduse-andmed) | Liiklusdetektorite mõõtmiste ajalugu |
+| 
 
 ## Tehnoloogiad
 
@@ -27,7 +29,7 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 ## Projekti struktuur
 
 .
-├── archive_old_pipeline/
+├── archive_old_pipeline/       -vana töövoog, mis töötab lokaalselt parquet failide põhjal
 │
 ├── dags/
 │   └── airwolf_pipeline.py		-Airflow töövoog: loob tabelid, laeb andmed, käivitab dbt mudelid ja testid
