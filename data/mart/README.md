@@ -1,0 +1,1 @@
+Kui andmebaasi ühendus katkeb näidatakse parquet failide sisu.
