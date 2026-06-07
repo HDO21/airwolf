@@ -6,7 +6,7 @@ Airflow DAG (dags/airwolf_pipeline.py). Iga moodul pakub funktsioone
 `load_*_backfill()` ja `load_*_recent()`, mis võtavad vastu Airflow
 PostgresHook'i ja kirjutavad andmed otse analytics-db staging-skeemi.
 
-Lokaalse arenduse jaoks (ilma Dockeri/Airflow'ta) kasuta projekti juurkaustas
+Lokaalse arenduse jaoks (ilma Dockeri/Airflow'ta) kasuta projekti archice_old_pipeline kaustas
 olevaid skripte:
     ingest_weather.py   — kirjutab toorandmed parquet-formaadis data/staging/
     ingest_air_quality.py
