@@ -28,6 +28,7 @@ Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](http
 
 ## Projekti struktuur
 
+```text
 AIRWOLF/
 ├── archive_old_pipeline/          ← vana lokaalne töövoog Parquet-failide põhjal
 │
@@ -67,6 +68,7 @@ AIRWOLF/
 ├── Dockerfile.airflow             ← Airflow konteineri ehitusfail koos vajalike Python/dbt sõltuvustega
 ├── Dockerfile.app                 ← Streamlit dashboardi konteineri ehitusfail
 └── streamlit_app.py               ← Streamlit dashboardi põhifail
+```
 
 ## Käivitamine
 
