@@ -1,39 +1,50 @@
-# airwolf - Õhukvaliteedi analüütika
+# Õhuhunt — Eesti õhukvaliteedi analüütika
 
-## Äriküsimus
+*Andmetoru, mis kõnetab su hingetoru*
 
-Projekti eesmärk on uurida, kas, kuidas ja millisel määral sõltub Eesti asulates mõõdetud õhukvaliteet ilmastikunähtustest, nagu tuul, sademed ja temperatuur, ning liiklussagedusest. Millistes Eesti asulates ja mis aegadel tagab ilmastiku ning liiklussageduse koosmõju kõige puhtama/saastatuma õhukvaliteedi?
+## Mis see on?
 
-## Andmeallikad ja nende muutuvus ajas (sh lingid)
+Projekt uurib statistilisi seoseid Eesti linnade õhukvaliteedi ning ilmastiku (temperatuur, sademed, tuulekiirus) ja liiklussageduse vahel. Õhukvaliteeti hinnatakse saasteainete (SO2, NO2, O3, PM10, PM2.5) kontsentratsiooni alusel kolmes linnas — Tallinnas, Tartus ja Narvas — alates jaanuarist 2024.
 
-- **Ilmavaatluste andmed**  
+Tulemused on nähtavad dashboardil: [est-air-quality-monitor.streamlit.app](https://est-air-quality-monitor.streamlit.app)
 
-Allikas: https://keskkonnaandmed.envir.ee/f_kliima_paev  
+## Andmeallikad
 
-Tegemist on ajas muutuva andmeallikaga, mis sisaldab meteoroloogilisi vaatlusi erinevate ilmastikunäitajate kohta. Avaandmete päringuid uuendatakse reeglina üks kord ööpäevas, tavaliselt öisel ajal. Andmeid on enamasti iga tunni kohta.
+| Allikas | Kirjeldus |
+| --- | --- |
+| [Keskkonnaandmed](https://keskkonnaandmed.envir.ee/f_kliima_tund) | Tunnipõhised ilmavaatlused (temperatuur, sademed, tuulekiirus) |
+| [Ohuseire](https://ohuseire.ee/api/monitoring/et) | Õhukvaliteedi seireandmed (SO2, NO2, O3, PM10, PM2.5) |
+| [Tark Tee](https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer) | Liiklusdetektorite tunnipõhised mõõtmised |
 
-- **Välisõhu seire andmed**
+## Tehnoloogiad
 
-Allikas: https://keskkonnaandmed.envir.ee/f_keskkonnaseire  
+- **Python** — andmete laadimine ja töötlus
+- **Apache Airflow** — igapäevane automatiseerimine
+- **PostgreSQL + dbt** — andmebaas ja transformatsioonid
+- **Streamlit + Altair + Folium** — dashboard
+- **Docker Compose** — kogu keskkond konteinerites
 
-Tegemist on ajas muutuva andmeallikaga, mis sisaldab õhukvaliteedi seireandmeid erinevate saasteainete ja mõõtepunktide lõikes. Ka selle andmeallika avaandmete päringuid uuendatakse reeglina üks kord ööpäevas. Andmeid salvestatakse iga 10 minuti järel.
-Hetkel eksisteeriv kaardirakendus: https://ohuseire.ee/ 
+## Projekti struktuur
 
-- **Liiklussageduse andmed**  
+    ingestion/             — andmete laadimine (ilm, õhukvaliteet, liiklus)
+    dbt_project/           — transformatsioonid ja mart-kihi mudelid
+    dags/                  — Airflow DAG igapäevaseks käivituseks
+    sql/                   — andmebaasi skeemid ja tabelite loomine
+    data/mart/             — mart-kihi andmefailid (dashboardi sisend)
+    docs/                  — arhitektuur ja dokumentatsioon
+    streamlit_app.py       — dashboard
+    compose.yml            — Docker Compose seadistus
+    .env.example           — keskkonnamuutujate näidis
 
-Allikas: https://tarktee.mnt.ee/tarktee/rest/services/traffic_detectors/MapServer  
+## Käivitamine
 
-Tegemist on ajas muutuva andmeallikaga, mis sisaldab liiklusdetektorite mõõtmisi, sealhulgas liiklusvoogude, raskeveokite osakaalu ja kiiruste infot. Ajalugu ei salvestata ja nähtav on korraga ühe päeva andmed.
+    cp .env.example .env
+    # Täida .env-is liikluse sisendfailide teed
+    docker compose up -d --build
 
-Allikas: https://andmed.eesti.ee/datasets/liiklusloenduse-andmed
+Dashboard: http://localhost:8501  
+Airflow UI: http://localhost:8080
 
-Tegemist on liiklusloenduse ajalooandmetega, mis on sobilikud "backfilliks". Eraldi saab lehelt alla laadida aastate kaupa liiklusloenduse andmeid. Liiklusandmete ajaloo andmete salvestamiseks antud projektis on vajalik alla laadida 2025, 2026 aasta liiklusloenduse andmed ja salvestada need järgnevalt:
+## Dokumentatsioon
 
-data\raw\stations\counts\traffic_2025.csv
-data\raw\stations\counts\traffic_2026.csv
-
-Allikas: https://andmed.eesti.ee/datasets/liiklusloendusseadmed
-
-Tegemist on liiklusloendusjaamade nimekirjaga. See fail on vaja alla laadida ja salvestada data\raw\stations kausta nimega LL_jaamad.xlsx
-
-
+Täpsem ülevaade arhitektuurist, andmevoogudest, mõõdikutest ja tööjaotusest: [docs/arhitektuur.md](docs/arhitektuur.md)
